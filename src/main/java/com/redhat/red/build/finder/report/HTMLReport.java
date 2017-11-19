@@ -41,31 +41,36 @@ import static j2html.TagCreator.tr;
 import static j2html.TagCreator.ul;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import com.redhat.red.build.finder.KojiBuild;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
-
 import j2html.attributes.Attr;
 import j2html.tags.ContainerTag;
 import j2html.tags.Tag;
+import org.apache.commons.io.FileUtils;
 
-public class HTMLReport extends Report {
+public class HTMLReport implements Report {
     private static final String HTML_STYLE = "html { font-family: sans-serif; } "
             + "table { width: 100%; border-style: solid; border-width: 1px; border-collapse: collapse; } "
             + "tr:nth-child(even) { background-color: lightgrey; } td { text-align: left; vertical-align: top; } "
             + "th { border-style: solid; border-width: 1px; background-color: darkgrey; text-align: left; font-weight: bold; } "
             + "tr, td { border-style: solid; border-width: 1px; font-size: small; }";
+    private static final String HTML_FILENAME = "output.html";
 
-    private String kojiwebUrl;
+    private final String outputDir;
+
+    private final String kojiwebUrl;
 
     private List<KojiBuild> builds;
 
     private Collection<File> files;
 
-    public HTMLReport(Collection<File> files, List<KojiBuild> builds, String kojiwebUrl) {
+    public HTMLReport(String outputDir, Collection<File> files, List<KojiBuild> builds, String kojiwebUrl) {
+        this.outputDir = outputDir;
         this.files = files;
         this.builds = builds;
         this.kojiwebUrl = kojiwebUrl;
@@ -103,7 +108,8 @@ public class HTMLReport extends Report {
         return span(source);
     }
 
-    public String render() {
+    @Override
+    public void render() throws IOException {
         double numImports = builds.stream().filter(b -> b.getBuildInfo().getId() > 0 && b.isImport()).count();
         double percentImported = 0;
         int buildsSize = builds.size() - 1;
@@ -114,7 +120,7 @@ public class HTMLReport extends Report {
 
         String percentBuiltStr = String.format("%.1f", (100.00 - percentImported));
 
-        return document().render()
+        String output = document().render()
                      + html().with(
                         head().with(style().withText(HTML_STYLE)).with(
                             title().withText("Build Report")
@@ -149,5 +155,6 @@ public class HTMLReport extends Report {
                               footer().attr(Attr.CLASS, "footer").attr(Attr.ID, "footer").withText("Created: " + new Date())
                         )
                     ).renderFormatted();
+        FileUtils.writeStringToFile(new File(outputDir + HTML_FILENAME), output, "UTF-8", false);
     }
 }

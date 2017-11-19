@@ -15,22 +15,30 @@
  */
 package com.redhat.red.build.finder.report;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.redhat.red.build.finder.KojiBuild;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
+import org.apache.commons.io.FileUtils;
 
-public class GAVReport extends Report {
-    private List<String> gavs;
+public class GAVReport implements Report {
+    private static final String GAV_FILENAME = "gav.txt";
 
-    public GAVReport(List<KojiBuild> builds) {
+    private final String outputDir;
+    private final List<String> gavs;
+
+    public GAVReport(String outputDir, List<KojiBuild> builds) {
         List<KojiBuildInfo> buildInfos = builds.stream().filter(b -> b.isMaven()).map(KojiBuild::getBuildInfo).collect(Collectors.toList());
+        this.outputDir = outputDir;
         this.gavs = buildInfos.stream().map(b -> b.getMavenGroupId() + ":" + b.getMavenArtifactId() + ":" + b.getMavenVersion()).collect(Collectors.toList());
         this.gavs.sort(String::compareToIgnoreCase);
     }
 
-    public String render() {
-        return this.gavs.stream().map(Object::toString).collect(Collectors.joining("\n"));
+    @Override
+    public void render() throws IOException {
+        FileUtils.writeStringToFile(new File(outputDir + GAVReport.GAV_FILENAME), gavs.stream().map(Object::toString).collect(Collectors.joining("\n")), "UTF-8", false);
     }
 }

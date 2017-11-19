@@ -40,7 +40,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.red.build.finder.report.GAVReport;
 import com.redhat.red.build.finder.report.HTMLReport;
 import com.redhat.red.build.finder.report.NVRReport;
-import com.redhat.red.build.finder.report.Report;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveQuery;
@@ -73,12 +72,6 @@ public final class BuildFinder {
     private static final String CHECKSUMS_FILENAME_BASENAME = "checksums-";
 
     private static final String BUILDS_FILENAME = "builds.json";
-
-    private static final String HTML_FILENAME = "output.html";
-
-    private static final String GAV_FILENAME = "gav.txt";
-
-    private static final String NVR_FILENAME = "nvr.txt";
 
     private static final int TERM_WIDTH = 80;
 
@@ -568,14 +561,9 @@ public final class BuildFinder {
                 Collections.sort(buildList, (b1, b2) -> Integer.compare(b1.getBuildInfo().getId(), b2.getBuildInfo().getId()));
                 buildList = Collections.unmodifiableList(buildList);
 
-                Report htmlReport = new HTMLReport(files, buildList, config.getKojiWebURL());
-                htmlReport.outputToFile(new File(outputDir + HTML_FILENAME));
-
-                Report nvrReport = new NVRReport(buildList);
-                nvrReport.outputToFile(new File(outputDir + NVR_FILENAME));
-
-                Report gavReport = new GAVReport(buildList);
-                gavReport.outputToFile(new File(outputDir + GAV_FILENAME));
+                new HTMLReport(outputDir, files, buildList, config.getKojiWebURL()).render();
+                new NVRReport(outputDir, buildList).render();
+                new GAVReport(outputDir, buildList).render();
             } else {
                 LOGGER.warn("Could not generate reports since list of builds was empty");
             }
@@ -628,4 +616,5 @@ public final class BuildFinder {
         }
         return result;
     }
+
 }
