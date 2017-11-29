@@ -15,23 +15,31 @@
  */
 package com.redhat.red.build.finder.report;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.redhat.red.build.finder.KojiBuild;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
+import org.apache.commons.io.FileUtils;
 
-public class NVRReport extends Report {
-    private List<String> nvrs;
+public class NVRReport implements Report {
+    private static final String NVR_FILENAME = "nvr.txt";
 
-    public NVRReport(List<KojiBuild> builds) {
+    private final String outputDir;
+    private final List<String> nvrs;
+
+    public NVRReport(String outputDir, List<KojiBuild> builds) {
+        this.outputDir = outputDir;
         List<KojiBuildInfo> buildInfos = builds.stream().map(KojiBuild::getBuildInfo).collect(Collectors.toList());
         buildInfos.remove(0);
         this.nvrs = buildInfos.stream().map(KojiBuildInfo::getNvr).collect(Collectors.toList());
         this.nvrs.sort(String::compareToIgnoreCase);
     }
 
-    public String render() {
-        return this.nvrs.stream().map(Object::toString).collect(Collectors.joining("\n"));
+    @Override
+    public void render() throws IOException {
+        FileUtils.writeStringToFile(new File(outputDir + NVR_FILENAME), nvrs.stream().map(Object::toString).collect(Collectors.joining("\n")), "UTF-8", false);
     }
 }
