@@ -228,6 +228,8 @@ public class BuildFinder {
 
             LOGGER.info("Found {} archives for checskum {}", archives.size(), checksum);
 
+            int firstBuild = -1;
+
             for (KojiArchiveInfo archive : archives) {
                 if (!archive.getChecksumType().equals(config.getChecksumType())) {
                     LOGGER.warn("Skipping archive id {} as checksum is not {}, but is {}", config.getChecksumType(), archive.getArchiveId(), archive.getChecksumType());
@@ -260,6 +262,12 @@ public class BuildFinder {
                         if (tags.size() == 0) {
                             LOGGER.warn("Skipping build id {} due to no tags", buildInfo.getId());
                             archivesToRemove.add(archive);
+                            continue;
+                        }
+
+                        /* Ignore imports when the artifact was also found in an earlier build */
+                        if (taskInfo == null && firstBuild != -1 && buildInfo.getId() > firstBuild) {
+                            LOGGER.warn("Skipping import id {} because artifact exists in build id {}", buildInfo.getId(), firstBuild);
                             continue;
                         }
 
@@ -323,6 +331,11 @@ public class BuildFinder {
                                 if (taskInfo != null) {
                                     LOGGER.info("Found task info task id {} for build id {} using method {}", taskInfo.getTaskId(), buildInfo.getId(), taskInfo.getMethod());
 
+                                    /* Track first build that is not an import */
+                                    if (firstBuild == -1 || buildInfo.getId() < firstBuild) {
+                                        firstBuild = buildInfo.getId();
+                                    }
+
                                     if (!useTaskRequest) {
                                         List<Object> request = taskInfo.getRequest();
 
@@ -342,11 +355,16 @@ public class BuildFinder {
                                 LOGGER.warn("Got null task id (import) for build id {} with checksum {} and files {}", buildInfo.getId(), checksum, checksumTable.get(checksum));
                             }
 
-                            archiveList = new ArrayList<>();
-                            archiveList.add(new KojiLocalArchive(archive, new ArrayList<>(filenames)));
+                            /* Ignore imports when the artifact was also found in an earlier build */
+                            if (buildInfo.getTaskId() == null && firstBuild != -1 && buildInfo.getId() > firstBuild) {
+                                LOGGER.warn("Skipping import id {} because artifact exists in build id {}", buildInfo.getId(), firstBuild);
+                            } else {
+                                archiveList = new ArrayList<>();
+                                archiveList.add(new KojiLocalArchive(archive, new ArrayList<>(filenames)));
 
-                            build = new KojiBuild(buildInfo, taskInfo, taskRequest, archiveList, allArchives, tags);
-                            builds.put(archive.getBuildId(), build);
+                                build = new KojiBuild(buildInfo, taskInfo, taskRequest, archiveList, allArchives, tags);
+                                builds.put(archive.getBuildId(), build);
+                            }
                         } else {
                             LOGGER.warn("Build not found for checksum {}. This is never supposed to happen", checksum);
                         }
