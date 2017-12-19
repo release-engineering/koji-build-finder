@@ -28,6 +28,7 @@ import static j2html.TagCreator.html;
 import static j2html.TagCreator.li;
 import static j2html.TagCreator.main;
 import static j2html.TagCreator.ol;
+import static j2html.TagCreator.p;
 import static j2html.TagCreator.span;
 import static j2html.TagCreator.style;
 import static j2html.TagCreator.table;
@@ -99,15 +100,30 @@ public class HTMLReport extends Report {
     }
 
     public String render() {
-        double numImports = builds.stream().filter(b -> b.getBuildInfo().getId() > 0 && b.isImport()).count();
-        double percentImported = 0;
+        double numBuildsImports = builds.stream().filter(b -> b.getBuildInfo().getId() > 0 && b.isImport()).count();
+        double percentBuildsImported = 0;
         int buildsSize = builds.size() - 1;
+        long archivesSize = 0;
+        double numArchivesImports = 0;
+        double percentArchivesImported = 0;
 
-        if (buildsSize > 0) {
-            percentImported = (numImports / buildsSize) * 100;
+        for (int i = 0; i < builds.size(); i++) {
+            long a = builds.get(i).getArchives().stream().count();
+            archivesSize += a;
+            if (builds.get(i).isImport()) {
+                numArchivesImports += a;
+            }
         }
 
-        String percentBuiltStr = String.format("%.1f", (100.00 - percentImported));
+        if (buildsSize > 0) {
+            percentBuildsImported = (numBuildsImports / buildsSize) * 100;
+            percentArchivesImported = (numArchivesImports / archivesSize) * 100;
+        }
+
+        String percentBuildsBuiltStr = String.format("%.1f", (100.00 - percentBuildsImported));
+        String percentArchivesBuiltStr = String.format("%.1f", (100.00 - percentArchivesImported));
+        String numBuildsImportsStr = String.format("%.0f", numBuildsImports);
+        String numArchivesImportsStr = String.format("%.0f", numArchivesImports);
 
         return document().render()
                      + html().with(
@@ -117,8 +133,13 @@ public class HTMLReport extends Report {
                         body().with(
                             header().with(
                                 h1().with(
-                                    text("Build Report for "), each(files, file -> text(file.getName() + " ")),
-                                    text("(" + buildsSize + " builds, " + percentBuiltStr + "% built from source)")
+                                    text("Build Report for "), each(files, file -> text(file.getName() + " "))
+                                ),
+                                p().with(
+                                    text(buildsSize + " builds, " + percentBuildsBuiltStr + "% built from source (" + numBuildsImportsStr + " imported)")
+                                ),
+                                p().with(
+                                    text(archivesSize + " artifacts, " + percentArchivesBuiltStr + "% built from source (" + numArchivesImportsStr + " imported)")
                                 )
                             ),
                             main().with(
