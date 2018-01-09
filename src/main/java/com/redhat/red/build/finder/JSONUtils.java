@@ -28,6 +28,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.redhat.red.build.koji.model.json.util.KojiObjectMapper;
 
 public final class JSONUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(JSONUtils.class);
@@ -37,8 +38,8 @@ public final class JSONUtils {
     }
 
     public static String dumpString(Object obj) {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        ObjectMapper mapper = new KojiObjectMapper();
+
         mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
 
         try {
@@ -52,8 +53,8 @@ public final class JSONUtils {
     }
 
     public static boolean dumpFile(File file, Object obj) {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        ObjectMapper mapper = new KojiObjectMapper();
+
         mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
 
         try {
@@ -69,7 +70,7 @@ public final class JSONUtils {
     }
 
     public static Map<String, Collection<String>> loadChecksumsFile(File file)  {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new KojiObjectMapper();
         TypeReference<Map<String, List<String>>> typeRef = new TypeReference<Map<String, List<String>>>() {
 
         };
@@ -85,7 +86,7 @@ public final class JSONUtils {
     }
 
    public static Map<Integer, KojiBuild> loadBuildsFile(File file) {
-       ObjectMapper mapper = new ObjectMapper();
+       ObjectMapper mapper = new KojiObjectMapper();
        TypeReference<Map<Integer, KojiBuild>> ref = new TypeReference<Map<Integer, KojiBuild>>() {
 
        };
