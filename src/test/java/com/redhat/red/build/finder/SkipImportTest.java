@@ -32,7 +32,7 @@ public class SkipImportTest  {
     public void verifySkipImport() throws Exception {
         final String CHECKSUM = "2e7e85f0ee97afde716231a6c792492a";
         final List<String> FILENAMES = Collections.unmodifiableList(Arrays.asList("commons-lang-2.6-redhat-2.jar"));
-        MockKojiClientSession session = new MockKojiClientSession(MockKojiClientSession.MESSAGES_BASE + "/PRODTASKS-328");
+        MockKojiClientSession session = new MockKojiClientSession("skip-import-test");
         BuildConfig config = new BuildConfig();
         BuildFinder finder = new BuildFinder(session, config);
         Map<String, Collection<String>> checksumTable = Collections.singletonMap(CHECKSUM, FILENAMES);

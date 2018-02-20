@@ -44,15 +44,9 @@ import com.redhat.red.build.koji.model.xmlrpc.messages.ListArchivesResponse;
 import com.redhat.red.build.koji.model.xmlrpc.messages.ListTagsResponse;
 
 public class MockKojiClientSession implements ClientSession {
-    public static final String MESSAGES_BASE = "messages";
-
     private RWXMapper rwxMapper;
 
     private String resourcePath;
-
-    public MockKojiClientSession() {
-        this(MESSAGES_BASE);
-    }
 
     public MockKojiClientSession(String resourcePath) {
         Registry.setInstance(new Model_Registry());
