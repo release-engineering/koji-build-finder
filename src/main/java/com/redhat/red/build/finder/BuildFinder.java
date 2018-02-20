@@ -374,7 +374,7 @@ public class BuildFinder {
 
                             /* Ignore imports when the artifact was also found in an earlier build */
                             if (buildInfo.getTaskId() == null && firstBuild != -1 && buildInfo.getId() > firstBuild) {
-                                LOGGER.warn("Skipping import id {} because artifact exists in build id {}", buildInfo.getId(), firstBuild);
+                                LOGGER.warn("Skipping import id {} because artifact exists in build id {}", red(buildInfo.getId()), red(firstBuild));
                             } else {
                                 archiveList = new ArrayList<>();
                                 archiveList.add(new KojiLocalArchive(archive, new ArrayList<>(filenames)));
