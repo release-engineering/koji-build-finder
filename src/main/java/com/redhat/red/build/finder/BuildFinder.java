@@ -701,7 +701,7 @@ public class BuildFinder {
     public static String getVersion() {
         Package p = BuildFinder.class.getPackage();
 
-        return ((p == null) ? "unknown" : p.getImplementationVersion());
+        return ((p == null || p.getImplementationVersion() == null) ? "unknown" : p.getImplementationVersion());
     }
 
     /**
