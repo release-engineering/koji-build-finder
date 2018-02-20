@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<methodResponse>
+  <params>
+    <param>
+      <value>
+        <array>
+          <data>
+            <value>
+              <string>git://localhost/rpms/apache-commons-lang?#4885bf826b97f4785a5509351608d24f97dac763</string>
+            </value>
+            <value>
+              <string>jb-eap-6-rhel-6-candidate</string>
+            </value>
+            <value>
+              <struct>
+</struct>
+            </value>
+          </data>
+        </array>
+      </value>
+    </param>
+  </params>
+</methodResponse>

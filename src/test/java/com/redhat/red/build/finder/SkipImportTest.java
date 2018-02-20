@@ -16,27 +16,31 @@
 package com.redhat.red.build.finder;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
 
-public class MockKojiClientSessionTest  {
+public class SkipImportTest  {
     @Test
-    public void verifyMockSession() throws Exception {
-        final String CHECKSUM = "f18c45047648e5d6d3ad71319488604e";
-        final String FILENAME = "bar-1.1.pom";
-        MockKojiClientSession session = new MockKojiClientSession();
+    public void verifySkipImport() throws Exception {
+        final String CHECKSUM = "2e7e85f0ee97afde716231a6c792492a";
+        final List<String> FILENAMES = Collections.unmodifiableList(Arrays.asList("commons-lang-2.6-redhat-2.jar"));
+        MockKojiClientSession session = new MockKojiClientSession(MockKojiClientSession.MESSAGES_BASE + "/PRODTASKS-328");
         BuildConfig config = new BuildConfig();
         BuildFinder finder = new BuildFinder(session, config);
-        Map<String, Collection<String>> checksumTable = new HashMap<>();
-        List<String> files = Collections.singletonList(FILENAME);
-        checksumTable.put(CHECKSUM, files);
+        Map<String, Collection<String>> checksumTable = Collections.singletonMap(CHECKSUM, FILENAMES);
         Map<Integer, KojiBuild> builds = finder.findBuilds(checksumTable);
+
         assertEquals(2, builds.size());
+        assertTrue(builds.containsKey(0));
+        assertTrue(builds.containsKey(228994));
+        assertFalse(builds.containsKey(251444));
     }
 }

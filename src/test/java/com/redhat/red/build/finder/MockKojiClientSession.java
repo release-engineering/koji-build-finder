@@ -44,7 +44,7 @@ import com.redhat.red.build.koji.model.xmlrpc.messages.ListArchivesResponse;
 import com.redhat.red.build.koji.model.xmlrpc.messages.ListTagsResponse;
 
 public class MockKojiClientSession implements ClientSession {
-    private static final String MESSAGES_BASE = "messages";
+    public static final String MESSAGES_BASE = "messages";
 
     private RWXMapper rwxMapper;
 
@@ -75,8 +75,16 @@ public class MockKojiClientSession implements ClientSession {
 
     @Override
     public List<KojiArchiveInfo> listArchives(KojiArchiveQuery query) throws KojiClientException {
+        String id = null;
+
+        if (query.getChecksum() != null) {
+            id = query.getChecksum();
+        } else if (query.getBuildId() != null) {
+            id = String.valueOf(query.getBuildId());
+        }
+
         try {
-            ListArchivesResponse response = parseCapturedMessage(ListArchivesResponse.class, "listArchives-response.xml");
+            ListArchivesResponse response = parseCapturedMessage(ListArchivesResponse.class, "listArchives-" + id + ".xml");
             return response.getArchives();
         } catch (Exception e) {
             throw new KojiClientException("listArchives(" + query + ") failed", e);
@@ -86,7 +94,7 @@ public class MockKojiClientSession implements ClientSession {
     @Override
     public Map<String, KojiArchiveType> getArchiveTypeMap() throws KojiClientException {
         try {
-            GetArchiveTypesResponse response = parseCapturedMessage(GetArchiveTypesResponse.class, "getArchiveTypes-response.xml");
+            GetArchiveTypesResponse response = parseCapturedMessage(GetArchiveTypesResponse.class, "getArchiveTypes-all.xml");
             Map<String, KojiArchiveType> types = new HashMap<>();
             response.getArchiveTypes().forEach(at -> at.getExtensions().forEach(ext -> types.put(ext, at)));
             return types;
@@ -98,7 +106,7 @@ public class MockKojiClientSession implements ClientSession {
     @Override
     public KojiBuildInfo getBuild(Integer buildId) throws KojiClientException {
         try {
-            GetBuildResponse response = parseCapturedMessage(GetBuildResponse.class, "getBuild-response.xml");
+            GetBuildResponse response = parseCapturedMessage(GetBuildResponse.class, "getBuild-" + buildId + ".xml");
             return response.getBuildInfo();
         } catch (Exception e) {
             throw new KojiClientException("getBuild(" + buildId + ") failed", e);
@@ -108,7 +116,7 @@ public class MockKojiClientSession implements ClientSession {
     @Override
     public KojiTaskInfo getTaskInfo(int taskId, boolean request) throws KojiClientException {
         try {
-            GetTaskResponse response = parseCapturedMessage(GetTaskResponse.class, "getTaskInfo-response.xml");
+            GetTaskResponse response = parseCapturedMessage(GetTaskResponse.class, "getTaskInfo-" + taskId + ".xml");
             return response.getTaskInfo();
         } catch (Exception e) {
             throw new KojiClientException("getTaskInfo(" + taskId + ", " + request + ") failed", e);
@@ -118,7 +126,7 @@ public class MockKojiClientSession implements ClientSession {
     @Override
     public KojiTaskRequest getTaskRequest(int taskId) throws KojiClientException {
         try {
-            GetTaskRequestResponse response = parseCapturedMessage(GetTaskRequestResponse.class, "getTaskRequest-response.xml");
+            GetTaskRequestResponse response = parseCapturedMessage(GetTaskRequestResponse.class, "getTaskRequest-" + taskId + ".xml");
             return new KojiTaskRequest(response.getTaskRequestInfo());
         } catch (Exception e) {
             throw new KojiClientException("getTaskReqest(" + taskId + ") failed", e);
@@ -128,7 +136,7 @@ public class MockKojiClientSession implements ClientSession {
     @Override
     public List<KojiTagInfo> listTags(int id) throws KojiClientException {
         try {
-            ListTagsResponse response = parseCapturedMessage(ListTagsResponse.class, "listTags-response.xml");
+            ListTagsResponse response = parseCapturedMessage(ListTagsResponse.class, "listTags-" + id + ".xml");
             return response.getTags();
         } catch (Exception e) {
             throw new KojiClientException("getTaskReqest(" + id + ") failed", e);
