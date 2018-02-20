@@ -1,5 +1,5 @@
-/**
- * Copyright 2017 Red Hat, Inc.
+/*
+ * Copyright (C) 2017 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +29,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.redhat.red.build.koji.model.json.util.KojiObjectMapper;
 
 public final class JSONUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(JSONUtils.class);
@@ -37,8 +39,8 @@ public final class JSONUtils {
     }
 
     public static String dumpString(Object obj) {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        ObjectMapper mapper = new KojiObjectMapper();
+
         mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
 
         try {
@@ -48,19 +50,18 @@ public final class JSONUtils {
             LOGGER.error("JSON error", e);
         }
 
-        return "";
+        return null;
     }
 
-    public static boolean dumpFile(File file, Object obj) {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+    public static boolean dumpObjectToFile(Object object, File file) {
+        ObjectMapper mapper = new KojiObjectMapper();
+
         mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
 
         try {
-            mapper.writerWithDefaultPrettyPrinter().writeValue(file, obj);
+            FileUtils.forceMkdirParent(file);
+            mapper.writerWithDefaultPrettyPrinter().writeValue(file, object);
             return true;
-        } catch (JsonProcessingException e) {
-            LOGGER.error("JSON error", e);
         } catch (IOException e) {
             LOGGER.error("JSON error", e);
         }
@@ -68,8 +69,8 @@ public final class JSONUtils {
         return false;
     }
 
-    public static Map<String, Collection<String>> loadChecksumsFile(File file)  {
-        ObjectMapper mapper = new ObjectMapper();
+    public static Map<String, Collection<String>> loadChecksumsFile(File file) {
+        ObjectMapper mapper = new KojiObjectMapper();
         TypeReference<Map<String, List<String>>> typeRef = new TypeReference<Map<String, List<String>>>() {
 
         };
@@ -84,19 +85,19 @@ public final class JSONUtils {
         return null;
     }
 
-   public static Map<Integer, KojiBuild> loadBuildsFile(File file) {
-       ObjectMapper mapper = new ObjectMapper();
-       TypeReference<Map<Integer, KojiBuild>> ref = new TypeReference<Map<Integer, KojiBuild>>() {
+    public static Map<Integer, KojiBuild> loadBuildsFile(File file) {
+        ObjectMapper mapper = new KojiObjectMapper();
+        TypeReference<Map<Integer, KojiBuild>> ref = new TypeReference<Map<Integer, KojiBuild>>() {
 
-       };
+        };
 
-       try {
-           Map<Integer, KojiBuild> obj = mapper.readValue(file, ref);
-           return obj;
-       } catch (IOException e) {
-           LOGGER.error("JSON error", e);
-       }
+        try {
+            Map<Integer, KojiBuild> obj = mapper.readValue(file, ref);
+            return obj;
+        } catch (IOException e) {
+            LOGGER.error("JSON error", e);
+        }
 
-       return null;
-   }
+        return null;
+    }
 }

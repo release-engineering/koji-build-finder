@@ -10,7 +10,7 @@ An example `codestyle-intellij.xml` code formatting style is supplied for Intell
 
 ## Operation
 
-The support for various compressed archive types relies on [Apache Commons Compress](https://commons.apache.org/proper/commons-compress/) and the compressor and archive formats that Commons Compress can open *automatically*. If an exception occurs while trying to open a file, then the file is considered to be a normal file and recursive processing of the file is aborted.
+The support for various compressed archive types relies on [Apache Commons VFS](https://commons.apache.org/proper/commons-vfs/) and the compressor and archive formats that Commons VFS can open *automatically*. If an exception occurs while trying to open a file, then the file is considered to be a normal file and recursive processing of the file is aborted.
 
 The default supported Koji archive types are `jar`, `xml`, `pom`, `so`, `dll`, and `dylib`. The software uses [Koji Java Interface](https://github.com/release-engineering/kojiji) for Koji support and asks for all known extensions for the given type name. If you were to specify no Koji archive types, the software will ask the Koji server for all known Koji archive types, but the default set of types is meant to give a reasonable default.
 
@@ -26,6 +26,8 @@ The executable jar takes the following options.
     Usage: koji-build-finder <files>
      -a,--archive-type <type>         Add a koji archive type to check. Default:
                                       [null].
+     -c,--config <file>               Specify configuration file to use. Default:
+                                      ${user.home}/.koji-build-finder/config.json.
      -d,--debug                       Enable debug logging.
      -h,--help                        Show this help message.
      -k,--checksum-only               Only checksum files and do not find sources.
@@ -52,9 +54,9 @@ The default configuration file, `config.json`, is as follows.
 
     {
       "archive-types" : [ "jar", "xml", "pom", "so", "dll", "dylib" ],
-      "excludes" : "^(?!.*/pom\\.xml$).*/.*\\.xml$",
       "checksum-only" : false,
       "checksum-type" : "md5",
+      "excludes" : [ "^(?!.*/pom\\.xml$).*/.*\\.xml$" ],
       "koji-hub-url" : "http://kojihub.my.host/kojihub",
       "koji-web-url" : "https://kojiweb.my.host/koji"
     }

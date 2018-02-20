@@ -1,0 +1,1460 @@
+{
+  "0" : {
+    "buildInfo" : {
+      "version" : "not found",
+      "release" : "not found",
+      "build_id" : 0,
+      "package_id" : 0,
+      "package_name" : "not found",
+      "completion_time" : 1515569456,
+      "creation_time" : 1515569456,
+      "state" : "COMPLETE"
+    }
+  },
+  "179040" : {
+    "buildInfo" : {
+      "version" : "2.6",
+      "release" : "1",
+      "nvr" : "commons-lang-commons-lang-2.6-1",
+      "build_id" : 179040,
+      "package_id" : 10947,
+      "package_name" : "commons-lang-commons-lang",
+      "completion_time" : 1315571308,
+      "creation_time" : 1315571308,
+      "owner_id" : 1515,
+      "owner_name" : "hfnukal",
+      "state" : "COMPLETE",
+      "creation_event_id" : 4200951,
+      "maven_group_id" : "commons-lang",
+      "maven_artifact_id" : "commons-lang",
+      "maven_version" : "2.6"
+    },
+    "archives" : [ {
+      "archive" : {
+        "filename" : "commons-lang-2.6.pom",
+        "checksum" : "cca9ee287cb26a44a2f65450a24957cd",
+        "size" : 17494,
+        "id" : 104977,
+        "type_extensions" : "pom",
+        "build_id" : 179040,
+        "type_name" : "pom",
+        "type_id" : 3,
+        "checksum_type" : "md5",
+        "type_description" : "Maven Project Object Management file",
+        "metadata_only" : false
+      },
+      "files" : [ "commons-lang-2.6.pom" ]
+    } ],
+    "remoteArchives" : [ {
+      "filename" : "commons-lang-2.6.jar",
+      "checksum" : "4d5c1693079575b362edf41500630bbd",
+      "size" : 284220,
+      "id" : 104975,
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 179040,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false
+    }, {
+      "filename" : "commons-lang-2.6-javadoc.jar",
+      "checksum" : "95e8b869e0ad5870c65843611d7d2e4c",
+      "size" : 1624033,
+      "id" : 104976,
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 179040,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false
+    }, {
+      "filename" : "commons-lang-2.6.pom",
+      "checksum" : "cca9ee287cb26a44a2f65450a24957cd",
+      "size" : 17494,
+      "id" : 104977,
+      "type_extensions" : "pom",
+      "build_id" : 179040,
+      "type_name" : "pom",
+      "type_id" : 3,
+      "checksum_type" : "md5",
+      "type_description" : "Maven Project Object Management file",
+      "metadata_only" : false
+    }, {
+      "filename" : "commons-lang-2.6-sources.jar",
+      "checksum" : "7e64377d330ddad7cbf1e3554f73d3c3",
+      "size" : 372982,
+      "id" : 104978,
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 179040,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false
+    } ],
+    "tags" : [ {
+      "id" : 2588,
+      "name" : "mead-import-maven-all",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 3711,
+      "name" : "jb-wfk-2-rhel-6-deps",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 4280,
+      "name" : "jb-jpp-6-deps",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 4367,
+      "name" : "eng-rhel-6-mead-jdk7",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 4592,
+      "name" : "jb-fuse-6-rhel-6-todo",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 4923,
+      "name" : "jb-mobile-1-rhel-6-todo",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 5024,
+      "name" : "jb-middleware-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 5057,
+      "name" : "jb-fuse-6.0.0-rhel-6-todo",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 5513,
+      "name" : "rhs-2.1-rhel-6-mead-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 5514,
+      "name" : "jboss-on-3-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 5517,
+      "name" : "jboss-on-3-nightly-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 5580,
+      "name" : "jb-eap-6.2.0-middleware-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 5765,
+      "name" : "jb-eap-6.0.1-middleware-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 5767,
+      "name" : "jb-eap-6.0.0-middleware-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 6136,
+      "name" : "rhs-3.0-rhel-6-mead-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 6339,
+      "name" : "jb-wfk-2.5.0-rhel-6-build",
+      "locked" : true,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 6452,
+      "name" : "jb-wfk-2.6.0-rhel-6-build",
+      "locked" : true,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 6579,
+      "name" : "jb-ip-6-fuse-6.0.0-todo",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 6986,
+      "name" : "jb-fuse-6.1.1-rhel-6-todo",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 6995,
+      "name" : "mrg-messaging-3.1-rhel-6-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 7120,
+      "name" : "satellite-6.1.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 7501,
+      "name" : "zanata-eng-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 7721,
+      "name" : "amq-broker-7.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 7844,
+      "name" : "jb-eap-6.3.0-rhel-6-maven-imports",
+      "locked" : true,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 7985,
+      "name" : "rhmap-4.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8348,
+      "name" : "jb-amq-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8362,
+      "name" : "jb-mc-4.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8431,
+      "name" : "rhos-8.0-odl-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8465,
+      "name" : "jb-fuse-6.2.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8490,
+      "name" : "jb-eap-7.0.0.alpha-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8582,
+      "name" : "sso-7.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8832,
+      "name" : "jb-bxms-6.3-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8860,
+      "name" : "jb-apigateway-1.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8916,
+      "name" : "jb-cs-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8942,
+      "name" : "jb-common-6.4-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8943,
+      "name" : "jb-bxms-6.2-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8944,
+      "name" : "jb-dv-6.2-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8945,
+      "name" : "jb-dv-6.3-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8946,
+      "name" : "jb-fsw-6.2-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8963,
+      "name" : "jb-eap-6.4-rhel-6-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8964,
+      "name" : "jb-eap-6.3-rhel-6-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8967,
+      "name" : "jb-infra-1-rhel-6-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9003,
+      "name" : "rhevm-4.0-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9024,
+      "name" : "rhevm-3.6-rhel-6-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9132,
+      "name" : "jb-eap-7.0-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9155,
+      "name" : "jb-eap-7.0.0-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9254,
+      "name" : "rhmap-4.2-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9262,
+      "name" : "rhmap-4.1-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9422,
+      "name" : "jb-common-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9761,
+      "name" : "jb-fis-2.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9930,
+      "name" : "jb-fuse-6.3-patch-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10106,
+      "name" : "jb-vertx-3.3-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10332,
+      "name" : "rhmap-4.3-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10556,
+      "name" : "jb-vertx-3.4-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10561,
+      "name" : "jb-mm-7.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10574,
+      "name" : "jb-fuse-6.3.0.r1-maven-imports",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    }, {
+      "id" : 10643,
+      "name" : "soa-brms-5.3.1-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10653,
+      "name" : "jws-3.1.0-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    }, {
+      "id" : 10702,
+      "name" : "jb-bxms-6.4.0-maven-imports",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    }, {
+      "id" : 10723,
+      "name" : "jb-bxms-6.4.2-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10848,
+      "name" : "rh-sso-7.1.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10890,
+      "name" : "jb-eap-7.1.0.alpha-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10920,
+      "name" : "rhmap-4.4-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 11411,
+      "name" : "jb-fuse-7-maven-imports",
+      "locked" : false,
+      "perm" : "maven-import",
+      "perm_id" : 13,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 11511,
+      "name" : "jb-bxms-6.4.4-maven-imports",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    }, {
+      "id" : 11961,
+      "name" : "rhos-13.0-odl-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 12921,
+      "name" : "jb-bxms-6.4.7-maven-imports",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    } ],
+    "types" : [ "maven" ],
+    "duplicateArchives" : [ {
+      "filename" : "commons-lang-2.6.pom",
+      "checksum" : "cca9ee287cb26a44a2f65450a24957cd",
+      "size" : 17494,
+      "id" : 104977,
+      "type_extensions" : "pom",
+      "build_id" : 179040,
+      "type_name" : "pom",
+      "type_id" : 3,
+      "checksum_type" : "md5",
+      "type_description" : "Maven Project Object Management file",
+      "metadata_only" : false
+    } ]
+  },
+  "279090" : {
+    "buildInfo" : {
+      "version" : "2.6",
+      "release" : "2",
+      "nvr" : "commons-lang-commons-lang-2.6-2",
+      "build_id" : 279090,
+      "package_id" : 10947,
+      "package_name" : "commons-lang-commons-lang",
+      "completion_time" : 1372288088,
+      "creation_time" : 1372288088,
+      "owner_id" : 1515,
+      "owner_name" : "hfnukal",
+      "state" : "COMPLETE",
+      "creation_event_id" : 6988277,
+      "maven_group_id" : "commons-lang",
+      "maven_artifact_id" : "commons-lang",
+      "maven_version" : "2.6"
+    },
+    "archives" : [ {
+      "archive" : {
+        "filename" : "commons-lang-2.6.pom",
+        "checksum" : "cca9ee287cb26a44a2f65450a24957cd",
+        "size" : 17494,
+        "id" : 403174,
+        "type_extensions" : "pom",
+        "build_id" : 279090,
+        "type_name" : "pom",
+        "type_id" : 3,
+        "checksum_type" : "md5",
+        "type_description" : "Maven Project Object Management file",
+        "metadata_only" : false
+      },
+      "files" : [ "commons-lang-2.6.pom" ]
+    } ],
+    "remoteArchives" : [ {
+      "filename" : "commons-lang-2.6.jar",
+      "checksum" : "4d5c1693079575b362edf41500630bbd",
+      "size" : 284220,
+      "id" : 403172,
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 279090,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false
+    }, {
+      "filename" : "commons-lang-2.6-javadoc.jar",
+      "checksum" : "95e8b869e0ad5870c65843611d7d2e4c",
+      "size" : 1624033,
+      "id" : 403173,
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 279090,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false
+    }, {
+      "filename" : "commons-lang-2.6.pom",
+      "checksum" : "cca9ee287cb26a44a2f65450a24957cd",
+      "size" : 17494,
+      "id" : 403174,
+      "type_extensions" : "pom",
+      "build_id" : 279090,
+      "type_name" : "pom",
+      "type_id" : 3,
+      "checksum_type" : "md5",
+      "type_description" : "Maven Project Object Management file",
+      "metadata_only" : false
+    }, {
+      "filename" : "commons-lang-2.6-sources.jar",
+      "checksum" : "7e64377d330ddad7cbf1e3554f73d3c3",
+      "size" : 372982,
+      "id" : 403175,
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 279090,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false
+    } ],
+    "tags" : [ {
+      "id" : 4280,
+      "name" : "jb-jpp-6-deps",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 6069,
+      "name" : "rhose-2.1-rhel-6-maven-deps",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 6203,
+      "name" : "cto-bigdata-spark-rhel-7-deps",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 6324,
+      "name" : "jboss-on-3-fuse-jpp-deps",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 6571,
+      "name" : "jboss-on-3.3-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 6824,
+      "name" : "rcm-mw-tools-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 7467,
+      "name" : "mrg-messaging-3.2-rhel-6-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 7501,
+      "name" : "zanata-eng-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 7596,
+      "name" : "candlepin-mead-rhel-6-deps",
+      "arches" : [ "x86_64" ],
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 7705,
+      "name" : "amq-interconnect-1.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 7713,
+      "name" : "amq-clients-1-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 7852,
+      "name" : "rhs-3.1-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8017,
+      "name" : "lpc-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8362,
+      "name" : "jb-mc-4.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8431,
+      "name" : "rhos-8.0-odl-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8458,
+      "name" : "jb-dg-7-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8964,
+      "name" : "jb-eap-6.3-rhel-6-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9095,
+      "name" : "maven-3-eng-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9132,
+      "name" : "jb-eap-7.0-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9352,
+      "name" : "rhos-9.0-odl-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9609,
+      "name" : "jb-eap-7.0.1-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9813,
+      "name" : "rhos-10.0-odl-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9950,
+      "name" : "jb-eap-6.4.12-rhel-6-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10004,
+      "name" : "rhos-11.0-odl-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10468,
+      "name" : "jws-4.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10561,
+      "name" : "jb-mm-7.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10653,
+      "name" : "jws-3.1.0-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    }, {
+      "id" : 10657,
+      "name" : "rhos-12.0-odl-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10702,
+      "name" : "jb-bxms-6.4.0-maven-imports",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    }, {
+      "id" : 10848,
+      "name" : "rh-sso-7.1.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10890,
+      "name" : "jb-eap-7.1.0.alpha-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10935,
+      "name" : "jb-dg-7.1.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 11446,
+      "name" : "rhmap-4.5-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 11961,
+      "name" : "rhos-13.0-odl-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    } ],
+    "types" : [ "maven" ],
+    "duplicateArchives" : [ {
+      "filename" : "commons-lang-2.6.pom",
+      "checksum" : "cca9ee287cb26a44a2f65450a24957cd",
+      "size" : 17494,
+      "id" : 403174,
+      "type_extensions" : "pom",
+      "build_id" : 279090,
+      "type_name" : "pom",
+      "type_id" : 3,
+      "checksum_type" : "md5",
+      "type_description" : "Maven Project Object Management file",
+      "metadata_only" : false
+    } ]
+  },
+  "443838" : {
+    "buildInfo" : {
+      "version" : "1.9.2.redhat_1",
+      "release" : "1",
+      "nvr" : "commons-beanutils-commons-beanutils-1.9.2.redhat_1-1",
+      "build_id" : 443838,
+      "package_id" : 10883,
+      "package_name" : "commons-beanutils-commons-beanutils",
+      "completion_time" : 1435175830,
+      "creation_time" : 1435175830,
+      "task_id" : 9416917,
+      "owner_id" : 687,
+      "owner_name" : "dwalluck",
+      "state" : "COMPLETE",
+      "creation_event_id" : 11482681,
+      "maven_group_id" : "commons-beanutils",
+      "maven_artifact_id" : "commons-beanutils",
+      "maven_version" : "1.9.2.redhat-1"
+    },
+    "taskInfo" : {
+      "taskId" : 9416917,
+      "weight" : 0.2,
+      "parentTaskId" : 0,
+      "channelId" : 4,
+      "startTime" : 1435175493,
+      "priority" : 20,
+      "completionTime" : 1435175877,
+      "state" : 2,
+      "createTime" : 1435175479,
+      "ownerId" : 0,
+      "hostId" : 96,
+      "method" : "maven",
+      "arch" : "noarch"
+    },
+    "taskRequest" : {
+      "request" : [ "svn+http://svn.apache.org/repos/asf/commons/proper/beanutils/tags/BEANUTILS_1_9_2#1598386", "jb-eap-7.0-rhel-7-maven-candidate", {
+        "patches" : "git://localhost/rpms/apache-commons-beanutils?#1a485a0a3a06cf4578b26816ad5c224a7802cd5e",
+        "properties" : {
+          "additionalparam" : "-Xdoclint:none",
+          "version.incremental.suffix" : "redhat"
+        }
+      } ]
+    },
+    "archives" : [ {
+      "archive" : {
+        "filename" : "commons-beanutils-1.9.2.redhat-1.pom",
+        "checksum" : "47b2528d69f7b834cb157db9b781ec7b",
+        "size" : 14183,
+        "id" : 1037494,
+        "type_extensions" : "pom",
+        "build_id" : 443838,
+        "type_name" : "pom",
+        "type_id" : 3,
+        "checksum_type" : "md5",
+        "type_description" : "Maven Project Object Management file",
+        "metadata_only" : false,
+        "buildroot_id" : 2630528
+      },
+      "files" : [ "commons-beanutils-1.9.2.redhat-1.pom" ]
+    } ],
+    "remoteArchives" : [ {
+      "filename" : "commons-beanutils-1.9.2.redhat-1-patches.zip",
+      "checksum" : "edfa83cb4e2264deb94acf942fb4ab9c",
+      "size" : 4022,
+      "id" : 1037489,
+      "type_extensions" : "zip",
+      "build_id" : 443838,
+      "type_name" : "zip",
+      "type_id" : 2,
+      "checksum_type" : "md5",
+      "type_description" : "Zip file",
+      "metadata_only" : false,
+      "buildroot_id" : 2630528
+    }, {
+      "filename" : "commons-beanutils-1.9.2.redhat-1-scm-sources.zip",
+      "checksum" : "253a3eaee155607d3f6f57e784daabc1",
+      "size" : 669215,
+      "id" : 1037490,
+      "type_extensions" : "zip",
+      "build_id" : 443838,
+      "type_name" : "zip",
+      "type_id" : 2,
+      "checksum_type" : "md5",
+      "type_description" : "Zip file",
+      "metadata_only" : false,
+      "buildroot_id" : 2630528
+    }, {
+      "filename" : "commons-beanutils-1.9.2.redhat-1-javadoc.jar",
+      "checksum" : "f0a4d7a2d59c107faf548fe0fe24d5a0",
+      "size" : 810857,
+      "id" : 1037491,
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 443838,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false,
+      "buildroot_id" : 2630528
+    }, {
+      "filename" : "commons-beanutils-1.9.2.redhat-1.jar",
+      "checksum" : "581c39262495189ec260da82eeebd43a",
+      "size" : 245606,
+      "id" : 1037492,
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 443838,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false,
+      "buildroot_id" : 2630528
+    }, {
+      "filename" : "commons-beanutils-1.9.2.redhat-1-sources.jar",
+      "checksum" : "ea75d9200e0e40b01323d9c5e57a5c1c",
+      "size" : 309075,
+      "id" : 1037493,
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 443838,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false,
+      "buildroot_id" : 2630528
+    }, {
+      "filename" : "commons-beanutils-1.9.2.redhat-1.pom",
+      "checksum" : "47b2528d69f7b834cb157db9b781ec7b",
+      "size" : 14183,
+      "id" : 1037494,
+      "type_extensions" : "pom",
+      "build_id" : 443838,
+      "type_name" : "pom",
+      "type_id" : 3,
+      "checksum_type" : "md5",
+      "type_description" : "Maven Project Object Management file",
+      "metadata_only" : false,
+      "buildroot_id" : 2630528
+    }, {
+      "filename" : "commons-beanutils-1.9.2.redhat-1-project-sources.tar.gz",
+      "checksum" : "5096f9870ad7076583e9a98e8f402f59",
+      "size" : 409063,
+      "id" : 1037495,
+      "type_extensions" : "tar tar.gz tar.bz2 tar.xz",
+      "build_id" : 443838,
+      "type_name" : "tar",
+      "type_id" : 4,
+      "checksum_type" : "md5",
+      "type_description" : "Tar file",
+      "metadata_only" : false,
+      "buildroot_id" : 2630528
+    } ],
+    "tags" : [ {
+      "id" : 6484,
+      "name" : "jb-eap-7.0.0-rhel-6-released",
+      "locked" : true,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 6728,
+      "name" : "jb-eap-7.0-rhel-7-candidate",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 6731,
+      "name" : "jb-eap-7.0.0-rhel-7-released",
+      "locked" : true,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 7789,
+      "name" : "siege-1.0-candidate",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8345,
+      "name" : "jb-amq-7-candidate",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8369,
+      "name" : "jb-fuse-6.2-todo",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8458,
+      "name" : "jb-dg-7-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8904,
+      "name" : "jb-eap-7.0.0.er5-errata-rhel-6",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    }, {
+      "id" : 8905,
+      "name" : "jb-eap-7.0.0.er5-errata-rhel-7",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    }, {
+      "id" : 8967,
+      "name" : "jb-infra-1-rhel-6-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8972,
+      "name" : "jb-eap-7.0.0.er6-errata-rhel-6",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8973,
+      "name" : "jb-eap-7.0.0.er6-errata-rhel-7",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9419,
+      "name" : "jb-common-candidate",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9426,
+      "name" : "jb-eap-7.0.0-maven-repository",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10695,
+      "name" : "jb-bxms-6.4.1-maven-deps",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    }, {
+      "id" : 10698,
+      "name" : "jb-bxms-6.4.0-maven-deps",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    }, {
+      "id" : 10808,
+      "name" : "jb-eap-7.0.6-rhel-7-deps",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10845,
+      "name" : "rh-sso-7.1.0-maven-deps",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10861,
+      "name" : "rh-sso-7.1.1-maven-deps",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 10928,
+      "name" : "jb-dg-7.1.0-maven-deps",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 11204,
+      "name" : "jb-bxms-6.4.3-maven-deps",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    }, {
+      "id" : 11347,
+      "name" : "jb-eap-7.0.7-rhel-7-deps",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 11817,
+      "name" : "pnc-jb-wfs-7.0-beta1-released",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    }, {
+      "id" : 11818,
+      "name" : "pnc-jb-wfs-7.0-latest-released",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    }, {
+      "id" : 11865,
+      "name" : "jb-eap-7.0.8-rhel-7-deps",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 11872,
+      "name" : "jb-eap-7.0.9-rhel-7-deps",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 11909,
+      "name" : "pnc-jb-wfs-7.0-beta2-released",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    } ],
+    "types" : [ "maven" ]
+  },
+  "596963" : {
+    "buildInfo" : {
+      "version" : "1.1.0.Final_redhat_14",
+      "release" : "1",
+      "nvr" : "org.wildfly.swarm-config-api-parent-1.1.0.Final_redhat_14-1",
+      "extra" : {
+        "build_system" : "PNC",
+        "external_build_id" : "985",
+        "external_build_system" : "http://localhost/pnc-web/#/build-records/985",
+        "maven" : {
+          "artifact_id" : "config-api-parent",
+          "group_id" : "org.wildfly.swarm",
+          "version" : "1.1.0.Final-redhat-14"
+        }
+      },
+      "build_id" : 596963,
+      "package_id" : 60606,
+      "package_name" : "org.wildfly.swarm-config-api-parent",
+      "completion_time" : 1505428225,
+      "creation_time" : 1505439913,
+      "owner_id" : 3724,
+      "owner_name" : "newcastle",
+      "state" : "COMPLETE",
+      "creation_event_id" : 16585340,
+      "maven_group_id" : "org.wildfly.swarm",
+      "maven_artifact_id" : "config-api-parent",
+      "maven_version" : "1.1.0.Final-redhat-14",
+      "source" : "git+ssh://localhost:22/wildfly-swarm-prod/wildfly-config-api.git#1.x"
+    },
+    "archives" : [ {
+      "archive" : {
+        "filename" : "config-api-1.1.0.Final-redhat-14.pom",
+        "checksum" : "d417e7a75b68203ab463122e9dde3376",
+        "size" : 7688,
+        "id" : 2059686,
+        "type_extensions" : "pom",
+        "build_id" : 596963,
+        "type_name" : "pom",
+        "type_id" : 3,
+        "checksum_type" : "md5",
+        "type_description" : "Maven Project Object Management file",
+        "metadata_only" : false,
+        "buildroot_id" : 3476030
+      },
+      "files" : [ "config-api-1.1.0.Final-redhat-14.pom" ]
+    } ],
+    "remoteArchives" : [ {
+      "filename" : "config-api-generator-1.1.0.Final-redhat-14.jar",
+      "checksum" : "96eb1850c51fd6d9ff21c11d0437197b",
+      "size" : 70323,
+      "id" : 2059679,
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 596963,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false,
+      "buildroot_id" : 3476030
+    }, {
+      "filename" : "config-api-generator-1.1.0.Final-redhat-14.pom",
+      "checksum" : "61e539f2667d92e2f789721f509d664f",
+      "size" : 3428,
+      "id" : 2059680,
+      "type_extensions" : "pom",
+      "build_id" : 596963,
+      "type_name" : "pom",
+      "type_id" : 3,
+      "checksum_type" : "md5",
+      "type_description" : "Maven Project Object Management file",
+      "metadata_only" : false,
+      "buildroot_id" : 3476030
+    }, {
+      "filename" : "config-api-generator-1.1.0.Final-redhat-14-sources.jar",
+      "checksum" : "d04eb962d23b84b4d4886fc6b2fe092f",
+      "size" : 37944,
+      "id" : 2059681,
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 596963,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false,
+      "buildroot_id" : 3476030
+    }, {
+      "filename" : "config-api-1.1.0.Final-redhat-14.jar",
+      "checksum" : "864e156fd166335fe2c503aa23ad65c0",
+      "size" : 1546959,
+      "id" : 2059682,
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 596963,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false,
+      "buildroot_id" : 3476030
+    }, {
+      "filename" : "config-api-parent-1.1.0.Final-redhat-14-project-sources.tar.gz",
+      "checksum" : "7ee30c1de421394314925a89e3c8b863",
+      "size" : 94852,
+      "id" : 2059683,
+      "type_extensions" : "tar tar.gz tar.bz2 tar.xz",
+      "build_id" : 596963,
+      "type_name" : "tar",
+      "type_id" : 4,
+      "checksum_type" : "md5",
+      "type_description" : "Tar file",
+      "metadata_only" : false,
+      "buildroot_id" : 3476030
+    }, {
+      "filename" : "config-api-parent-1.1.0.Final-redhat-14.pom",
+      "checksum" : "1139adf0260657370884b8ee52fb3d6d",
+      "size" : 6803,
+      "id" : 2059684,
+      "type_extensions" : "pom",
+      "build_id" : 596963,
+      "type_name" : "pom",
+      "type_id" : 3,
+      "checksum_type" : "md5",
+      "type_description" : "Maven Project Object Management file",
+      "metadata_only" : false,
+      "buildroot_id" : 3476030
+    }, {
+      "filename" : "config-api-runtime-1.1.0.Final-redhat-14-sources.jar",
+      "checksum" : "4126c6653464748b2587cfc8f90dd9cb",
+      "size" : 29295,
+      "id" : 2059685,
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 596963,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false,
+      "buildroot_id" : 3476030
+    }, {
+      "filename" : "config-api-1.1.0.Final-redhat-14.pom",
+      "checksum" : "d417e7a75b68203ab463122e9dde3376",
+      "size" : 7688,
+      "id" : 2059686,
+      "type_extensions" : "pom",
+      "build_id" : 596963,
+      "type_name" : "pom",
+      "type_id" : 3,
+      "checksum_type" : "md5",
+      "type_description" : "Maven Project Object Management file",
+      "metadata_only" : false,
+      "buildroot_id" : 3476030
+    }, {
+      "filename" : "config-api-1.1.0.Final-redhat-14-sources.jar",
+      "checksum" : "ba5735a965b4efcb691df9f468a145d7",
+      "size" : 919203,
+      "id" : 2059687,
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 596963,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false,
+      "buildroot_id" : 3476030
+    }, {
+      "filename" : "config-api-runtime-1.1.0.Final-redhat-14.pom",
+      "checksum" : "c98a5cb82ce3743504f97c9cd4474911",
+      "size" : 1951,
+      "id" : 2059688,
+      "type_extensions" : "pom",
+      "build_id" : 596963,
+      "type_name" : "pom",
+      "type_id" : 3,
+      "checksum_type" : "md5",
+      "type_description" : "Maven Project Object Management file",
+      "metadata_only" : false,
+      "buildroot_id" : 3476030
+    }, {
+      "filename" : "config-api-runtime-1.1.0.Final-redhat-14.jar",
+      "checksum" : "63ddecbcf0375bc0307308ad130199f1",
+      "size" : 51827,
+      "id" : 2059689,
+      "type_extensions" : "jar war rar ear sar kar jdocbook jdocbook-style plugin",
+      "build_id" : 596963,
+      "type_name" : "jar",
+      "type_id" : 1,
+      "checksum_type" : "md5",
+      "type_description" : "Jar file",
+      "metadata_only" : false,
+      "buildroot_id" : 3476030
+    } ],
+    "tags" : [ {
+      "id" : 10858,
+      "name" : "pnc-jb-wfs-7.0-candidate",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 11909,
+      "name" : "pnc-jb-wfs-7.0-beta2-released",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    } ],
+    "types" : [ "maven" ]
+  },
+  "610867" : {
+    "buildInfo" : {
+      "version" : "2.3.0.amq_710003",
+      "release" : "1.redhat_1.el6",
+      "nvr" : "artemis-native-linux-2.3.0.amq_710003-1.redhat_1.el6",
+      "build_id" : 610867,
+      "package_id" : 54194,
+      "package_name" : "artemis-native-linux",
+      "completion_time" : 1508749664,
+      "creation_time" : 1508749524,
+      "task_id" : 14324506,
+      "owner_id" : 1476,
+      "owner_name" : "pkralik",
+      "state" : "COMPLETE",
+      "creation_event_id" : 16938829,
+      "maven_group_id" : "artemis-native-linux",
+      "maven_artifact_id" : "artemis-native-linux-repolib",
+      "maven_version" : "2.3.0.amq_710003-1.redhat_1.el6"
+    },
+    "taskInfo" : {
+      "taskId" : 14324506,
+      "weight" : 0.2,
+      "parentTaskId" : 0,
+      "channelId" : 1,
+      "startTime" : 1508749380,
+      "priority" : 20,
+      "completionTime" : 1508749711,
+      "state" : 2,
+      "createTime" : 1508749377,
+      "ownerId" : 0,
+      "hostId" : 65,
+      "method" : "build",
+      "arch" : "noarch"
+    },
+    "taskRequest" : {
+      "request" : [ "git://localhost/rpms/artemis-native-linux#eee002a284922bf7c4c6b006dcb62f2c036ef293", "jb-amq-7-rhel-6-candidate", { } ]
+    },
+    "archives" : [ {
+      "archive" : {
+        "filename" : "libartemis-native-32-2.3.0.amq_710003-redhat-1.pom",
+        "checksum" : "4bb5c341445d689a7e21ceaa47399fc2",
+        "size" : 1509,
+        "id" : 2136306,
+        "type_extensions" : "pom",
+        "build_id" : 610867,
+        "type_name" : "pom",
+        "type_id" : 3,
+        "checksum_type" : "md5",
+        "type_description" : "Maven Project Object Management file",
+        "metadata_only" : false
+      },
+      "files" : [ "libartemis-native-32-2.3.0.amq_710003-redhat-1.pom" ]
+    } ],
+    "remoteArchives" : [ {
+      "filename" : "libartemis-native-64-2.3.0.amq_710003-redhat-1.pom",
+      "checksum" : "b0234a8120583fd4a6de2a48f59741de",
+      "size" : 1509,
+      "id" : 2136304,
+      "type_extensions" : "pom",
+      "build_id" : 610867,
+      "type_name" : "pom",
+      "type_id" : 3,
+      "checksum_type" : "md5",
+      "type_description" : "Maven Project Object Management file",
+      "metadata_only" : false
+    }, {
+      "filename" : "libartemis-native-64-2.3.0.amq_710003-redhat-1.so",
+      "checksum" : "750a5b55c5718c9f1766ba550bf6c33d",
+      "size" : 19256,
+      "id" : 2136305,
+      "type_extensions" : "so",
+      "build_id" : 610867,
+      "type_name" : "so",
+      "type_id" : 18,
+      "checksum_type" : "md5",
+      "type_description" : "Shared library",
+      "metadata_only" : false
+    }, {
+      "filename" : "libartemis-native-32-2.3.0.amq_710003-redhat-1.pom",
+      "checksum" : "4bb5c341445d689a7e21ceaa47399fc2",
+      "size" : 1509,
+      "id" : 2136306,
+      "type_extensions" : "pom",
+      "build_id" : 610867,
+      "type_name" : "pom",
+      "type_id" : 3,
+      "checksum_type" : "md5",
+      "type_description" : "Maven Project Object Management file",
+      "metadata_only" : false
+    }, {
+      "filename" : "libartemis-native-32-2.3.0.amq_710003-redhat-1.so",
+      "checksum" : "f12b8f9340667c2fb7fdd3f23d734400",
+      "size" : 15084,
+      "id" : 2136307,
+      "type_extensions" : "so",
+      "build_id" : 610867,
+      "type_name" : "so",
+      "type_id" : 18,
+      "checksum_type" : "md5",
+      "type_description" : "Shared library",
+      "metadata_only" : false
+    } ],
+    "tags" : [ {
+      "id" : 8345,
+      "name" : "jb-amq-7-candidate",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 8797,
+      "name" : "jb-amq-7-rhel-6-candidate",
+      "locked" : false,
+      "maven_support" : false,
+      "maven_include_all" : false
+    } ],
+    "types" : [ "maven", "rpm" ]
+  }
+}

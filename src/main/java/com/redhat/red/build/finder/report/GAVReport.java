@@ -1,5 +1,5 @@
-/**
- * Copyright 2017 Red Hat, Inc.
+/*
+ * Copyright (C) 2017 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,12 @@ public class GAVReport extends Report {
     private List<String> gavs;
 
     public GAVReport(List<KojiBuild> builds) {
-        List<KojiBuildInfo> buildInfos = builds.stream().filter(b -> b.getBuildInfo() != null && b.getBuildInfo().getTypeNames() != null && b.getBuildInfo().getTypeNames().contains("maven")).map(KojiBuild::getBuildInfo).collect(Collectors.toList());
+        List<KojiBuildInfo> buildInfos = builds.stream().filter(b -> b.getBuildInfo() != null && b.getTypes() != null && b.getTypes().contains("maven")).map(KojiBuild::getBuildInfo).collect(Collectors.toList());
         this.gavs = buildInfos.stream().map(b -> b.getMavenGroupId() + ":" + b.getMavenArtifactId() + ":" + b.getMavenVersion()).collect(Collectors.toList());
         this.gavs.sort(String::compareToIgnoreCase);
     }
 
+    @Override
     public String render() {
         return this.gavs.stream().map(Object::toString).collect(Collectors.joining("\n"));
     }

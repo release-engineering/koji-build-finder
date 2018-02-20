@@ -1,5 +1,5 @@
-/**
- * Copyright 2017 Red Hat, Inc.
+/*
+ * Copyright (C) 2017 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 
 public class KojiLocalArchive {
     private KojiArchiveInfo archive;
+
     private List<String> files;
 
     public KojiLocalArchive() {

@@ -1,5 +1,5 @@
-/**
- * Copyright 2017 Red Hat, Inc.
+/*
+ * Copyright (C) 2017 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ public class NVRReport extends Report {
         this.nvrs.sort(String::compareToIgnoreCase);
     }
 
+    @Override
     public String render() {
         return this.nvrs.stream().map(Object::toString).collect(Collectors.joining("\n"));
     }

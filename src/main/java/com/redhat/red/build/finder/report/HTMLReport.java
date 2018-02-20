@@ -1,5 +1,5 @@
-/**
- * Copyright 2017 Red Hat, Inc.
+/*
+ * Copyright (C) 2017 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,6 +98,7 @@ public class HTMLReport extends Report {
         return span(source);
     }
 
+    @Override
     public String render() {
         double numImports = builds.stream().filter(b -> b.getBuildInfo().getId() > 0 && b.isImport()).count();
         double percentImported = 0;
@@ -125,23 +126,24 @@ public class HTMLReport extends Report {
                               h2("Builds found in distribution"),
                               table(thead(tr().with(th("#"), th("ID"), th("Name"), th("Version"), th("Artifacts"), th("Tags"), th("Type"), th("Sources"), th("Patches"), th("SCM URL"), th("Options"), th("Extra"))),
                                     tbody(each(builds, build ->
-                                          tr(td().with(text(Integer.toString(builds.indexOf(build))),
-                                          td().with(build.getBuildInfo().getId() > 0 ? linkBuild(build.getBuildInfo().getId()) : errorText(String.valueOf(build.getBuildInfo().getId()))),
-                                          td().with(build.getBuildInfo().getId() > 0 ? linkPackage(build.getBuildInfo().getPackageId(), build.getBuildInfo().getName()) : text(""))),
-                                          td().with(build.getBuildInfo().getId() > 0 ? text(build.getBuildInfo().getVersion().replace('_', '-')) : text("")),
-                                          td().with(build.getArchives() != null ? ol().with(each(build.getArchives(), archive -> li(linkArchive(build, archive.getArchive()), text(": "), each(archive.getFiles(), file -> text(archive.getFiles().indexOf(file) != (archive.getFiles().size() - 1) ? file + ", " : file))))) : text("")),
-                                          td().with(build.getTags() != null ? ul().with(each(build.getTags(), tag -> li(linkTag(tag.getId(), tag.getName())))) : text("")),
-                                          td().with(build.getType() != null ? text(build.getType()) : (build.getBuildInfo().getId() > 0 ? errorText("imported build") : text(""))),
-                                          td().with(build.getSourcesZip() != null ? linkArchive(build, build.getSourcesZip()) : text("")),
-                                          td().with(build.getPatchesZip() != null ? linkArchive(build, build.getPatchesZip()) : text("")),
-                                          td().with(build.getSource() != null ? linkSource(build.getSource()) : (build.getBuildInfo().getId() == 0 ? text("") : errorText("missing URL"))),
-                                          td().with(build.getTaskInfo() != null && build.getTaskInfo().getMethod() != null && build.getTaskInfo().getMethod().equals("maven") && build.getTaskRequest() != null ? each(build.getTaskRequest().asMavenBuildRequest().getProperties().entrySet(), entry -> text(entry.getKey() + (entry.getValue() != null ? ("=" + entry.getValue() + "; ") : "; "))) : text("")),
-                                          td().with(build.getBuildInfo().getExtra() != null ? each(build.getBuildInfo().getExtra().entrySet(), entry -> text(entry.getKey() + (entry.getValue() != null ? ("=" + entry.getValue() + "; ") : "; "))) : text(""))
+                                          tr(
+                                          td().with(text(Integer.toString(builds.indexOf(build))),
+                                          td(build.getBuildInfo().getId() > 0 ? linkBuild(build.getBuildInfo().getId()) : errorText(String.valueOf(build.getBuildInfo().getId()))),
+                                          td(build.getBuildInfo().getId() > 0 ? linkPackage(build.getBuildInfo().getPackageId(), build.getBuildInfo().getName()) : text(""))),
+                                          td(build.getBuildInfo().getId() > 0 ? text(build.getBuildInfo().getVersion().replace('_', '-')) : text("")),
+                                          td(build.getArchives() != null ? ol().with(each(build.getArchives(), archive -> li(linkArchive(build, archive.getArchive()), text(": "), each(archive.getFiles(), file -> text(archive.getFiles().indexOf(file) != (archive.getFiles().size() - 1) ? file + ", " : file))))) : text("")),
+                                          td(build.getTags() != null ? ul().with(each(build.getTags(), tag -> li(linkTag(tag.getId(), tag.getName())))) : text("")),
+                                          td(build.getMethod() != null ? text(build.getMethod()) : (build.getBuildInfo().getId() > 0 ? errorText("imported build") : text(""))),
+                                          td(build.getSourcesZip() != null ? linkArchive(build, build.getSourcesZip()) : text("")),
+                                          td(build.getPatchesZip() != null ? linkArchive(build, build.getPatchesZip()) : text("")),
+                                          td(build.getSource() != null ? linkSource(build.getSource()) : (build.getBuildInfo().getId() == 0 ? text("") : errorText("missing URL"))),
+                                          td(build.getTaskInfo() != null && build.getTaskInfo().getMethod() != null && build.getTaskInfo().getMethod().equals("maven") && build.getTaskRequest() != null && build.getTaskRequest().asMavenBuildRequest().getProperties() != null && build.getTaskRequest().asMavenBuildRequest() != null ? each(build.getTaskRequest().asMavenBuildRequest().getProperties().entrySet(), entry -> text(entry.getKey() + (entry.getValue() != null ? ("=" + entry.getValue() + "; ") : "; "))) : text("")),
+                                          td(build.getBuildInfo().getExtra() != null ? each(build.getBuildInfo().getExtra().entrySet(), entry -> text(entry.getKey() + (entry.getValue() != null ? ("=" + entry.getValue() + "; ") : "; "))) : text(""))
                                        ))
                                    )
                                 )
                             ),
-                              footer().attr(Attr.CLASS, "footer").attr(Attr.ID, "footer").withText("Created: " + new Date())
+                            footer().attr(Attr.CLASS, "footer").attr(Attr.ID, "footer").withText("Created: " + new Date())
                         )
                     ).renderFormatted();
     }

@@ -1,5 +1,5 @@
-/**
- * Copyright 2017 Red Hat, Inc.
+/*
+ * Copyright (C) 2017 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
@@ -55,18 +54,19 @@ public class DistributionAnalyzer {
 
     private StandardFileSystemManager sfs;
 
-    public DistributionAnalyzer(List<File> files, String algorithm)  {
+    private String rootString;
+
+    public DistributionAnalyzer(List<File> files, String algorithm) {
         this.files = files;
         this.md = DigestUtils.getDigest(algorithm);
         this.map = new ArrayListValuedHashMap<>();
     }
 
-    private String rootString;
-
     public void checksumFiles() throws IOException {
-
         sfs = new StandardFileSystemManager();
+
         sfs.init();
+
         try {
             for (File file : files) {
                 try (FileObject fo = sfs.resolveFile(file.getAbsolutePath())) {
@@ -88,11 +88,10 @@ public class DistributionAnalyzer {
             byte[] digest = DigestUtils.digest(md, fc.getInputStream());
             String checksum = Hex.encodeHexString(digest);
             map.put(checksum, found);
-            LOGGER.info("Checksum: {} {}", checksum, found);
+            LOGGER.debug("Checksum: {} {}", checksum, found);
         }
 
-        if (fo.getType().getName().equals(FileType.FOLDER.getName())
-            || fo.getType().getName().equals(FileType.FILE_OR_FOLDER.getName())) {
+        if (fo.getType().getName().equals(FileType.FOLDER.getName()) || fo.getType().getName().equals(FileType.FILE_OR_FOLDER.getName())) {
             for (FileObject fileO : fo.getChildren()) {
                 try {
                     listChildren(fileO);
@@ -101,34 +100,22 @@ public class DistributionAnalyzer {
                 }
             }
         } else {
-            if (Stream.of(sfs.getSchemes()).anyMatch(s -> s.equals(fo.getName().getExtension()) && !NON_ARCHIVE_SCHEMES
-                    .contains(fo.getName().getExtension()))) {
+            if (Stream.of(sfs.getSchemes()).anyMatch(s -> s.equals(fo.getName().getExtension()) && !NON_ARCHIVE_SCHEMES.contains(fo.getName().getExtension()))) {
+                LOGGER.debug("Creating file system for: {}", found);
 
-                LOGGER.info("Attempting to create file system for {}", found);
                 try (FileObject layered = sfs.createFileSystem(fo.getName().getExtension(), fo)) {
                     listChildren(layered);
                     sfs.closeFileSystem(layered.getFileSystem());
                 } catch (FileSystemException e) {
-                    LOGGER.error("Unable to process archive/compressed file {} ", found);
+                    LOGGER.warn("Unable to process archive/compressed file: {}", found);
                     LOGGER.debug("Caught file system exception", e);
                 }
             }
         }
     }
 
-    public String toJSON() {
-        return JSONUtils.dumpString(map.asMap());
-    }
-
     public boolean outputToFile(File file) {
-        try {
-            FileUtils.writeStringToFile(file, toJSON(), "UTF-8", false);
-        } catch (IOException e) {
-            LOGGER.error("File output error", e);
-            return false;
-        }
-
-        return true;
+        return JSONUtils.dumpObjectToFile(map.asMap(), file);
     }
 
     public MultiValuedMap<String, String> getMap() {
@@ -138,5 +125,4 @@ public class DistributionAnalyzer {
     public void setMap(MultiValuedMap<String, String> map) {
         this.map = map;
     }
-
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-    Copyright 2017 Red Hat, Inc.
+    Copyright (C) 2017 Red Hat, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
     limitations under the License.
 -->
 <configuration>
-
-  <appender name="STDOUT"
-    class="ch.qos.logback.core.ConsoleAppender">
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%level %logger{36} - %msg%n</pattern>
+      <pattern>[%highlight(%level)] %msg%n</pattern>
     </encoder>
   </appender>
 
   <logger name="com.redhat.red.build.koji" level="WARN" />
   <logger name="org.apache.commons.beanutils" level="WARN" />
   <logger name="org.apache.commons.vfs2" level="WARN" />
+  <!-- Set to OFF due to <https://issues.apache.org/jira/browse/VFS-634> -->
+  <logger name="org.apache.commons.vfs2.impl" level="OFF" />
   <logger name="org.apache.http" level="WARN" />
   <logger name="org.apache.kerby" level="WARN" />
   <logger name="org.commonjava.util.jhttpc" level="WARN" />
@@ -34,5 +34,4 @@
   <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>
-
 </configuration>

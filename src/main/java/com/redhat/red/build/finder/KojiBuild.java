@@ -1,5 +1,5 @@
-/**
- * Copyright 2017 Red Hat, Inc.
+/*
+ * Copyright (C) 2017 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,26 +28,33 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiTaskRequest;
 
 public class KojiBuild {
     private KojiBuildInfo buildInfo;
+
     private KojiTaskInfo taskInfo;
+
     private KojiTaskRequest taskRequest;
+
     private List<KojiLocalArchive> archives;
+
     private List<KojiArchiveInfo> remoteArchives;
+
     private List<KojiTagInfo> tags;
+
+    private List<String> types;
+
     private List<KojiArchiveInfo> duplicateArchives;
 
     public KojiBuild() {
 
     }
 
-    public KojiBuild(KojiBuildInfo buildInfo, KojiTaskInfo taskInfo, KojiTaskRequest taskRequest,
-            List<KojiLocalArchive> archives, List<KojiArchiveInfo> remoteArchives,
-            List<KojiTagInfo> tags) {
+    public KojiBuild(KojiBuildInfo buildInfo, KojiTaskInfo taskInfo, KojiTaskRequest taskRequest, List<KojiLocalArchive> archives, List<KojiArchiveInfo> remoteArchives, List<KojiTagInfo> tags, List<String> types) {
         this.buildInfo = buildInfo;
         this.taskInfo = taskInfo;
         this.taskRequest = taskRequest;
         this.archives = archives;
         this.remoteArchives = remoteArchives;
         this.tags = tags;
+        this.types = types;
     }
 
     public KojiBuildInfo getBuildInfo() {
@@ -98,6 +105,14 @@ public class KojiBuild {
         this.tags = tags;
     }
 
+    public List<String> getTypes() {
+        return types;
+    }
+
+    public void setTypes(List<String> types) {
+        this.types = types;
+    }
+
     public List<KojiArchiveInfo> getDuplicateArchives() {
         return duplicateArchives;
     }
@@ -126,16 +141,16 @@ public class KojiBuild {
 
     @JsonIgnore
     public KojiArchiveInfo getSourcesZip() {
-         String mavenVersion = buildInfo.getMavenVersion();
-         KojiArchiveInfo sourcesZip = null;
+        String mavenVersion = buildInfo.getMavenVersion();
+        KojiArchiveInfo sourcesZip = null;
 
-         if (remoteArchives != null && mavenVersion != null) {
-             String sourcesZipFilename = buildInfo.getMavenArtifactId() + "-" + buildInfo.getMavenVersion() + "-scm-sources.zip";
-             sourcesZip = remoteArchives.stream().filter(sArchive -> sArchive.getFilename().equals(sourcesZipFilename)).findAny().orElse(null);
-             return sourcesZip;
-         }
+        if (remoteArchives != null && mavenVersion != null) {
+            String sourcesZipFilename = buildInfo.getMavenArtifactId() + "-" + buildInfo.getMavenVersion() + "-scm-sources.zip";
+            sourcesZip = remoteArchives.stream().filter(sArchive -> sArchive.getFilename().equals(sourcesZipFilename)).findAny().orElse(null);
+            return sourcesZip;
+        }
 
-         return null;
+        return null;
     }
 
     @JsonIgnore
@@ -188,7 +203,7 @@ public class KojiBuild {
     }
 
     @JsonIgnore
-    public String getType() {
+    public String getMethod() {
         if (taskInfo != null) {
             return taskInfo.getMethod();
         }
@@ -207,7 +222,7 @@ public class KojiBuild {
                     String version = (String) extra.get("version");
 
                     if (version != null) {
-                         buildSystem += (" " + version);
+                        buildSystem += (" " + version);
                     }
                 }
 

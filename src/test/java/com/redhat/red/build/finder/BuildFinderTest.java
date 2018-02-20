@@ -1,5 +1,5 @@
-/**
- * Copyright 2017 Red Hat, Inc.
+/*
+ * Copyright (C) 2017 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,12 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
+import ch.qos.logback.classic.Level;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
+import org.slf4j.LoggerFactory;
 
 public class BuildFinderTest {
     @Rule
@@ -36,11 +38,20 @@ public class BuildFinderTest {
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
     @Test
-    public void verifyDebug() throws IOException, InterruptedException {
-        File target = new File(TestUtils.resolveFileResource("./", "").getParentFile().getParentFile(), "pom.xml");
-        BuildFinder.main(new String[] {"-d", "-k", target.getAbsolutePath()});
+    public void verifyDebug() throws IOException {
+        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+        Level level = root.getLevel();
 
-        assertTrue(systemOutRule.getLog().contains("DEBUG"));
+        try {
+            File folder = temp.newFolder();
+            File target = new File(TestUtils.resolveFileResource("./", "").getParentFile().getParentFile(), "pom.xml");
+
+            BuildFinder.main(new String[] {"-d", "-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
+
+            assertTrue(systemOutRule.getLog().contains(" DEBUG "));
+        } finally {
+            root.setLevel(level);
+        }
     }
 
     @Test

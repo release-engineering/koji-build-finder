@@ -1,5 +1,5 @@
-/**
- * Copyright 2017 Red Hat, Inc.
+/*
+ * Copyright (C) 2017 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,6 +106,7 @@ public class FileObjectTrackingTest {
 
     /**
      * Byteman modifies this method to return the actual counter value.
+     *
      * @return Integer counter
      */
     private Object getAbstractFileObjectCounter() {
@@ -114,6 +115,7 @@ public class FileObjectTrackingTest {
 
     /**
      * Byteman modifies this method to return the actual counter value.
+     *
      * @return Integer counter
      */
     private Object getFileSystemCounter() {

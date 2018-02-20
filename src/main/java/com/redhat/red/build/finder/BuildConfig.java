@@ -1,12 +1,12 @@
-/**
- * Copyright 2017 Red Hat, Inc.
- * <p>
+/*
+ * Copyright (C) 2017 Red Hat, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,15 +21,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
 public class BuildConfig {
+    @JsonProperty("archive-types")
+    private List<String> archiveTypes;
+
     @JsonProperty("checksum-only")
     private Boolean checksumOnly;
 
     @JsonProperty("checksum-type")
     private KojiChecksumType checksumType;
 
-    @JsonProperty("archive-types")
-    private List<String> archiveTypes;
-
+    @JsonProperty("excludes")
     private List<String> excludes;
 
     @JsonProperty("koji-hub-url")
@@ -38,21 +39,23 @@ public class BuildConfig {
     @JsonProperty("koji-web-url")
     private String kojiWebURL;
 
-    public List<String> getExcludes() {
-        if (excludes == null) {
-            excludes = ConfigDefaults.EXCLUDES;
+    public List<String> getArchiveTypes() {
+        if (archiveTypes == null) {
+            archiveTypes = ConfigDefaults.ARCHIVE_TYPES;
         }
-        return excludes;
+
+        return archiveTypes;
     }
 
-    public void setExcludes(List<String> excludes) {
-        this.excludes = excludes;
+    public void setArchiveTypes(List<String> archiveTypes) {
+        this.archiveTypes = archiveTypes;
     }
 
     public boolean getChecksumOnly() {
         if (checksumOnly == null) {
             checksumOnly = ConfigDefaults.CHECKSUM_ONLY;
         }
+
         return checksumOnly;
     }
 
@@ -64,6 +67,7 @@ public class BuildConfig {
         if (checksumType == null) {
             checksumType = ConfigDefaults.CHECKSUM_TYPE;
         }
+
         return checksumType;
     }
 
@@ -71,21 +75,23 @@ public class BuildConfig {
         this.checksumType = checksumType;
     }
 
-    public List<String> getArchiveTypes() {
-        if (archiveTypes == null) {
-            archiveTypes = ConfigDefaults.ARCHIVE_TYPES;
+    public List<String> getExcludes() {
+        if (excludes == null) {
+            excludes = ConfigDefaults.EXCLUDES;
         }
-        return archiveTypes;
+
+        return excludes;
     }
 
-    public void setArchiveTypes(List<String> archiveTypes) {
-        this.archiveTypes = archiveTypes;
+    public void setExcludes(List<String> excludes) {
+        this.excludes = excludes;
     }
 
     public String getKojiHubURL() {
         if (kojiHubURL == null) {
             kojiHubURL = ConfigDefaults.KOJI_HUB_URL;
         }
+
         return kojiHubURL;
     }
 
@@ -97,6 +103,7 @@ public class BuildConfig {
         if (kojiWebURL == null) {
             kojiWebURL = ConfigDefaults.KOJI_WEB_URL;
         }
+
         return kojiWebURL;
     }
 
@@ -104,11 +111,12 @@ public class BuildConfig {
         this.kojiWebURL = kojiWebURL;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "BuildConfig{"
-            + "\n\tchecksumOnly=" + getChecksumOnly()
+            + "\n\tarchiveTypes=" + getArchiveTypes()
+            + ", \n\tchecksumOnly=" + getChecksumOnly()
             + ", \n\tchecksumType=" + getChecksumType()
-            + ", \n\tarchiveTypes=" + getArchiveTypes()
             + ", \n\texcludes=" + getExcludes()
             + ", \n\tkojiHubURL='" + getKojiHubURL()
             + '\'' + ", \n\tkojiWebURL='" + getKojiWebURL()
