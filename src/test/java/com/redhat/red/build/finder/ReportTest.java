@@ -98,14 +98,14 @@ public class ReportTest {
         assertNull(buildList.get(1).getSourcesZip());
         assertNull(buildList.get(1).getPatchesZip());
         assertNull(buildList.get(1).getProjectSourcesTgz());
-        assertEquals(buildList.get(1).getDuplicateArchives().size(), 1);
+        assertEquals(1, buildList.get(1).getDuplicateArchives().size());
         assertNotNull(buildList.get(1).toString());
 
         assertTrue(buildList.get(2).isImport());
         assertNull(buildList.get(2).getSourcesZip());
         assertNull(buildList.get(2).getPatchesZip());
         assertNull(buildList.get(2).getProjectSourcesTgz());
-        assertEquals(buildList.get(2).getDuplicateArchives().size(), 1);
+        assertEquals(1, buildList.get(2).getDuplicateArchives().size());
         assertNotNull(buildList.get(2).toString());
         assertNotNull(buildList.get(2).getDuplicateArchives().get(0));
 
