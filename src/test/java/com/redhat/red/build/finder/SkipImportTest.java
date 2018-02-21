@@ -30,12 +30,12 @@ import org.junit.Test;
 public class SkipImportTest  {
     @Test
     public void verifySkipImport() throws Exception {
-        final String CHECKSUM = "2e7e85f0ee97afde716231a6c792492a";
-        final List<String> FILENAMES = Collections.unmodifiableList(Arrays.asList("commons-lang-2.6-redhat-2.jar"));
+        final String checksum = "2e7e85f0ee97afde716231a6c792492a";
+        final List<String> filenames = Collections.unmodifiableList(Arrays.asList("commons-lang-2.6-redhat-2.jar"));
         MockKojiClientSession session = new MockKojiClientSession("skip-import-test");
         BuildConfig config = new BuildConfig();
         BuildFinder finder = new BuildFinder(session, config);
-        Map<String, Collection<String>> checksumTable = Collections.singletonMap(CHECKSUM, FILENAMES);
+        Map<String, Collection<String>> checksumTable = Collections.singletonMap(checksum, filenames);
         Map<Integer, KojiBuild> builds = finder.findBuilds(checksumTable);
 
         assertEquals(2, builds.size());
