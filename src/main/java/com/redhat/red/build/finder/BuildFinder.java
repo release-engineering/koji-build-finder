@@ -665,7 +665,7 @@ public class BuildFinder {
                 reports.add(new BuildStatisticsReport(outputDirectory, buildList));
                 reports.add(new NVRReport(outputDirectory, buildList));
                 reports.add(new GAVReport(outputDirectory, buildList));
-                reports.forEach(report -> report.outputText());
+                reports.forEach(Report::outputText);
 
                 new HTMLReport(outputDirectory, files, buildList, config.getKojiWebURL(), Collections.unmodifiableList(reports)).outputHTML();
 
