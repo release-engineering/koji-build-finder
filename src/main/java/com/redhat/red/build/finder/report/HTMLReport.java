@@ -59,11 +59,13 @@ import j2html.tags.Tag;
 
 public class HTMLReport extends Report {
     private static final String HTML_STYLE = "html { font-family: sans-serif; } "
+
             + "table { width: 100%; border-style: solid; border-width: 1px; border-collapse: collapse; } "
             + "caption { background: lightyellow; caption-side: top; font-weight: bold; font-size: 105%; text-align: left; margin-top: 50px; } "
             + "tr:nth-child(even) { background-color: lightgrey; } td { text-align: left; vertical-align: top; } "
             + "th { border-style: solid; border-width: 1px; background-color: darkgrey; text-align: left; font-weight: bold; } "
-            + "tr, td { border-style: solid; border-width: 1px; font-size: small; }";
+            + "tr, td { border-style: solid; border-width: 1px; font-size: small; } "
+            + "footer { font-size: 80%; }";
 
     private String kojiwebUrl;
 
@@ -72,8 +74,9 @@ public class HTMLReport extends Report {
     private List<Report> reports;
 
     public HTMLReport(File outputDirectory, Collection<File> files, List<KojiBuild> builds, String kojiwebUrl, List<Report> reports) {
-        setDescription("Build Report for " + String.join(", ", files.stream().map(File::getName).collect(Collectors.toList())));
-        setBaseName("output");
+        setName("Build Report for " + String.join(", ", files.stream().map(File::getName).collect(Collectors.toList())));
+        setDescription("List of analyzed artifacts whether or not they were found in a Koji build");
+        setBaseFilename("output");
         setOutputDirectory(outputDirectory);
 
         this.builds = builds;
@@ -113,16 +116,16 @@ public class HTMLReport extends Report {
         return document().render()
                      + html(
                         head(style().withText(HTML_STYLE)).with(
-                            title().withText(getDescription())
+                            title().withText(getName())
                         ),
                         body().with(
                             header(
-                                h1(getDescription())
+                                h1(getName())
                             ),
                             main(
-                              div(table(caption("Overview"), thead(tr(th("Report"))), tbody(tr(td(a().withHref("#div-" + getBaseName()).with(text("Build report")))), each(reports, report -> tr(td(a().withHref("#div-" + report.getBaseName()).with(text(report.getDescription())))))))),
-                              div(attrs("#div-" + getBaseName()),
-                              table(caption(text("Builds")), thead(tr(th("#"), th("ID"), th("Name"), th("Version"), th("Artifacts"), th("Tags"), th("Type"), th("Sources"), th("Patches"), th("SCM URL"), th("Options"), th("Extra"))),
+                              div(attrs("#div-reports"), table(caption(text("Reports")), thead(tr(th(text("Name")), th(text("Description")))), tbody(tr(td(a().withHref("#div-" + getBaseFilename()).with(text("Builds"))), td(text(getDescription()))), each(reports, report -> tr(td(a().withHref("#div-" + report.getBaseFilename()).with(text(report.getName()))), td(text(report.getDescription()))))))),
+                              div(attrs("#div-" + getBaseFilename()),
+                              table(caption(text("Builds")), thead(tr(th(text("#")), th(text("ID")), th(text("Name")), th(text("Version")), th(text("Artifacts")), th(text("Tags")), th(text("Type")), th(text("Sources")), th(text("Patches")), th(text("SCM URL")), th(text("Options")), th(text("Extra")))),
                                     tbody(each(filter(builds, build -> build.getBuildInfo().getId() > 0 || (build.getBuildInfo().getId() == 0 && build.getArchives() != null)), build ->
                                           tr(
                                           td(text(Integer.toString(builds.indexOf(build)))),
@@ -140,9 +143,9 @@ public class HTMLReport extends Report {
                                        ))
                                    )
                                 )), each(reports, report ->
-                                    div(attrs("#div-" + report.getBaseName()), report.toHTML()))
+                                    div(attrs("#div-" + report.getBaseFilename()), report.toHTML()))
                             ),
-                            footer().attr(Attr.CLASS, "footer").attr(Attr.ID, "footer").with(text("Created: " + new Date() + " by "), a().withHref("https://github.com/release-engineering/koji-build-finder/").with(text(BuildFinder.getName())), text(" " + BuildFinder.getVersion() + " (SHA: "), a().withHref("https://github.com/release-engineering/koji-build-finder/commit/" + BuildFinder.getScmRevision()).with(text(BuildFinder.getScmRevision()), text(")")))
+                            div(attrs("#div-footer"), footer().attr(Attr.CLASS, "footer").attr(Attr.ID, "footer").with(text("Created: " + new Date() + " by "), a().withHref("https://github.com/release-engineering/koji-build-finder/").with(text(BuildFinder.getName())), text(" " + BuildFinder.getVersion() + " (SHA: "), a().withHref("https://github.com/release-engineering/koji-build-finder/commit/" + BuildFinder.getScmRevision()).with(text(BuildFinder.getScmRevision()), text(")"))))
                         )
                     ).renderFormatted();
     }

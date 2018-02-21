@@ -39,8 +39,9 @@ public class GAVReport extends Report {
     private List<String> gavs;
 
     public GAVReport(File outputDirectory, List<KojiBuild> builds) {
-        setDescription("Maven artifacts");
-        setBaseName("gav");
+        setName("Maven artifacts");
+        setDescription("List of Maven artifacts in standard Maven <groupId>:<artifactId>:<version> format");
+        setBaseFilename("gav");
         setOutputDirectory(outputDirectory);
 
         List<KojiBuildInfo> buildInfos = builds.stream().filter(b -> b.getBuildInfo() != null && b.getTypes() != null && b.getTypes().contains("maven")).map(KojiBuild::getBuildInfo).collect(Collectors.toList());
@@ -55,6 +56,6 @@ public class GAVReport extends Report {
 
     @Override
     public ContainerTag toHTML() {
-        return table(attrs("#table-" + getBaseName()), caption(text(getDescription())), thead(tr(th(text("<groupId>-<artifactId>-<version>")))), tbody(each(gavs, i -> tr(td(i)))));
+        return table(attrs("#table-" + getBaseFilename()), caption(text(getName())), thead(tr(th(text("<groupId>-<artifactId>-<version>")))), tbody(each(gavs, i -> tr(td(text(i))))));
     }
 }

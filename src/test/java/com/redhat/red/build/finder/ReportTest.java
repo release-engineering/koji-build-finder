@@ -72,20 +72,20 @@ public class ReportTest {
         NVRReport nvrReport = new NVRReport(folder, buildList);
         assertEquals(nvrReport.renderText(), nvrExpected);
         nvrReport.outputText();
-        assertEquals(FileUtils.readFileToString(new File(folder, nvrReport.getBaseName() + ".txt"), "UTF-8"), nvrExpected);
+        assertEquals(FileUtils.readFileToString(new File(folder, nvrReport.getBaseFilename() + ".txt"), "UTF-8"), nvrExpected);
 
         final String gavExpected = "artemis-native-linux:artemis-native-linux-repolib:2.3.0.amq_710003-1.redhat_1.el6\ncommons-beanutils:commons-beanutils:1.9.2.redhat-1\ncommons-lang:commons-lang:2.6\ncommons-lang:commons-lang:2.6\norg.wildfly.swarm:config-api-parent:1.1.0.Final-redhat-14";
         GAVReport gavReport = new GAVReport(folder, buildList);
         assertEquals(gavReport.renderText(), gavExpected);
         gavReport.outputText();
-        assertEquals(FileUtils.readFileToString(new File(folder, gavReport.getBaseName() + ".txt"), "UTF-8"), gavExpected);
+        assertEquals(FileUtils.readFileToString(new File(folder, gavReport.getBaseFilename() + ".txt"), "UTF-8"), gavExpected);
 
         BuildStatisticsReport buildStatisticsReport = new BuildStatisticsReport(folder, buildList);
         buildStatisticsReport.outputText();
 
         HTMLReport htmlReport = new HTMLReport(folder, files, buildList, ConfigDefaults.KOJI_WEB_URL, new ArrayList<>());
         htmlReport.outputHTML();
-        assertTrue(FileUtils.readFileToString(new File(folder, htmlReport.getBaseName() + ".html"), "UTF-8").contains("<html>"));
+        assertTrue(FileUtils.readFileToString(new File(folder, htmlReport.getBaseFilename() + ".html"), "UTF-8").contains("<html>"));
 
         assertTrue(buildList.get(0).isImport());
         assertNull(buildList.get(0).getSourcesZip());

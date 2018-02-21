@@ -27,9 +27,11 @@ import j2html.tags.ContainerTag;
 public abstract class Report {
     private static final Logger LOGGER = LoggerFactory.getLogger(Report.class);
 
+    private String name;
+
     private String description;
 
-    private String baseName;
+    private String baseFilename;
 
     private File outputDirectory;
 
@@ -45,7 +47,7 @@ public abstract class Report {
         }
 
         try {
-            FileUtils.writeStringToFile(new File(outputDirectory, baseName + ".txt"), text, "UTF-8", false);
+            FileUtils.writeStringToFile(new File(outputDirectory, baseFilename + ".txt"), text, "UTF-8", false);
         } catch (IOException e) {
             LOGGER.error("File output error", e);
             return false;
@@ -66,13 +68,21 @@ public abstract class Report {
         }
 
         try {
-            FileUtils.writeStringToFile(new File(outputDirectory, baseName + ".html"), html, "UTF-8", false);
+            FileUtils.writeStringToFile(new File(outputDirectory, baseFilename + ".html"), html, "UTF-8", false);
         } catch (IOException e) {
             LOGGER.error("File output error", e);
             return false;
         }
 
         return true;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
@@ -83,12 +93,12 @@ public abstract class Report {
         this.description = description;
     }
 
-    public String getBaseName() {
-        return baseName;
+    public String getBaseFilename() {
+        return baseFilename;
     }
 
-    public void setBaseName(String baseName) {
-        this.baseName = baseName;
+    public void setBaseFilename(String baseFilename) {
+        this.baseFilename = baseFilename;
     }
 
     public File getOutputDirectory() {

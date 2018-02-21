@@ -39,8 +39,9 @@ public class NVRReport extends Report {
     private List<String> nvrs;
 
     public NVRReport(File outputDirectory, List<KojiBuild> builds) {
-        setDescription("Koji builds");
-        setBaseName("nvr");
+        setName("Koji builds");
+        setDescription("List of builds in standard Koji <name>-<version>-<release> format");
+        setBaseFilename("nvr");
         setOutputDirectory(outputDirectory);
 
         List<KojiBuildInfo> buildInfos = builds.stream().map(KojiBuild::getBuildInfo).collect(Collectors.toList());
@@ -56,6 +57,6 @@ public class NVRReport extends Report {
 
     @Override
     public ContainerTag toHTML() {
-        return table(attrs("#table-" + getBaseName()), caption(text(getDescription())), thead(tr(th(text("<name>-<version>-<release>")))), tbody(each(nvrs, i -> tr(td(i)))));
+        return table(attrs("#table-" + getBaseFilename()), caption(text(getName())), thead(tr(th(text("<name>-<version>-<release>")))), tbody(each(nvrs, i -> tr(td(text(i))))));
     }
 }
