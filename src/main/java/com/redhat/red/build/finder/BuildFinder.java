@@ -246,7 +246,7 @@ public class BuildFinder {
 
             LOGGER.debug("Found {} archives for checksum: {}", archives.size(), checksum);
 
-            int firstBuild = -1;
+            int firstBuildId = -1;
 
             for (KojiArchiveInfo archive : archives) {
                 if (archive.getChecksumType() != config.getChecksumType()) {
@@ -285,8 +285,8 @@ public class BuildFinder {
                         }
 
                         /* Ignore imports when the artifact was also found in an earlier build */
-                        if (taskInfo == null && firstBuild != -1 && buildInfo.getId() > firstBuild) {
-                            LOGGER.warn("Skipping import id {} because artifact exists in build id {}", buildInfo.getId(), firstBuild);
+                        if (taskInfo == null && firstBuildId != -1 && buildInfo.getId() > firstBuildId) {
+                            LOGGER.warn("Skipping import id {} because artifact exists in build id {}", buildInfo.getId(), firstBuildId);
                             continue;
                         }
 
@@ -349,8 +349,8 @@ public class BuildFinder {
                                     LOGGER.debug("Found task info task id {} for build id {} using method {}", taskInfo.getTaskId(), buildInfo.getId(), taskInfo.getMethod());
 
                                     /* Track first build that is not an import */
-                                    if (firstBuild == -1 || buildInfo.getId() < firstBuild) {
-                                        firstBuild = buildInfo.getId();
+                                    if (firstBuildId == -1 || buildInfo.getId() < firstBuildId) {
+                                        firstBuildId = buildInfo.getId();
                                     }
 
                                     if (!useTaskRequest) {
@@ -373,8 +373,8 @@ public class BuildFinder {
                             }
 
                             /* Ignore imports when the artifact was also found in an earlier build */
-                            if (buildInfo.getTaskId() == null && firstBuild != -1 && buildInfo.getId() > firstBuild) {
-                                LOGGER.warn("Skipping import id {} because artifact exists in build id {}", red(buildInfo.getId()), red(firstBuild));
+                            if (buildInfo.getTaskId() == null && firstBuildId != -1 && buildInfo.getId() > firstBuildId) {
+                                LOGGER.warn("Skipping import id {} because artifact exists in build id {}", red(buildInfo.getId()), red(firstBuildId));
                             } else {
                                 archiveList = new ArrayList<>();
                                 archiveList.add(new KojiLocalArchive(archive, new ArrayList<>(filenames)));
