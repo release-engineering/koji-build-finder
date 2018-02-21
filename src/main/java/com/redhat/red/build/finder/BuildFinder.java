@@ -476,7 +476,7 @@ public class BuildFinder {
             }
 
             if (line.hasOption("debug")) {
-                ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+                ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
                 rootLogger.setLevel(Level.DEBUG);
 
                 LoggerContext loggerContext = rootLogger.getLoggerContext();
