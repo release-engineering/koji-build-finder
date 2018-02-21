@@ -58,14 +58,15 @@ import j2html.tags.ContainerTag;
 import j2html.tags.Tag;
 
 public class HTMLReport extends Report {
-    private static final String HTML_STYLE = "html { font-family: sans-serif; } "
-
-            + "table { width: 100%; border-style: solid; border-width: 1px; border-collapse: collapse; } "
-            + "caption { background: lightyellow; caption-side: top; font-weight: bold; font-size: 105%; text-align: left; margin-top: 50px; } "
-            + "tr:nth-child(even) { background-color: lightgrey; } td { text-align: left; vertical-align: top; } "
-            + "th { border-style: solid; border-width: 1px; background-color: darkgrey; text-align: left; font-weight: bold; } "
-            + "tr, td { border-style: solid; border-width: 1px; font-size: small; } "
-            + "footer { font-size: 80%; }";
+    private static final String HTML_STYLE = ""
+            + "body { font-family: Verdana, Helvetica, Arial, sans-serif; font-size: 13px; }\n"
+            + "table { width: 100%; border-style: solid; border-width: 1px; border-collapse: collapse; }\n"
+            + "caption { background: lemonchiffon; caption-side: top; font-weight: bold; font-size: larger; text-align: left; margin-top: 50px; }\n"
+            + "th { border-style: solid; border-width: 1px; background-color: darkgrey; text-align: left; font-weight: bold; }\n"
+            + "tr { border-style: solid; border-width: 1px; }\n"
+            + "tr:nth-child(even) { background-color: lightgrey; }\n"
+            + "td { border-style: solid; border-width: 1px; text-align: left; vertical-align: top; font-size: small; }\n"
+            + "footer { font-size: smaller; }";
 
     private String kojiwebUrl;
 
