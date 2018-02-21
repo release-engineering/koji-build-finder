@@ -54,10 +54,8 @@ public class KojiClientSession implements ClientSession {
     public KojiClientSession(String url, String krbService, String krbPrincipal, String krbPassword, String krbCCache, String krbKeytab) throws KojiClientException {
         client = new KojiClient(new SimpleKojiConfigBuilder().withKojiURL(url).withKrbService(krbService).withKrbCCache(krbCCache).withKrbKeytab(krbKeytab).withKrbPrincipal(krbPrincipal).withKrbPassword(krbPassword).build(), new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT));
 
-        if (krbService != null) {
-            if ((krbPrincipal != null && krbPassword != null) || krbCCache != null || krbKeytab != null) {
-                session = client.login();
-            }
+        if (krbService != null && ((krbPrincipal != null && krbPassword != null) || krbCCache != null || krbKeytab != null)) {
+            session = client.login();
         }
     }
 
