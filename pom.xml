@@ -204,7 +204,7 @@
       <dependency>
         <groupId>org.jboss.byteman</groupId>
         <artifactId>byteman-bmunit</artifactId>
-        <version>4.0.0</version>
+        <version>4.0.1</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
