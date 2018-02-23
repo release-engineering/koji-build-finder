@@ -709,22 +709,30 @@ public class BuildFinder {
      * @return the GIT sha of this codebase.
      */
     public static String getScmRevision() {
+        String scmRevision = "unknown";
+
         try {
-            final Enumeration<URL> resources = BuildFinder.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+            Enumeration<URL> resources = BuildFinder.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
 
             while (resources.hasMoreElements()) {
-                final URL jarUrl = resources.nextElement();
+                URL jarUrl = resources.nextElement();
 
-                if (jarUrl.getFile().contains("koji-build-finder")) {
-                    final Manifest manifest = new Manifest(jarUrl.openStream());
-                    return manifest.getMainAttributes().getValue("Scm-Revision");
+                if (jarUrl.getFile().contains(NAME)) {
+                    Manifest manifest = new Manifest(jarUrl.openStream());
+                    String manifestValue = manifest.getMainAttributes().getValue("Scm-Revision");
+
+                    if (manifestValue != null && !manifestValue.isEmpty()) {
+                        scmRevision = manifestValue;
+                    }
+
+                    break;
                 }
             }
         } catch (IOException e) {
             LOGGER.error("Unexpected exception processing jar file", e);
         }
 
-        return "unknown";
+        return scmRevision;
     }
 
     private static Object cyan(Object o) {
