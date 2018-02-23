@@ -57,6 +57,7 @@ import com.redhat.red.build.finder.report.BuildStatisticsReport;
 import com.redhat.red.build.finder.report.GAVReport;
 import com.redhat.red.build.finder.report.HTMLReport;
 import com.redhat.red.build.finder.report.NVRReport;
+import com.redhat.red.build.finder.report.ProductReport;
 import com.redhat.red.build.finder.report.Report;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
@@ -663,6 +664,7 @@ public class BuildFinder {
 
                 List<Report> reports = new ArrayList<>();
                 reports.add(new BuildStatisticsReport(outputDirectory, buildList));
+                reports.add(new ProductReport(outputDirectory, buildList));
                 reports.add(new NVRReport(outputDirectory, buildList));
                 reports.add(new GAVReport(outputDirectory, buildList));
                 reports.forEach(Report::outputText);

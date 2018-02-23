@@ -39,6 +39,7 @@ import com.redhat.red.build.finder.report.BuildStatisticsReport;
 import com.redhat.red.build.finder.report.GAVReport;
 import com.redhat.red.build.finder.report.HTMLReport;
 import com.redhat.red.build.finder.report.NVRReport;
+import com.redhat.red.build.finder.report.ProductReport;
 
 public class ReportTest {
     @Rule
@@ -160,6 +161,18 @@ public class ReportTest {
         assertEquals(2, buildStatisticsReport.getBuildStatistics().getNumberOfImportedArchives());
         assertEquals(((double) 2 / (double) 5) * 100.00, buildStatisticsReport.getBuildStatistics().getPercentOfBuildsImported(), 0);
         assertEquals(((double) 2 / (double) 5) * 100.00, buildStatisticsReport.getBuildStatistics().getPercentOfArchivesImported(), 0);
+    }
+
+    @Test
+    public void verifyProductReport() throws IOException {
+        ProductReport productReport = new ProductReport(folder, builds);
+        productReport.outputText();
+
+        assertEquals(2, productReport.getProductMap().size());
+        assertTrue(productReport.getProductMap().containsKey("JBoss EAP 7.0"));
+        assertTrue(productReport.getProductMap().containsKey("JBoss AMQ 7"));
+        assertTrue(productReport.getProductMap().get("JBoss EAP 7.0").contains("commons-beanutils-commons-beanutils-1.9.2.redhat_1-1"));
+        assertTrue(productReport.getProductMap().get("JBoss AMQ 7").contains("artemis-native-linux-2.3.0.amq_710003-1.redhat_1.el6"));
     }
 
     @Test
