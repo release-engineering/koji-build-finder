@@ -21,15 +21,16 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class BuildConfigTest {
     @Rule
-    public TemporaryFolder temp = new TemporaryFolder();
+    public final TemporaryFolder temp = new TemporaryFolder();
 
     @Test
     public void verifyDefaults() {
@@ -45,11 +46,11 @@ public class BuildConfigTest {
 
     @Test
     public void verifyMapping() throws IOException {
-        String json = "{\"archive-types\":[\"jar\"],\"excludes\":\"^(?!.*/pom\\\\.xml$).*/.*\\\\.xml$\",\""
-            + "checksum-only\":true,\"checksum-type\":\"md5\",\"koji-hub-url\":\"https://my.url.com\",\"koji-web-url\":\"https://my.url.com/brew\"}";
-
         ObjectMapper mapper = new ObjectMapper();
+
         mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+
+        String json = "{\"archive-types\":[\"jar\"],\"excludes\":\"^(?!.*/pom\\\\.xml$).*/.*\\\\.xml$\",\"checksum-only\":true,\"checksum-type\":\"md5\",\"koji-hub-url\":\"\",\"koji-web-url\":\"\"}";
         BuildConfig bc = mapper.readValue(json, BuildConfig.class);
 
         assertTrue(bc.getChecksumOnly());

@@ -610,7 +610,7 @@ public class BuildFinder {
                 }
             }
 
-            File checksumFile = new File(outputDirectory, CHECKSUMS_FILENAME_BASENAME + config.getChecksumType() + ".json");
+            File checksumFile = new File(outputDirectory, getChecksumFilename(config.getChecksumType()));
             Map<String, Collection<String>> checksums = null;
 
             LOGGER.info("Checksum type: {}", green(config.getChecksumType()));
@@ -733,6 +733,14 @@ public class BuildFinder {
         }
 
         return scmRevision;
+    }
+
+    public static String getChecksumFilename() {
+        return CHECKSUMS_FILENAME_BASENAME + ConfigDefaults.CHECKSUM_TYPE + ".json";
+    }
+
+    public static String getChecksumFilename(KojiChecksumType checksumType) {
+        return CHECKSUMS_FILENAME_BASENAME + checksumType + ".json";
     }
 
     private static Object cyan(Object o) {

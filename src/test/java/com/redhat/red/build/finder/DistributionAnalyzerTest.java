@@ -39,7 +39,7 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
 public class DistributionAnalyzerTest {
     @Rule
-    public TemporaryFolder temp = new TemporaryFolder();
+    public final TemporaryFolder temp = new TemporaryFolder();
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();

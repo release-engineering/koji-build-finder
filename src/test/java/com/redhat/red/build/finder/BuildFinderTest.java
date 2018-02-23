@@ -23,28 +23,66 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
-import ch.qos.logback.classic.Level;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
+
+import ch.qos.logback.classic.Level;
 
 public class BuildFinderTest {
     @Rule
-    public TemporaryFolder temp = new TemporaryFolder();
+    public final TemporaryFolder temp = new TemporaryFolder();
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
+    private File target;
+
+    @Before
+    public void setTarget() throws IOException {
+        this.target = new File(TestUtils.resolveFileResource("./", "").getParentFile().getParentFile(), "pom.xml");
+    }
+
+    @Test
+    public void verifyDirectory() throws IOException {
+        File folder = temp.newFolder();
+        KojiChecksumType checksumType = KojiChecksumType.sha1;
+
+
+        BuildFinder.main(new String[] {"-t", String.valueOf(checksumType), "-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
+
+        File[] file = folder.listFiles();
+
+        assertTrue(file != null && file.length == 1);
+        assertTrue(file[0].getName().equals(BuildFinder.getChecksumFilename(checksumType)));
+    }
+
+    @Test
+    public void verifyloadChecksumsFile() throws IOException {
+        File folder = temp.newFolder();
+
+        BuildFinder.main(new String[] {"-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
+
+        Map<String, Collection<String>> checksums = JSONUtils.loadChecksumsFile(new File(folder, BuildFinder.getChecksumFilename()));
+
+        assertEquals(1, checksums.size());
+    }
+
     @Test
     public void verifyDebug() throws IOException {
-        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         Level level = root.getLevel();
 
         try {
             File folder = temp.newFolder();
-            File target = new File(TestUtils.resolveFileResource("./", "").getParentFile().getParentFile(), "pom.xml");
+
+            root.setLevel(Level.INFO);
 
             BuildFinder.main(new String[] {"-d", "-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
 
@@ -52,29 +90,5 @@ public class BuildFinderTest {
         } finally {
             root.setLevel(level);
         }
-    }
-
-    @Test
-    public void verifyDirectory() throws IOException {
-        File target = new File(TestUtils.resolveFileResource("./", "").getParentFile().getParentFile(), "pom.xml");
-        File folder = temp.newFolder();
-
-        BuildFinder.main(new String[] {"-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
-
-        File[] f = folder.listFiles();
-        assertTrue(f != null && f.length == 1);
-        assertTrue(f[0].getName().equals("checksums-md5.json"));
-    }
-
-    @Test
-    public void verifyloadChecksumsFile() throws IOException {
-        File target = new File(TestUtils.resolveFileResource("./", "").getParentFile().getParentFile(), "pom.xml");
-        File folder = temp.newFolder();
-
-        BuildFinder.main(new String[] {"-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
-
-        Map<String, Collection<String>> checksums = JSONUtils.loadChecksumsFile(new File(folder, "checksums-md5.json"));
-
-        assertEquals(checksums.keySet().size(), 1);
     }
 }

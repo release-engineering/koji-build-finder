@@ -35,7 +35,7 @@ public abstract class ConfigDefaults {
 
     public static final List<String> EXCLUDES = Collections.unmodifiableList(Arrays.asList("^(?!.*/pom\\.xml$).*/.*\\.xml$"));
 
-    public static final String KOJI_HUB_URL = "http://kojihub.my.host/kojihub";
+    public static final String KOJI_HUB_URL = "";
 
-    public static final String KOJI_WEB_URL = "https://kojiweb.my.host/koji";
+    public static final String KOJI_WEB_URL = "";
 }

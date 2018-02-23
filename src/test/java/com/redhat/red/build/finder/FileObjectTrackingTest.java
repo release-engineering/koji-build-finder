@@ -38,7 +38,7 @@ import org.junit.runner.RunWith;
 // @BMUnitConfig(bmunitVerbose=true, debug=true, verbose = true)
 public class FileObjectTrackingTest {
     @Rule
-    public TemporaryFolder temp = new TemporaryFolder();
+    public final TemporaryFolder temp = new TemporaryFolder();
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
