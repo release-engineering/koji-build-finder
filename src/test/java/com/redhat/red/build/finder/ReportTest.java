@@ -79,7 +79,7 @@ public class ReportTest {
     }
 
     @Test
-    public void verifyBuilds() throws IOException {
+    public void verifyBuilds() {
         assertTrue(builds.get(0).isImport());
         assertNull(builds.get(0).getSourcesZip());
         assertNull(builds.get(0).getPatchesZip());
@@ -150,7 +150,7 @@ public class ReportTest {
     }
 
     @Test
-    public void verifyBuildStatisticsReport() throws IOException {
+    public void verifyBuildStatisticsReport() {
         BuildStatisticsReport buildStatisticsReport = new BuildStatisticsReport(folder, builds);
         buildStatisticsReport.outputText();
 
