@@ -36,14 +36,10 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
 public class DistributionAnalyzerTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionAnalyzerTest.class);
-
     @Rule
     public final TemporaryFolder temp = new TemporaryFolder();
 
