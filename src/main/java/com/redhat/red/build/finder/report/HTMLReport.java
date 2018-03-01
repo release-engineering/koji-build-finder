@@ -146,7 +146,7 @@ public class HTMLReport extends Report {
                                 )), each(reports, report ->
                                     div(attrs("#div-" + report.getBaseFilename()), report.toHTML()))
                             ),
-                            div(attrs("#div-footer"), footer().attr(Attr.CLASS, "footer").attr(Attr.ID, "footer").with(text("Created: " + new Date() + " by "), a().withHref("https://github.com/release-engineering/koji-build-finder/").with(text(BuildFinder.getName())), text(" " + BuildFinder.getVersion() + " (SHA: "), a().withHref("https://github.com/release-engineering/koji-build-finder/commit/" + BuildFinder.getScmRevision()).with(text(BuildFinder.getScmRevision()), text(")"))))
+                            div(attrs("#div-footer"), footer().attr(Attr.CLASS, "footer").attr(Attr.ID, "footer").with(text("Created: " + new Date() + " by "), a().withHref("https://github.com/release-engineering/koji-build-finder/").with(text(BuildFinder.getName())), text(" " + BuildFinder.getVersion() + " (SHA: "), a().withHref("https://github.com/release-engineering/koji-build-finder/commit/" + BuildFinder.getScmRevision()).with(text(BuildFinder.getScmRevision() + ")"))))
                         )
                     ).renderFormatted();
     }
