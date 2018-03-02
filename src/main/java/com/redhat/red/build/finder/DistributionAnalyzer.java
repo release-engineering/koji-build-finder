@@ -121,8 +121,4 @@ public class DistributionAnalyzer {
     public MultiValuedMap<String, String> getMap() {
         return map;
     }
-
-    public void setMap(MultiValuedMap<String, String> map) {
-        this.map = map;
-    }
 }
