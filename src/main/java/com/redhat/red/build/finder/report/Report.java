@@ -56,9 +56,7 @@ public abstract class Report {
         return true;
     }
 
-    public ContainerTag toHTML() {
-        return null;
-    }
+    public abstract ContainerTag toHTML();
 
     public boolean outputHTML() {
         String html = renderText();

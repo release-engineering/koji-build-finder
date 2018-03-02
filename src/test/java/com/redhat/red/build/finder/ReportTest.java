@@ -39,6 +39,7 @@ import com.redhat.red.build.finder.report.BuildStatisticsReport;
 import com.redhat.red.build.finder.report.GAVReport;
 import com.redhat.red.build.finder.report.HTMLReport;
 import com.redhat.red.build.finder.report.NVRReport;
+import com.redhat.red.build.finder.report.Report;
 
 public class ReportTest {
     @Rule
@@ -137,7 +138,7 @@ public class ReportTest {
         NVRReport nvrReport = new NVRReport(folder, builds);
         assertEquals(nvrReport.renderText(), nvrExpected);
         nvrReport.outputText();
-        assertEquals(FileUtils.readFileToString(new File(folder, nvrReport.getBaseFilename() + ".txt"), "UTF-8"), nvrExpected);
+        assertEquals(FileUtils.readFileToString(new File(nvrReport.getOutputDirectory(), nvrReport.getBaseFilename() + ".txt"), "UTF-8"), nvrExpected);
     }
 
     @Test
@@ -146,14 +147,13 @@ public class ReportTest {
         GAVReport gavReport = new GAVReport(folder, builds);
         assertEquals(gavReport.renderText(), gavExpected);
         gavReport.outputText();
-        assertEquals(FileUtils.readFileToString(new File(folder, gavReport.getBaseFilename() + ".txt"), "UTF-8"), gavExpected);
+        assertEquals(FileUtils.readFileToString(new File(gavReport.getOutputDirectory(), gavReport.getBaseFilename() + ".txt"), "UTF-8"), gavExpected);
     }
 
     @Test
     public void verifyBuildStatisticsReport() {
         BuildStatisticsReport buildStatisticsReport = new BuildStatisticsReport(folder, builds);
         buildStatisticsReport.outputText();
-
         assertEquals(builds.size() - 1, buildStatisticsReport.getBuildStatistics().getNumberOfBuilds());
         assertEquals(2, buildStatisticsReport.getBuildStatistics().getNumberOfImportedBuilds());
         assertEquals(5, buildStatisticsReport.getBuildStatistics().getNumberOfArchives());
@@ -165,8 +165,14 @@ public class ReportTest {
     @Test
     public void verifyHTMLReport() throws IOException {
         List<File> files = Collections.unmodifiableList(Collections.emptyList());
-        HTMLReport htmlReport = new HTMLReport(folder, files, builds, ConfigDefaults.KOJI_WEB_URL, new ArrayList<>());
+
+        List<Report> reports = new ArrayList<>();
+        reports.add(new BuildStatisticsReport(folder, builds));
+        reports.add(new NVRReport(folder, builds));
+        reports.add(new GAVReport(folder, builds));
+
+        HTMLReport htmlReport = new HTMLReport(folder, files, builds, ConfigDefaults.KOJI_WEB_URL, Collections.unmodifiableList(reports));
         htmlReport.outputHTML();
-        assertTrue(FileUtils.readFileToString(new File(folder, htmlReport.getBaseFilename() + ".html"), "UTF-8").contains("<html>"));
+        assertTrue(FileUtils.readFileToString(new File(htmlReport.getOutputDirectory(), htmlReport.getBaseFilename() + ".html"), "UTF-8").contains("<html>"));
     }
 }
