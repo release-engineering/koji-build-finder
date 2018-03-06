@@ -98,7 +98,7 @@ public class MockKojiClientSession implements ClientSession {
     }
 
     @Override
-    public KojiBuildInfo getBuild(Integer buildId) throws KojiClientException {
+    public KojiBuildInfo getBuild(int buildId) throws KojiClientException {
         try {
             GetBuildResponse response = parseCapturedMessage(GetBuildResponse.class, "getBuild-" + buildId + ".xml");
             return response.getBuildInfo();

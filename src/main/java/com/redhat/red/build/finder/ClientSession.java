@@ -32,7 +32,7 @@ public interface ClientSession {
 
     Map<String, KojiArchiveType> getArchiveTypeMap() throws KojiClientException;
 
-    KojiBuildInfo getBuild(Integer buildId) throws KojiClientException;
+    KojiBuildInfo getBuild(int buildId) throws KojiClientException;
 
     KojiTaskInfo getTaskInfo(int taskId, boolean request) throws KojiClientException;
 

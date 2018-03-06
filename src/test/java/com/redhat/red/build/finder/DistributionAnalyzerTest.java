@@ -18,6 +18,7 @@ package com.redhat.red.build.finder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,20 +29,17 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
 public class DistributionAnalyzerTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionAnalyzerTest.class);
-
     @Rule
     public final TemporaryFolder temp = new TemporaryFolder();
 
@@ -81,13 +79,8 @@ public class DistributionAnalyzerTest {
 
     @Test
     public void verifyCacheClearance() throws IOException {
-        String osName = System.getProperty("os.name");
-
         // XXX: Skip on Windows due to <https://issues.apache.org/jira/browse/VFS-634>
-        if (osName != null && osName.startsWith("Windows")) {
-            LOGGER.warn("Skipping test verifyCacheClearance() since ${os.name} is: {}", osName);
-            return;
-        }
+        assumeFalse(SystemUtils.IS_OS_WINDOWS);
 
         File cache = temp.newFolder();
         System.setProperty("java.io.tmpdir", cache.getAbsolutePath());
