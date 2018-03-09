@@ -632,6 +632,10 @@ public class BuildFinder {
                 checksums = JSONUtils.loadChecksumsFile(checksumFile);
             }
 
+            if (checksums.isEmpty()) {
+                LOGGER.warn("The list of checksums is empty. If this is unexpected, try removing the checksum cache ({}) and try again.", checksumFile.getAbsolutePath());
+            }
+
             if (config.getChecksumOnly()) {
                 return;
             }
@@ -660,7 +664,7 @@ public class BuildFinder {
                 JSONUtils.dumpObjectToFile(builds, buildsFile);
             }
 
-            if (builds != null && builds.size() > 0) {
+            if (!builds.isEmpty()) {
                 LOGGER.info("Generating reports");
                 List<KojiBuild> buildList = new ArrayList<>(builds.values());
 
@@ -678,7 +682,7 @@ public class BuildFinder {
 
                 LOGGER.info("{}", boldYellow("DONE"));
             } else {
-                LOGGER.warn("Could not generate reports since list of builds was empty");
+                LOGGER.warn("Could not generate any reports since list of builds is empty. If this is unexpected, try removing the builds cache ({}) and try again.", buildsFile.getAbsolutePath());
             }
         } catch (IOException e) {
             e.printStackTrace();
