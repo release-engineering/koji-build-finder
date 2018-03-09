@@ -55,7 +55,7 @@ public class BuildFinderTest {
         KojiChecksumType checksumType = KojiChecksumType.sha1;
 
 
-        BuildFinder.main(new String[] {"-t", String.valueOf(checksumType), "-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
+        Main.main(new String[] {"-t", String.valueOf(checksumType), "-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
 
         File[] file = folder.listFiles();
 
@@ -67,9 +67,9 @@ public class BuildFinderTest {
     public void verifyloadChecksumsFile() throws IOException {
         File folder = temp.newFolder();
 
-        BuildFinder.main(new String[] {"-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
+        Main.main(new String[] {"-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
 
-        Map<String, Collection<String>> checksums = JSONUtils.loadChecksumsFile(new File(folder, BuildFinder.getChecksumFilename()));
+        Map<String, Collection<String>> checksums = JSONUtils.loadChecksumsFile(new File(folder, BuildFinder.getChecksumFilename(KojiChecksumType.md5)));
 
         assertEquals(1, checksums.size());
     }
@@ -84,7 +84,7 @@ public class BuildFinderTest {
 
             root.setLevel(Level.INFO);
 
-            BuildFinder.main(new String[] {"-d", "-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
+            Main.main(new String[] {"-d", "-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
 
             assertTrue(systemOutRule.getLog().contains(" DEBUG "));
         } finally {
