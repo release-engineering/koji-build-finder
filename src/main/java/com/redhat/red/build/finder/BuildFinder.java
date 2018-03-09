@@ -17,6 +17,7 @@ package com.redhat.red.build.finder;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -544,9 +545,13 @@ public class BuildFinder {
                 config.setKojiHubURL(line.getOptionValue("koji-hub-url"));
             }
 
+            verifyURL("koji-hub-url", config.getKojiHubURL(), line, configFile);
+
             if (line.hasOption("koji-web-url")) {
                 config.setKojiWebURL(line.getOptionValue("koji-web-url"));
             }
+
+            verifyURL("koji-web-url", config.getKojiWebURL(), line, configFile);
 
             if (line.hasOption("krb-ccache")) {
                 krbCCache = line.getOptionValue("krb-ccache");
@@ -682,6 +687,30 @@ public class BuildFinder {
             usage(options);
         } finally {
             AnsiConsole.systemUninstall();
+        }
+    }
+
+    private static void verifyURL(String key, String value, CommandLine line, File configFile) throws ParseException {
+        String location = null;
+
+        if (line.hasOption(key)) {
+            location = "on the command line";
+        } else {
+            location = "in the configuration file";
+
+            if (configFile != null) {
+                location += " (" + configFile.getAbsolutePath() + ")";
+            }
+        }
+
+        if (value == null || value.isEmpty()) {
+            throw new ParseException("You must specify a non-empty value for " + key + " " + location + ".");
+        }
+
+        try {
+            new URL(value);
+        } catch (MalformedURLException e) {
+            throw new ParseException("The value specified for " + key + " (" + value + ") " + location + " is malformed.");
         }
     }
 
