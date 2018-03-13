@@ -218,13 +218,17 @@ public final class Main {
                 config.setKojiHubURL(line.getOptionValue("koji-hub-url"));
             }
 
-            verifyURL("koji-hub-url", config.getKojiHubURL(), line, configFile);
+            if (!config.getChecksumOnly()) {
+                verifyURL("koji-hub-url", config.getKojiHubURL(), line, configFile);
+            }
 
             if (line.hasOption("koji-web-url")) {
                 config.setKojiWebURL(line.getOptionValue("koji-web-url"));
             }
 
-            verifyURL("koji-web-url", config.getKojiWebURL(), line, configFile);
+            if (!config.getChecksumOnly()) {
+                verifyURL("koji-web-url", config.getKojiWebURL(), line, configFile);
+            }
 
             if (line.hasOption("krb-ccache")) {
                 krbCCache = line.getOptionValue("krb-ccache");
