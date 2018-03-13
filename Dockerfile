@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 FROM registry.fedoraproject.org/fedora:27
 RUN dnf install -y maven git
 
