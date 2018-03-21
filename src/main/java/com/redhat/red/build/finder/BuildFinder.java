@@ -385,15 +385,16 @@ public class BuildFinder {
 
         final Instant endTime = Instant.now();
         final Duration duration = Duration.between(startTime, endTime).abs();
-        long numBuilds = builds.keySet().stream().count() - 1L;
+        int numChecksums = checksumTable.keySet().size();
+        int numBuilds = builds.keySet().size() - 1;
 
-        LOGGER.info("Total number of files: {}, checked: {}, skipped: {}, hits: {}, time: {}, average: {}", green(checksumTable.keySet().size()), green(numBuilds), green(checksumTable.size() - numBuilds), green(hits), green(duration), green(duration.dividedBy(numBuilds)));
+        LOGGER.info("Total number of files: {}, checked: {}, skipped: {}, hits: {}, time: {}, average: {}", green(numChecksums), green(numBuilds), green(numChecksums - numBuilds), green(hits), green(duration), green(numBuilds > 0 ? duration.dividedBy(numBuilds) : 0));
 
         LOGGER.debug("Found {} total builds", numBuilds);
 
         builds.values().removeIf(b -> b.getBuildInfo().getBuildState() != KojiBuildState.COMPLETE);
 
-        numBuilds = builds.keySet().stream().count() - 1L;
+        numBuilds = builds.keySet().size() - 1;
 
         LOGGER.info("Found {} builds", green(numBuilds));
 
