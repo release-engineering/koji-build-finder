@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.redhat.red.build.koji.model.json.util.KojiObjectMapper;
@@ -71,6 +72,9 @@ public final class JSONUtils {
 
     public static Map<String, Collection<String>> loadChecksumsFile(File file) {
         ObjectMapper mapper = new KojiObjectMapper();
+
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
         TypeReference<Map<String, List<String>>> typeRef = new TypeReference<Map<String, List<String>>>() {
 
         };
@@ -87,6 +91,9 @@ public final class JSONUtils {
 
     public static Map<Integer, KojiBuild> loadBuildsFile(File file) {
         ObjectMapper mapper = new KojiObjectMapper();
+
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
         TypeReference<Map<Integer, KojiBuild>> ref = new TypeReference<Map<Integer, KojiBuild>>() {
 
         };

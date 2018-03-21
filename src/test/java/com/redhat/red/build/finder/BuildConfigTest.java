@@ -62,7 +62,9 @@ public class BuildConfigTest {
         String json = "{\"koji-hub-url\":\"https://my.url.com\",\"koji-web-url\":\"https://my.url.com/brew\"}";
 
         ObjectMapper mapper = new ObjectMapper();
+
         mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+
         BuildConfig bc = mapper.readValue(json, BuildConfig.class);
 
         assertTrue(bc.getKojiHubURL().equals("https://my.url.com"));
