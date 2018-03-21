@@ -48,19 +48,22 @@ To see the available options, execute the command `java -jar target/koji-build-f
      -x,--exclude <pattern>              Add a pattern to exclude from build lookup.
                                          Default: [^(?!.*/pom\.xml$).*/.*\.xml$].
 
-
 ### Running via Docker containers
 
 There is a `Dockerfile` and a `Makefile` supplied in the code repository. If you are unfamiliar with Java-based projects, you can easily create a container image and run Koji Build Finder in a Fedora Linux container by executing the following commands in a shell:
 
 1. Build the container image:
 
-    make build
+```
+$ make build
+```
 
 2. Invoke shell in the container so you can try the tool out:
 
-    make shell
-    java -jar target/koji-build-finder-<version>-jar-with-dependencies.jar
+```
+$ make shell
+# java -jar target/koji-build-finder-<version>-jar-with-dependencies.jar
+```
 
 where `<version>` should be replaced with the current version of the software.
 
