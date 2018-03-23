@@ -70,4 +70,16 @@ public class BuildConfigTest {
         assertTrue(bc.getKojiHubURL().equals("https://my.url.com"));
         assertFalse(bc.getChecksumOnly());
     }
+
+    @Test
+    public void verifyIgnoreUnknownProperties() throws IOException {
+        String json = "{\"foo\":\"bar\"}";
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        BuildConfig bc = mapper.readValue(json, BuildConfig.class);
+    }
 }
