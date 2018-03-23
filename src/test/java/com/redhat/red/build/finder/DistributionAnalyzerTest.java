@@ -50,8 +50,15 @@ public class DistributionAnalyzerTest {
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
     @Test
+    public void verifyEmptyList() throws IOException {
+        List<File> af = Collections.emptyList();
+        DistributionAnalyzer da = new DistributionAnalyzer(af, KojiChecksumType.md5.getAlgorithm());
+        da.checksumFiles();
+    }
+
+    @Test
     public void verifySize() throws IOException {
-        ArrayList<File> af = new ArrayList<>();
+        List<File> af = new ArrayList<>();
         File test = temp.newFile();
         af.add(test);
 
@@ -65,7 +72,7 @@ public class DistributionAnalyzerTest {
 
     @Test
     public void verifyType() throws IOException {
-        ArrayList<File> af = new ArrayList<>();
+        List<File> af = new ArrayList<>();
         String[] types = {"test.res", "test.ram", "test.tmp", "test.file"};
 
         for (String s : types) {

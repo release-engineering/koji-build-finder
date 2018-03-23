@@ -15,9 +15,14 @@
  */
 package com.redhat.red.build.finder;
 
+import static com.redhat.red.build.finder.AnsiUtils.green;
+import static com.redhat.red.build.finder.AnsiUtils.red;
+
 import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -63,6 +68,7 @@ public class DistributionAnalyzer {
     }
 
     public void checksumFiles() throws IOException {
+        final Instant startTime = Instant.now();
         sfs = new StandardFileSystemManager();
 
         sfs.init();
@@ -77,6 +83,12 @@ public class DistributionAnalyzer {
         } finally {
             sfs.close();
         }
+
+        final Instant endTime = Instant.now();
+        final Duration duration = Duration.between(startTime, endTime).abs();
+        final int numChecksums = map.size();
+
+        LOGGER.info("Total number of checksums: {}, time: {}, average: {}", green(numChecksums), green(duration), green(numChecksums > 0 ? duration.dividedBy(numChecksums) : 0));
     }
 
     private void listChildren(FileObject fo) throws IOException {
@@ -107,7 +119,7 @@ public class DistributionAnalyzer {
                     listChildren(layered);
                     sfs.closeFileSystem(layered.getFileSystem());
                 } catch (FileSystemException e) {
-                    LOGGER.warn("Unable to process archive/compressed file: {}", found);
+                    LOGGER.warn("Unable to process archive/compressed file: {}", red(found));
                     LOGGER.debug("Caught file system exception", e);
                 }
             }
