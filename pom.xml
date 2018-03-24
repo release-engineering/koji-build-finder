@@ -331,6 +331,10 @@
           <artifactId>license-maven-plugin</artifactId>
           <configuration>
             <header>APACHE-2-SIMPLIFIED-COPYRIGHT.txt</header>
+            <mapping>
+              <editorconfig>SCRIPT_STYLE</editorconfig>
+              <Makefile>SCRIPT_STYLE</Makefile>
+            </mapping>
           </configuration>
         </plugin>
         <plugin>
