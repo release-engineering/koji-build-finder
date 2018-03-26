@@ -124,7 +124,6 @@ public class BuildFinder {
         builds.put(0, build);
 
         int checked = 0;
-        int skipped = 0;
         int numChecksums = checksumTable.size();
         int hits = 0;
 
@@ -137,7 +136,6 @@ public class BuildFinder {
 
             if (checksum.equals(EMPTY_MD5)) {
                 LOGGER.debug("Found empty file for checksum", checksum);
-                skipped++;
                 continue;
             }
 
@@ -156,7 +154,6 @@ public class BuildFinder {
 
                 if (exclude) {
                     LOGGER.debug("Skipping filename {} because it matches the excludes list", filename);
-                    skipped++;
                     continue;
                 }
 
@@ -171,7 +168,6 @@ public class BuildFinder {
 
             if (!foundExt) {
                 LOGGER.debug("Skipping {} : {} due to extension not found", checksum, filenames);
-                skipped++;
                 continue;
             }
 
@@ -389,13 +385,13 @@ public class BuildFinder {
         final Duration duration = Duration.between(startTime, endTime).abs();
         int numBuilds = builds.size() - 1;
 
-        LOGGER.info("Total number of files: {}, checked: {}, skipped: {}, hits: {}, time: {}, average: {}", green(numChecksums), green(numChecksums - skipped), green(skipped), green(hits), green(duration), green(numBuilds > 0 ? duration.dividedBy(numBuilds) : 0));
+        LOGGER.info("Total number of files: {}, checked: {}, skipped: {}, hits: {}, time: {}, average: {}", green(numChecksums), green(numChecksums - numBuilds), green(numBuilds), green(hits), green(duration), green(numBuilds > 0 ? duration.dividedBy(numBuilds) : 0));
 
         LOGGER.debug("Found {} total builds", numBuilds);
 
         builds.values().removeIf(b -> b.getBuildInfo().getBuildState() != KojiBuildState.COMPLETE);
 
-        numBuilds = builds.keySet().size() - 1;
+        numBuilds = builds.size() - 1;
 
         LOGGER.info("Found {} builds", green(numBuilds));
 
