@@ -27,6 +27,8 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 public abstract class ConfigDefaults {
     public static final List<String> ARCHIVE_TYPES = Collections.unmodifiableList(Arrays.asList("jar", "xml", "pom", "so", "dll", "dylib"));
 
+    public static final List<String> ARCHIVE_EXTENSIONS = Collections.unmodifiableList(Arrays.asList("dll", "dylib", "ear", "jar", "jdocbook", "jdocbook-style", "kar", "plugin", "pom", "rar", "sar", "so", "war", "xml"));
+
     public static final Boolean CHECKSUM_ONLY = Boolean.FALSE;
 
     public static final KojiChecksumType CHECKSUM_TYPE = KojiChecksumType.md5;

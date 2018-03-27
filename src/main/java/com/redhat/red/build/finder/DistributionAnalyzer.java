@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections4.MultiMapUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.vfs2.FileContent;
@@ -61,13 +62,16 @@ public class DistributionAnalyzer {
 
     private String rootString;
 
-    public DistributionAnalyzer(List<File> files, String algorithm) {
+    private BuildConfig config;
+
+    public DistributionAnalyzer(List<File> files, BuildConfig config) {
         this.files = files;
-        this.md = DigestUtils.getDigest(algorithm);
+        this.config = config;
+        this.md = DigestUtils.getDigest(config.getChecksumType().getAlgorithm());
         this.map = new ArrayListValuedHashMap<>();
     }
 
-    public void checksumFiles() throws IOException {
+    public MultiValuedMap<String, String> checksumFiles() throws IOException {
         final Instant startTime = Instant.now();
         sfs = new StandardFileSystemManager();
 
@@ -88,7 +92,9 @@ public class DistributionAnalyzer {
         final Duration duration = Duration.between(startTime, endTime).abs();
         final int numChecksums = map.size();
 
-        LOGGER.info("Total number of checksums: {}, time: {}, average: {}", green(numChecksums), green(duration), green(numChecksums > 0 ? duration.dividedBy(numChecksums) : 0));
+        LOGGER.info("Total number of checksums: {}, time: {}, average: {}", green(numChecksums), green(duration), green(numChecksums > 0D ? duration.dividedBy(numChecksums) : 0D));
+
+        return MultiMapUtils.unmodifiableMultiValuedMap(map);
     }
 
     private void listChildren(FileObject fo) throws IOException {
@@ -97,18 +103,27 @@ public class DistributionAnalyzer {
         String found = friendly.substring(friendly.indexOf(rootString) + rootString.length());
 
         if (fo.getType().getName().equals(FileType.FILE.getName())) {
-            byte[] digest = DigestUtils.digest(md, fc.getInputStream());
-            String checksum = Hex.encodeHexString(digest);
-            map.put(checksum, found);
-            LOGGER.debug("Checksum: {} {}", checksum, found);
+            boolean excludeExtension = config.getArchiveExtensions() != null && !config.getArchiveExtensions().isEmpty() && !config.getArchiveExtensions().stream().anyMatch(x -> x.equals(fo.getName().getExtension()));
+            boolean excludeFile = false;
+
+            if (!excludeExtension) {
+                excludeFile = config.getExcludes() != null && !config.getExcludes().isEmpty() && config.getExcludes().stream().anyMatch(friendly::matches);
+            }
+
+            if (!excludeFile && !excludeExtension) {
+                byte[] digest = DigestUtils.digest(md, fc.getInputStream());
+                String checksum = Hex.encodeHexString(digest);
+                map.put(checksum, found);
+                LOGGER.debug("Checksum: {} {}", checksum, found);
+            }
         }
 
         if (fo.getType().getName().equals(FileType.FOLDER.getName()) || fo.getType().getName().equals(FileType.FILE_OR_FOLDER.getName())) {
-            for (FileObject fileO : fo.getChildren()) {
+            for (FileObject file : fo.getChildren()) {
                 try {
-                    listChildren(fileO);
+                    listChildren(file);
                 } finally {
-                    fileO.close();
+                    file.close();
                 }
             }
         } else {
@@ -128,9 +143,5 @@ public class DistributionAnalyzer {
 
     public boolean outputToFile(File file) {
         return JSONUtils.dumpObjectToFile(map.asMap(), file);
-    }
-
-    public MultiValuedMap<String, String> getMap() {
-        return map;
     }
 }

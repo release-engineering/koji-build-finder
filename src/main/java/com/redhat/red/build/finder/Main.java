@@ -18,6 +18,7 @@ package com.redhat.red.build.finder;
 import static com.redhat.red.build.finder.AnsiUtils.boldYellow;
 import static com.redhat.red.build.finder.AnsiUtils.cyan;
 import static com.redhat.red.build.finder.AnsiUtils.green;
+import static com.redhat.red.build.finder.AnsiUtils.red;
 
 import java.io.File;
 import java.io.IOException;
@@ -114,6 +115,7 @@ public final class Main {
         options.addOption(Option.builder("k").longOpt("checksum-only").numberOfArgs(0).required(false).desc("Only checksum files and do not find builds. Default: " + ConfigDefaults.CHECKSUM_ONLY + ".").build());
         options.addOption(Option.builder("t").longOpt("checksum-type").argName("type").numberOfArgs(1).required(false).type(String.class).desc("Set checksum type (" + Arrays.stream(KojiChecksumType.values()).map(KojiChecksumType::name).collect(Collectors.joining(", ")) + "). Default: " + ConfigDefaults.CHECKSUM_TYPE + ".").build());
         options.addOption(Option.builder("a").longOpt("archive-type").argName("type").numberOfArgs(1).required(false).desc("Add a Koji archive type to check. Default: [" + ConfigDefaults.ARCHIVE_TYPES.stream().collect(Collectors.joining(", ")) + "].").type(List.class).build());
+        options.addOption(Option.builder("e").longOpt("archive-extension").argName("extension").numberOfArgs(1).required(false).desc("Add a Koji archive type extension to check. Default: [" + ConfigDefaults.ARCHIVE_EXTENSIONS.stream().collect(Collectors.joining(", ")) + "].").type(List.class).build());
         options.addOption(Option.builder("x").longOpt("exclude").numberOfArgs(1).argName("pattern").required(false).desc("Add a pattern to exclude from build lookup. Default: [" + ConfigDefaults.EXCLUDES.stream().collect(Collectors.joining(", ")) + "].").build());
         options.addOption(Option.builder().longOpt("koji-hub-url").numberOfArgs(1).argName("url").required(false).desc("Set Koji hub URL.").build());
         options.addOption(Option.builder().longOpt("koji-web-url").numberOfArgs(1).argName("url").required(false).desc("Set Koji web URL.").build());
@@ -190,9 +192,10 @@ public final class Main {
             BuildConfig config;
 
             if (configFile.exists()) {
-                config = mapper.readValue(configPath.toFile(), BuildConfig.class);
+                LOGGER.info("Using configuration file: {}", green(configFile));
+                config = mapper.readValue(configFile, BuildConfig.class);
             } else {
-                LOGGER.debug("Configuration does not exist. Implicitly creating with defaults.");
+                LOGGER.info("Configuration file {} does not exist. Implicitly creating with defaults.", green(configFile));
                 config = new BuildConfig();
             }
 
@@ -210,10 +213,16 @@ public final class Main {
                 config.setArchiveTypes(a);
             }
 
+            if (line.hasOption("archive-extension")) {
+                @SuppressWarnings("unchecked")
+                List<String> e = (List<String>) line.getParsedOptionValue("archive-extension");
+                config.setArchiveExtensions(e);
+            }
+
             if (line.hasOption("exclude")) {
                 @SuppressWarnings("unchecked")
-                List<String> e = (List<String>) line.getParsedOptionValue("exclude");
-                config.setExcludes(e);
+                List<String> x = (List<String>) line.getParsedOptionValue("exclude");
+                config.setExcludes(x);
             }
 
             if (line.hasOption("koji-hub-url")) {
@@ -265,17 +274,21 @@ public final class Main {
             LOGGER.debug("Configuration {} ", config);
 
             if (!configFile.exists()) {
-                File configDir = configPath.toFile().getParentFile();
+                File configDir = configFile.getParentFile();
 
                 if (configDir != null && !configDir.exists()) {
                     boolean created = configDir.mkdirs();
 
                     if (!created) {
-                        LOGGER.warn("Failed to create directory: {}", configDir);
+                        LOGGER.warn("Failed to create directory: {}", red(configDir));
                     }
                 }
 
-                JSONUtils.dumpObjectToFile(config, configPath.toFile());
+                if (configFile.canWrite()) {
+                    JSONUtils.dumpObjectToFile(config, configFile);
+                } else {
+                    LOGGER.warn("Could not write configuration file: {}", red(configFile));
+                }
             }
 
             for (String unparsedArg : unparsedArgs) {
@@ -296,16 +309,15 @@ public final class Main {
             }
 
             File checksumFile = new File(outputDirectory, BuildFinder.getChecksumFilename(config.getChecksumType()));
-            Map<String, Collection<String>> checksums = null;
+            Map<String, Collection<String>> checksums;
 
             LOGGER.info("Checksum type: {}", green(config.getChecksumType()));
 
             if (!checksumFile.exists()) {
                 LOGGER.info("Calculating checksums for files: {}", green(files));
-                DistributionAnalyzer pda = new DistributionAnalyzer(files, config.getChecksumType().getAlgorithm());
-                pda.checksumFiles();
-                checksums = pda.getMap().asMap();
-                pda.outputToFile(checksumFile);
+                DistributionAnalyzer da = new DistributionAnalyzer(files, config);
+                checksums = da.checksumFiles().asMap();
+                da.outputToFile(checksumFile);
             } else {
                 LOGGER.info("Loading checksums from file: {}", green(checksumFile));
                 checksums = JSONUtils.loadChecksumsFile(checksumFile);

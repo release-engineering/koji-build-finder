@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.junit.Rule;
@@ -36,8 +37,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
 public class DistributionAnalyzerTest {
     @Rule
@@ -52,7 +51,9 @@ public class DistributionAnalyzerTest {
     @Test
     public void verifyEmptyList() throws IOException {
         List<File> af = Collections.emptyList();
-        DistributionAnalyzer da = new DistributionAnalyzer(af, KojiChecksumType.md5.getAlgorithm());
+        BuildConfig config = new BuildConfig();
+        config.setArchiveExtensions(Collections.emptyList());
+        DistributionAnalyzer da = new DistributionAnalyzer(af, config);
         da.checksumFiles();
     }
 
@@ -65,7 +66,9 @@ public class DistributionAnalyzerTest {
         try (RandomAccessFile f = new RandomAccessFile(test, "rw")) {
             f.setLength(FileUtils.ONE_GB * 2);
 
-            DistributionAnalyzer da = new DistributionAnalyzer(af, KojiChecksumType.md5.getAlgorithm());
+            BuildConfig config = new BuildConfig();
+            config.setArchiveExtensions(Collections.emptyList());
+            DistributionAnalyzer da = new DistributionAnalyzer(af, config);
             da.checksumFiles();
         }
     }
@@ -80,7 +83,9 @@ public class DistributionAnalyzerTest {
             af.add(test);
         }
 
-        DistributionAnalyzer da = new DistributionAnalyzer(af, KojiChecksumType.md5.getAlgorithm());
+        BuildConfig config = new BuildConfig();
+        config.setArchiveExtensions(Collections.emptyList());
+        DistributionAnalyzer da = new DistributionAnalyzer(af, config);
         da.checksumFiles();
     }
 
@@ -96,7 +101,9 @@ public class DistributionAnalyzerTest {
         assertTrue(ls.isEmpty());
 
         List<File> target = Collections.singletonList(TestUtils.loadFile("nested.zip"));
-        DistributionAnalyzer da = new DistributionAnalyzer(target, KojiChecksumType.md5.getAlgorithm());
+        BuildConfig config = new BuildConfig();
+        config.setArchiveExtensions(Collections.emptyList());
+        DistributionAnalyzer da = new DistributionAnalyzer(target, config);
         da.checksumFiles();
 
         ls = FileUtils.listFiles(cache, null, true);
@@ -104,33 +111,38 @@ public class DistributionAnalyzerTest {
     }
 
     @Test
-    public void loadNestedZIP() throws IOException {
+    public void loadNestedZip() throws IOException {
         List<File> target = Collections.singletonList(TestUtils.loadFile("nested.zip"));
-        DistributionAnalyzer da = new DistributionAnalyzer(target, KojiChecksumType.md5.getAlgorithm());
-        da.checksumFiles();
+        BuildConfig config = new BuildConfig();
+        config.setArchiveExtensions(Collections.emptyList());
+        DistributionAnalyzer da = new DistributionAnalyzer(target, config);
+        MultiValuedMap<String, String> checksums = da.checksumFiles();
 
-        assertEquals(25, da.getMap().size());
+        assertEquals(25, checksums.size());
         assertFalse(systemOutRule.getLog().contains("zip:zip:file:"));
         assertFalse(systemOutRule.getLog().contains("target/test-classes"));
     }
 
     @Test
-    public void loadNestedWAR() throws IOException {
+    public void loadNestedWar() throws IOException {
         List<File> target = Collections.singletonList(TestUtils.loadFile("nested.war"));
-        DistributionAnalyzer da = new DistributionAnalyzer(target, KojiChecksumType.md5.getAlgorithm());
-        da.checksumFiles();
+        BuildConfig config = new BuildConfig();
+        config.setArchiveExtensions(Collections.emptyList());
+        DistributionAnalyzer da = new DistributionAnalyzer(target, config);
+        MultiValuedMap<String, String> checksums = da.checksumFiles();
 
-        assertEquals(7, da.getMap().size());
+        assertEquals(7, checksums.size());
     }
 
     @Test
-    public void loadManPageZIP() throws IOException {
+    public void loadManPageZip() throws IOException {
         List<File> target = Collections.singletonList(TestUtils.loadFile("symbolic.zip"));
-        DistributionAnalyzer da = new DistributionAnalyzer(target, KojiChecksumType.md5.getAlgorithm());
-        da.checksumFiles();
+        BuildConfig config = new BuildConfig();
+        config.setArchiveExtensions(Collections.emptyList());
+        DistributionAnalyzer da = new DistributionAnalyzer(target, config);
+        MultiValuedMap<String, String> checksums = da.checksumFiles();
 
-        assertEquals(4, da.getMap().size());
+        assertEquals(4, checksums.size());
         assertTrue(systemOutRule.getLog().contains("Unable to process archive/compressed file"));
     }
-
 }

@@ -21,6 +21,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
 public class BuildConfig {
+    @JsonProperty("archive-extensions")
+    private List<String> archiveExtensions;
+
     @JsonProperty("archive-types")
     private List<String> archiveTypes;
 
@@ -38,6 +41,18 @@ public class BuildConfig {
 
     @JsonProperty("koji-web-url")
     private String kojiWebURL;
+
+    public List<String> getArchiveExtensions() {
+        if (archiveExtensions == null) {
+            archiveExtensions = ConfigDefaults.ARCHIVE_EXTENSIONS;
+        }
+
+        return archiveExtensions;
+    }
+
+    public void setArchiveExtensions(List<String> archiveExtensions) {
+        this.archiveExtensions = archiveExtensions;
+    }
 
     public List<String> getArchiveTypes() {
         if (archiveTypes == null) {
@@ -114,7 +129,8 @@ public class BuildConfig {
     @Override
     public String toString() {
         return "BuildConfig{"
-            + "\n\tarchiveTypes=" + getArchiveTypes()
+            + "\n\tarchiveExtensions=" + getArchiveExtensions()
+            + ", \n\tarchiveTypes=" + getArchiveTypes()
             + ", \n\tchecksumOnly=" + getChecksumOnly()
             + ", \n\tchecksumType=" + getChecksumType()
             + ", \n\texcludes=" + getExcludes()

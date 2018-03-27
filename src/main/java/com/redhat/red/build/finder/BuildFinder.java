@@ -31,8 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
@@ -76,38 +74,49 @@ public class BuildFinder {
             return Collections.emptyMap();
         }
 
-        Set<String> extensionsToCheck = new TreeSet<>();
         final Instant startTime = Instant.now();
 
+        Map<String, KojiArchiveType> allArchiveTypesMap;
+
         try {
-            Map<String, KojiArchiveType> allTypesMap = session.getArchiveTypeMap();
-            Set<String> allTypes = allTypesMap.values().stream().map(KojiArchiveType::getName).collect(Collectors.toSet());
-
-            LOGGER.debug("There are {} known Koji archive types: {}", allTypes.size(), allTypes);
-
-            List<String> archiveTypes = config.getArchiveTypes();
-            Set<String> typesToCheck = null;
-
-            if (archiveTypes != null && !archiveTypes.isEmpty()) {
-                typesToCheck = archiveTypes.stream().collect(Collectors.toSet());
-            } else {
-                LOGGER.warn("Supplied archive types list is empty; defaulting to all known archive types");
-                typesToCheck = allTypes;
-            }
-
-            LOGGER.debug("There are {} Koji archive types to check: {}", typesToCheck.size(), typesToCheck);
-
-            typesToCheck.stream().filter(allTypesMap::containsKey).map(allTypesMap::get).map(archiveType -> {
-                LOGGER.debug("Adding archive type to check: {}", archiveType);
-                return archiveType.getExtensions();
-            }).forEach(extensionsToCheck::addAll);
+            allArchiveTypesMap = session.getArchiveTypeMap();
         } catch (KojiClientException e) {
-            LOGGER.error("Koji client error", e);
+            LOGGER.error("Koji client error: {}", red(e.getMessage()));
             session.close();
             return Collections.emptyMap();
         }
 
-        LOGGER.info("Looking up files with extensions matching: {}", green(extensionsToCheck));
+        List<String> allArchiveTypes = allArchiveTypesMap.values().stream().map(KojiArchiveType::getName).collect(Collectors.toList());
+        List<String> archiveTypes = config.getArchiveTypes();
+        List<String> archiveTypesToCheck;
+
+        if (archiveTypes != null && !archiveTypes.isEmpty()) {
+            LOGGER.debug("There are {} supplied Koji archive types: {}", archiveTypes.size(), archiveTypes);
+            archiveTypesToCheck = archiveTypes.stream().filter(allArchiveTypesMap::containsKey).collect(Collectors.toList());
+            LOGGER.debug("There are {} valid supplied Koji archive types: {}", archiveTypes.size(), archiveTypes);
+        } else {
+            LOGGER.debug("There are {} known Koji archive types: {}", allArchiveTypes.size(), allArchiveTypes);
+            LOGGER.warn("Supplied archive types list is empty; defaulting to all known archive types");
+            archiveTypesToCheck = allArchiveTypes;
+        }
+
+        LOGGER.debug("There are {} Koji archive types to check: {}", archiveTypesToCheck.size(), archiveTypesToCheck);
+
+        List<String> allArchiveExtensions = allArchiveTypesMap.values().stream().flatMap(at -> at.getExtensions().stream()).collect(Collectors.toList());
+        List<String> archiveExtensions = config.getArchiveExtensions();
+        List<String> archiveExtensionsToCheck;
+
+        if (archiveExtensions != null && !archiveExtensions.isEmpty()) {
+            LOGGER.debug("There are {} supplied Koji archive extensions: {}", archiveExtensions.size(), archiveExtensions);
+            archiveExtensionsToCheck = archiveExtensions.stream().filter(allArchiveExtensions::contains).collect(Collectors.toList());
+            LOGGER.debug("There are {} valid supplied Koji archive extensions: {}", archiveExtensions.size(), archiveExtensions);
+        } else {
+            LOGGER.debug("There are {} known Koji archive extensions: {}", allArchiveExtensions.size(), allArchiveExtensions.size());
+            LOGGER.warn("Supplied archive extensions list is empty; defaulting to all known archive extensions");
+            archiveExtensionsToCheck = allArchiveExtensions;
+        }
+
+        LOGGER.info("Looking up files with extensions matching: {}", green(archiveExtensionsToCheck));
 
         Map<Integer, KojiBuild> builds = new HashMap<>();
         KojiBuildInfo buildInfo = new KojiBuildInfo();
@@ -140,45 +149,15 @@ public class BuildFinder {
             }
 
             Collection<String> filenames = checksumTable.get(checksum);
-            boolean foundExt = false;
-            List<String> excludes = config.getExcludes();
-
-            for (String filename : filenames) {
-                LOGGER.debug("Checking checksum {} and filename {}", checksum, filename);
-
-                boolean exclude = false;
-
-                if (excludes != null && !excludes.isEmpty()) {
-                    exclude = excludes.stream().anyMatch(filename::matches);
-                }
-
-                if (exclude) {
-                    LOGGER.debug("Skipping filename {} because it matches the excludes list", filename);
-                    continue;
-                }
-
-                for (String ext : extensionsToCheck) {
-                    if (filename.endsWith("." + ext)) {
-                        foundExt = true;
-                        LOGGER.debug("Matched extension {} for checksum {}: {}", checksum, ext);
-                        break;
-                    }
-                }
-            }
-
-            if (!foundExt) {
-                LOGGER.debug("Skipping {} : {} due to extension not found", checksum, filenames);
-                continue;
-            }
-
             List<KojiArchiveInfo> archives;
 
             try {
                 LOGGER.debug("Looking up archives for checksum: {}", checksum);
                 archives = session.listArchives(new KojiArchiveQuery().withChecksum(checksum));
             } catch (KojiClientException e) {
-                LOGGER.error("Koji client error", e);
-                continue;
+                LOGGER.error("Koji client error: {}", red(e.getMessage()));
+                session.close();
+                return Collections.emptyMap();
             }
 
             if (archives == null || archives.isEmpty()) {
@@ -206,7 +185,7 @@ public class BuildFinder {
 
             for (KojiArchiveInfo archive : archives) {
                 if (archive.getChecksumType() != config.getChecksumType()) {
-                    LOGGER.warn("Skipping archive id {} as checksum is not {}, but is {}", config.getChecksumType(), archive.getArchiveId(), archive.getChecksumType());
+                    LOGGER.warn("Skipping archive id {} as checksum is not {}, but is {}", red(config.getChecksumType()), red(archive.getArchiveId()), red(archive.getChecksumType()));
                     archivesToRemove.add(archive);
                     continue;
                 }
@@ -235,19 +214,19 @@ public class BuildFinder {
                         }
 
                         if (tags.isEmpty()) {
-                            LOGGER.warn("Skipping build id {} due to no tags", buildInfo.getId());
+                            LOGGER.warn("Skipping build id {} due to no tags", red(buildInfo.getId()));
                             archivesToRemove.add(archive);
                             continue;
                         }
 
                         /* Ignore imports when the artifact was also found in an earlier build */
                         if (taskInfo == null && firstBuildId != -1 && buildInfo.getId() > firstBuildId) {
-                            LOGGER.warn("Skipping import id {} because artifact exists in build id {}", buildInfo.getId(), firstBuildId);
+                            LOGGER.warn("Skipping import id {} because artifact exists in build id {}", red(buildInfo.getId()), red(firstBuildId));
                             continue;
                         }
 
                         if (archiveList == null) {
-                            LOGGER.warn("Null archive list for archive id {} to build id {}", archive.getArchiveId(), buildInfo.getId());
+                            LOGGER.warn("Null archive list for archive id {} to build id {}", red(archive.getArchiveId()), red(buildInfo.getId()));
                             archiveList = new ArrayList<>();
                         }
 
@@ -316,13 +295,13 @@ public class BuildFinder {
                                             LOGGER.debug("Got task request for build id {}: {}", buildInfo.getId(), request);
                                             taskRequest = new KojiTaskRequest(request);
                                         } else {
-                                            LOGGER.warn("Null task request for build id {} with task id {} and checksum {}", buildInfo.getId(), taskInfo.getTaskId(), checksum);
+                                            LOGGER.warn("Null task request for build id {} with task id {} and checksum {}", red(buildInfo.getId()), red(taskInfo.getTaskId()), red(checksum));
                                         }
                                     } else {
                                         taskRequest = session.getTaskRequest(buildInfo.getTaskId());
                                     }
                                 } else {
-                                    LOGGER.warn("Task info not found for build id {}", buildInfo.getId());
+                                    LOGGER.warn("Task info not found for build id {}", red(buildInfo.getId()));
                                 }
                             } else {
                                 LOGGER.warn("Found import for build id {} with checksum {} and files {}", red(buildInfo.getId()), red(checksum), red(checksumTable.get(checksum)));
@@ -347,12 +326,13 @@ public class BuildFinder {
                                 LOGGER.info("Found build: id: {} nvr: {} checksum: {} archive: {} [{} / {} = {}%]", green(buildInfo.getId()), green(buildInfo.getNvr()), green(checksum), green(archive.getFilename()), cyan(checked), cyan(numChecksums), cyan(String.format("%.3f", (checked / (double) numChecksums) * 100)));
                             }
                         } else {
-                            LOGGER.warn("Build not found for checksum {}. This is never supposed to happen", checksum);
+                            LOGGER.warn("Build not found for checksum {}. This is never supposed to happen", red(checksum));
                         }
                     }
                 } catch (KojiClientException e) {
-                    LOGGER.error("Koji client error", e);
-                    continue;
+                    LOGGER.error("Koji client error: {}", red(e.getMessage()));
+                    session.close();
+                    return Collections.emptyMap();
                 }
             }
 
@@ -434,7 +414,7 @@ public class BuildFinder {
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("Unexpected exception processing jar file", e);
+            LOGGER.error("Unexpected exception processing jar file: {}", red(e.getMessage()));
         }
 
         return scmRevision;

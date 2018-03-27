@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMRules;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
@@ -95,7 +94,7 @@ public class FileObjectTrackingTest {
         System.setProperty("java.io.tmpdir", cache.getAbsolutePath());
 
         List<File> target = Collections.singletonList(TestUtils.loadFile("nested.zip"));
-        DistributionAnalyzer da = new DistributionAnalyzer(target, KojiChecksumType.md5.getAlgorithm());
+        DistributionAnalyzer da = new DistributionAnalyzer(target, new BuildConfig());
         da.checksumFiles();
 
         Object fCounter = getAbstractFileObjectCounter();
