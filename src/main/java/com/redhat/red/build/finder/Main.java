@@ -25,6 +25,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -300,10 +302,16 @@ public final class Main {
 
             if (!checksumFile.exists()) {
                 LOGGER.info("Calculating checksums for files: {}", green(files));
+                final Instant startTime = Instant.now();
+
                 DistributionAnalyzer pda = new DistributionAnalyzer(files, config.getChecksumType().getAlgorithm());
                 pda.checksumFiles();
                 checksums = pda.getMap().asMap();
                 pda.outputToFile(checksumFile);
+
+                final Instant endTime = Instant.now();
+                final Duration duration = Duration.between(startTime, endTime).abs();
+                LOGGER.info("Checksum calculation time: {}", green(duration));
             } else {
                 LOGGER.info("Loading checksums from file: {}", green(checksumFile));
                 checksums = JSONUtils.loadChecksumsFile(checksumFile);
