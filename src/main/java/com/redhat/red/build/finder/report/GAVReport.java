@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.redhat.red.build.finder.KojiBuild;
-import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 
 import j2html.tags.ContainerTag;
 
@@ -44,9 +43,7 @@ public class GAVReport extends Report {
         setBaseFilename("gav");
         setOutputDirectory(outputDirectory);
 
-        List<KojiBuildInfo> buildInfos = builds.stream().filter(b -> b.getBuildInfo() != null && b.getTypes() != null && b.getTypes().contains("maven")).map(KojiBuild::getBuildInfo).collect(Collectors.toList());
-        this.gavs = buildInfos.stream().map(b -> b.getMavenGroupId() + ":" + b.getMavenArtifactId() + ":" + b.getMavenVersion()).collect(Collectors.toList());
-        this.gavs.sort(String::compareToIgnoreCase);
+        this.gavs = builds.stream().filter(b -> b.getTypes() != null && b.getTypes().contains("maven")).flatMap(b -> b.getArchives().stream()).map(a -> a.getArchive().getGroupId() + ":" + a.getArchive().getArtifactId() + ":" + a.getArchive().getVersion()).sorted().distinct().collect(Collectors.toList());
     }
 
     @Override

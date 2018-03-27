@@ -40,5 +40,7 @@ public interface ClientSession {
 
     List<KojiTagInfo> listTags(int id) throws KojiClientException;
 
+    void enrichArchiveTypeInfo(List<KojiArchiveInfo> archiveInfos) throws KojiClientException;
+
     void close();
 }

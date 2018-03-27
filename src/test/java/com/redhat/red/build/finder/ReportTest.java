@@ -137,18 +137,18 @@ public class ReportTest {
     public void verifyNVRReport() throws IOException {
         final String nvrExpected = "artemis-native-linux-2.3.0.amq_710003-1.redhat_1.el6\ncommons-beanutils-commons-beanutils-1.9.2.redhat_1-1\ncommons-lang-commons-lang-2.6-1\ncommons-lang-commons-lang-2.6-2\norg.wildfly.swarm-config-api-parent-1.1.0.Final_redhat_14-1";
         NVRReport nvrReport = new NVRReport(folder, builds);
-        assertEquals(nvrReport.renderText(), nvrExpected);
+        assertEquals(nvrExpected, nvrReport.renderText());
         nvrReport.outputText();
-        assertEquals(FileUtils.readFileToString(new File(nvrReport.getOutputDirectory(), nvrReport.getBaseFilename() + ".txt"), "UTF-8"), nvrExpected);
+        assertEquals(nvrExpected, FileUtils.readFileToString(new File(nvrReport.getOutputDirectory(), nvrReport.getBaseFilename() + ".txt"), "UTF-8"));
     }
 
     @Test
     public void verifyGAVReport() throws IOException {
-        final String gavExpected = "artemis-native-linux:artemis-native-linux-repolib:2.3.0.amq_710003-1.redhat_1.el6\ncommons-beanutils:commons-beanutils:1.9.2.redhat-1\ncommons-lang:commons-lang:2.6\ncommons-lang:commons-lang:2.6\norg.wildfly.swarm:config-api-parent:1.1.0.Final-redhat-14";
+        final String gavExpected = "commons-beanutils:commons-beanutils:1.9.2.redhat-1\ncommons-lang:commons-lang:2.6\norg.apache.activemq:libartemis-native-32:2.3.0.amq_710003-redhat-1\norg.wildfly.swarm:config-api:1.1.0.Final-redhat-14";
         GAVReport gavReport = new GAVReport(folder, builds);
-        assertEquals(gavReport.renderText(), gavExpected);
+        assertEquals(gavExpected, gavReport.renderText());
         gavReport.outputText();
-        assertEquals(FileUtils.readFileToString(new File(gavReport.getOutputDirectory(), gavReport.getBaseFilename() + ".txt"), "UTF-8"), gavExpected);
+        assertEquals(gavExpected, FileUtils.readFileToString(new File(gavReport.getOutputDirectory(), gavReport.getBaseFilename() + ".txt"), "UTF-8"));
     }
 
     @Test

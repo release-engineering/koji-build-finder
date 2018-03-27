@@ -6,8 +6,8 @@
       "build_id" : 0,
       "package_id" : 0,
       "package_name" : "not found",
-      "completion_time" : 1515569456,
-      "creation_time" : 1515569456,
+      "completion_time" : 1522070640,
+      "creation_time" : 1522070640,
       "state" : "COMPLETE"
     }
   },
@@ -31,10 +31,13 @@
     },
     "archives" : [ {
       "archive" : {
+        "version" : "2.6",
         "filename" : "commons-lang-2.6.pom",
         "checksum" : "cca9ee287cb26a44a2f65450a24957cd",
         "size" : 17494,
         "id" : 104977,
+        "group_id" : "commons-lang",
+        "artifact_id" : "commons-lang",
         "type_extensions" : "pom",
         "build_id" : 179040,
         "type_name" : "pom",
@@ -43,7 +46,7 @@
         "type_description" : "Maven Project Object Management file",
         "metadata_only" : false
       },
-      "files" : [ "commons-lang-2.6.pom" ]
+      "files" : [ "commons-lang-2.6.pom", "commons-lang-2.6.pom.1" ]
     } ],
     "remoteArchives" : [ {
       "filename" : "commons-lang-2.6.jar",
@@ -383,6 +386,18 @@
       "maven_support" : true,
       "maven_include_all" : true
     }, {
+      "id" : 9359,
+      "name" : "jb-eap-7.1-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9365,
+      "name" : "jb-eap-7.1.0-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
       "id" : 9422,
       "name" : "jb-common-maven-imports",
       "locked" : false,
@@ -493,6 +508,12 @@
       "maven_support" : true,
       "maven_include_all" : true
     }, {
+      "id" : 12019,
+      "name" : "jb-vertx-3.5-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
       "id" : 12921,
       "name" : "jb-bxms-6.4.7-maven-imports",
       "locked" : false,
@@ -501,10 +522,13 @@
     } ],
     "types" : [ "maven" ],
     "duplicateArchives" : [ {
+      "version" : "2.6",
       "filename" : "commons-lang-2.6.pom",
       "checksum" : "cca9ee287cb26a44a2f65450a24957cd",
       "size" : 17494,
       "id" : 104977,
+      "group_id" : "commons-lang",
+      "artifact_id" : "commons-lang",
       "type_extensions" : "pom",
       "build_id" : 179040,
       "type_name" : "pom",
@@ -534,10 +558,13 @@
     },
     "archives" : [ {
       "archive" : {
+        "version" : "2.6",
         "filename" : "commons-lang-2.6.pom",
         "checksum" : "cca9ee287cb26a44a2f65450a24957cd",
         "size" : 17494,
         "id" : 403174,
+        "group_id" : "commons-lang",
+        "artifact_id" : "commons-lang",
         "type_extensions" : "pom",
         "build_id" : 279090,
         "type_name" : "pom",
@@ -546,7 +573,7 @@
         "type_description" : "Maven Project Object Management file",
         "metadata_only" : false
       },
-      "files" : [ "commons-lang-2.6.pom" ]
+      "files" : [ "commons-lang-2.6.pom", "commons-lang-2.6.pom.1" ]
     } ],
     "remoteArchives" : [ {
       "filename" : "commons-lang-2.6.jar",
@@ -719,6 +746,18 @@
       "maven_support" : true,
       "maven_include_all" : true
     }, {
+      "id" : 9359,
+      "name" : "jb-eap-7.1-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9365,
+      "name" : "jb-eap-7.1.0-rhel-7-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
       "id" : 9609,
       "name" : "jb-eap-7.0.1-rhel-7-maven-imports",
       "locked" : false,
@@ -802,13 +841,28 @@
       "locked" : false,
       "maven_support" : true,
       "maven_include_all" : true
+    }, {
+      "id" : 13064,
+      "name" : "jb-eap-7.2-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 13213,
+      "name" : "jws-5.0-maven-imports",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
     } ],
     "types" : [ "maven" ],
     "duplicateArchives" : [ {
+      "version" : "2.6",
       "filename" : "commons-lang-2.6.pom",
       "checksum" : "cca9ee287cb26a44a2f65450a24957cd",
       "size" : 17494,
       "id" : 403174,
+      "group_id" : "commons-lang",
+      "artifact_id" : "commons-lang",
       "type_extensions" : "pom",
       "build_id" : 279090,
       "type_name" : "pom",
@@ -854,7 +908,7 @@
     },
     "taskRequest" : {
       "request" : [ "svn+http://svn.apache.org/repos/asf/commons/proper/beanutils/tags/BEANUTILS_1_9_2#1598386", "jb-eap-7.0-rhel-7-maven-candidate", {
-        "patches" : "git://localhost/rpms/apache-commons-beanutils?#1a485a0a3a06cf4578b26816ad5c224a7802cd5e",
+        "patches" : "git://pkgs.devel.redhat.com/rpms/apache-commons-beanutils?#1a485a0a3a06cf4578b26816ad5c224a7802cd5e",
         "properties" : {
           "additionalparam" : "-Xdoclint:none",
           "version.incremental.suffix" : "redhat"
@@ -863,10 +917,13 @@
     },
     "archives" : [ {
       "archive" : {
+        "version" : "1.9.2.redhat-1",
         "filename" : "commons-beanutils-1.9.2.redhat-1.pom",
         "checksum" : "47b2528d69f7b834cb157db9b781ec7b",
         "size" : 14183,
         "id" : 1037494,
+        "group_id" : "commons-beanutils",
+        "artifact_id" : "commons-beanutils",
         "type_extensions" : "pom",
         "build_id" : 443838,
         "type_name" : "pom",
@@ -971,6 +1028,12 @@
       "buildroot_id" : 2630528
     } ],
     "tags" : [ {
+      "id" : 5811,
+      "name" : "jb-infra-1-rhel-6-candidate",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
       "id" : 6484,
       "name" : "jb-eap-7.0.0-rhel-6-released",
       "locked" : true,
@@ -1025,12 +1088,6 @@
       "maven_support" : false,
       "maven_include_all" : false
     }, {
-      "id" : 8967,
-      "name" : "jb-infra-1-rhel-6-maven-imports",
-      "locked" : false,
-      "maven_support" : true,
-      "maven_include_all" : true
-    }, {
       "id" : 8972,
       "name" : "jb-eap-7.0.0.er6-errata-rhel-6",
       "locked" : false,
@@ -1039,6 +1096,12 @@
     }, {
       "id" : 8973,
       "name" : "jb-eap-7.0.0.er6-errata-rhel-7",
+      "locked" : false,
+      "maven_support" : true,
+      "maven_include_all" : true
+    }, {
+      "id" : 9363,
+      "name" : "jb-eap-7.1.0-rhel-7-deps",
       "locked" : false,
       "maven_support" : true,
       "maven_include_all" : true
@@ -1143,7 +1206,7 @@
       "extra" : {
         "build_system" : "PNC",
         "external_build_id" : "985",
-        "external_build_system" : "http://localhost/pnc-web/#/build-records/985",
+        "external_build_system" : "http://orch.cloud.pnc.engineering.redhat.com/pnc-web/#/build-records/985",
         "maven" : {
           "artifact_id" : "config-api-parent",
           "group_id" : "org.wildfly.swarm",
@@ -1162,14 +1225,17 @@
       "maven_group_id" : "org.wildfly.swarm",
       "maven_artifact_id" : "config-api-parent",
       "maven_version" : "1.1.0.Final-redhat-14",
-      "source" : "git+ssh://localhost:22/wildfly-swarm-prod/wildfly-config-api.git#1.x"
+      "source" : "git+ssh://user-pnc-gerrit@code.engineering.redhat.com:22/wildfly-swarm-prod/wildfly-config-api.git#1.x"
     },
     "archives" : [ {
       "archive" : {
+        "version" : "1.1.0.Final-redhat-14",
         "filename" : "config-api-1.1.0.Final-redhat-14.pom",
         "checksum" : "d417e7a75b68203ab463122e9dde3376",
         "size" : 7688,
         "id" : 2059686,
+        "group_id" : "org.wildfly.swarm",
+        "artifact_id" : "config-api",
         "type_extensions" : "pom",
         "build_id" : 596963,
         "type_name" : "pom",
@@ -1375,14 +1441,17 @@
       "arch" : "noarch"
     },
     "taskRequest" : {
-      "request" : [ "git://localhost/rpms/artemis-native-linux#eee002a284922bf7c4c6b006dcb62f2c036ef293", "jb-amq-7-rhel-6-candidate", { } ]
+      "request" : [ "git://pkgs.devel.redhat.com/rpms/artemis-native-linux#eee002a284922bf7c4c6b006dcb62f2c036ef293", "jb-amq-7-rhel-6-candidate", { } ]
     },
     "archives" : [ {
       "archive" : {
+        "version" : "2.3.0.amq_710003-redhat-1",
         "filename" : "libartemis-native-32-2.3.0.amq_710003-redhat-1.pom",
         "checksum" : "4bb5c341445d689a7e21ceaa47399fc2",
         "size" : 1509,
         "id" : 2136306,
+        "group_id" : "org.apache.activemq",
+        "artifact_id" : "libartemis-native-32",
         "type_extensions" : "pom",
         "build_id" : 610867,
         "type_name" : "pom",
@@ -1448,12 +1517,6 @@
       "locked" : false,
       "maven_support" : true,
       "maven_include_all" : true
-    }, {
-      "id" : 8797,
-      "name" : "jb-amq-7-rhel-6-candidate",
-      "locked" : false,
-      "maven_support" : false,
-      "maven_include_all" : false
     } ],
     "types" : [ "maven", "rpm" ]
   }

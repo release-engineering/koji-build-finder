@@ -359,6 +359,16 @@ public class BuildFinder {
             }
         }
 
+        builds.values().removeIf(b -> b.getBuildInfo().getBuildState() != KojiBuildState.COMPLETE);
+
+        List<KojiArchiveInfo> archiveInfos = builds.values().stream().filter(b -> b.getBuildInfo().getId() > 0).flatMap(b -> b.getArchives().stream()).map(KojiLocalArchive::getArchive).collect(Collectors.toList());
+
+        try {
+            session.enrichArchiveTypeInfo(archiveInfos);
+        } catch (KojiClientException e) {
+            LOGGER.error("Koji client error", e);
+        }
+
         session.close();
 
         final Instant endTime = Instant.now();
@@ -366,12 +376,6 @@ public class BuildFinder {
         int numBuilds = builds.size() - 1;
 
         LOGGER.info("Total number of files: {}, checked: {}, skipped: {}, hits: {}, time: {}, average: {}", green(numChecksums), green(numChecksums - numBuilds), green(numBuilds), green(hits), green(duration), green(numBuilds > 0 ? duration.dividedBy(numBuilds) : 0));
-
-        LOGGER.debug("Found {} total builds", numBuilds);
-
-        builds.values().removeIf(b -> b.getBuildInfo().getBuildState() != KojiBuildState.COMPLETE);
-
-        numBuilds = builds.size() - 1;
 
         LOGGER.info("Found {} builds", green(numBuilds));
 

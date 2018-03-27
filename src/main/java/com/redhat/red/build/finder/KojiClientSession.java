@@ -43,7 +43,7 @@ public class KojiClientSession implements ClientSession {
 
     private KojiSessionInfo session;
 
-    public KojiClientSession(KojiConfig config, PasswordManager passwordManager, ExecutorService executorService) {
+    public KojiClientSession(KojiConfig config, PasswordManager passwordManager, ExecutorService executorService) throws KojiClientException {
         client = new KojiClient(config, passwordManager, executorService);
     }
 
@@ -87,6 +87,11 @@ public class KojiClientSession implements ClientSession {
     @Override
     public List<KojiTagInfo> listTags(int id) throws KojiClientException {
         return client.listTags(id, session);
+    }
+
+    @Override
+    public void enrichArchiveTypeInfo(List<KojiArchiveInfo> archiveInfos) throws KojiClientException {
+        client.enrichArchiveTypeInfo(archiveInfos, session);
     }
 
     @Override

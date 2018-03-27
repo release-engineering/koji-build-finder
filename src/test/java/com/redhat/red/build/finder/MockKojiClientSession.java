@@ -138,6 +138,11 @@ public class MockKojiClientSession implements ClientSession {
     }
 
     @Override
+    public void enrichArchiveTypeInfo(List<KojiArchiveInfo> archiveInfos) throws KojiClientException {
+        // XXX: not implemented
+    }
+
+    @Override
     public void close() {
 
     }
