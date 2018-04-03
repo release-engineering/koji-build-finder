@@ -193,7 +193,7 @@ public class BuildFinder {
 
                 build = builds.get(0);
                 tmpArchive.setArchiveId(-1 * (build.getArchives().size() + 1));
-                build.getArchives().add(new KojiLocalArchive(tmpArchive, new ArrayList<>(filenames)));
+                build.getArchives().add(new KojiLocalArchive(tmpArchive, filenames));
 
                 continue;
             }
@@ -251,18 +251,18 @@ public class BuildFinder {
                             archiveList = new ArrayList<>();
                         }
 
-                        KojiLocalArchive kla = new KojiLocalArchive(archive, null);
+                        KojiLocalArchive kla = new KojiLocalArchive(archive);
 
                         if (!archiveList.contains(kla)) {
                             LOGGER.debug("Adding archive id {} to build id {} already in table with {} archives", archive.getArchiveId(), archive.getBuildId(), build.getArchives().size());
-                            archiveList.add(new KojiLocalArchive(archive, new ArrayList<>(filenames)));
+                            archiveList.add(new KojiLocalArchive(archive, filenames));
 
                         } else {
                             int archiveIndex = archiveList.indexOf(kla);
                             KojiLocalArchive aArchive = archiveList.get(archiveIndex);
 
                             if (aArchive.getFiles() == null) {
-                                aArchive.setFiles(new ArrayList<>(filenames));
+                                aArchive.setFiles(filenames);
                             }
                         }
                     } else {
@@ -333,7 +333,7 @@ public class BuildFinder {
                                 LOGGER.warn("Skipping import id {} because artifact exists in build id {}", red(buildInfo.getId()), red(firstBuildId));
                             } else {
                                 archiveList = new ArrayList<>();
-                                archiveList.add(new KojiLocalArchive(archive, new ArrayList<>(filenames)));
+                                archiveList.add(new KojiLocalArchive(archive, filenames));
 
                                 List<String> buildTypes = null;
 
