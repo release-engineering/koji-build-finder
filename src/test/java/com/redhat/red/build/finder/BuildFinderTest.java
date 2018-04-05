@@ -54,7 +54,6 @@ public class BuildFinderTest {
         File folder = temp.newFolder();
         KojiChecksumType checksumType = KojiChecksumType.sha1;
 
-
         Main.main(new String[] {"-t", String.valueOf(checksumType), "-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
 
         File[] file = folder.listFiles();
@@ -66,10 +65,11 @@ public class BuildFinderTest {
     @Test
     public void verifyloadChecksumsFile() throws IOException {
         File folder = temp.newFolder();
+        KojiChecksumType checksumType = KojiChecksumType.md5;
 
-        Main.main(new String[] {"-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
+        Main.main(new String[] {"-t", String.valueOf(checksumType), "-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
 
-        Map<String, Collection<String>> checksums = JSONUtils.loadChecksumsFile(new File(folder, BuildFinder.getChecksumFilename(KojiChecksumType.md5)));
+        Map<String, Collection<String>> checksums = JSONUtils.loadChecksumsFile(new File(folder, BuildFinder.getChecksumFilename(checksumType)));
 
         assertEquals(1, checksums.size());
     }
