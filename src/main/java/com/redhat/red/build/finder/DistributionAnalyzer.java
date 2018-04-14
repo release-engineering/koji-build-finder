@@ -102,7 +102,7 @@ public class DistributionAnalyzer {
         String friendly = fo.getName().getFriendlyURI();
         String found = friendly.substring(friendly.indexOf(rootString) + rootString.length());
 
-        if (fo.getType().getName().equals(FileType.FILE.getName())) {
+        if (fo.getType().equals(FileType.FILE)) {
             boolean excludeExtension = config.getArchiveExtensions() != null && !config.getArchiveExtensions().isEmpty() && !config.getArchiveExtensions().stream().anyMatch(x -> x.equals(fo.getName().getExtension()));
             boolean excludeFile = false;
 
@@ -118,7 +118,7 @@ public class DistributionAnalyzer {
             }
         }
 
-        if (fo.getType().getName().equals(FileType.FOLDER.getName()) || fo.getType().getName().equals(FileType.FILE_OR_FOLDER.getName())) {
+        if (fo.getType().equals(FileType.FOLDER) || fo.getType().equals(FileType.FILE_OR_FOLDER)) {
             for (FileObject file : fo.getChildren()) {
                 try {
                     listChildren(file);
