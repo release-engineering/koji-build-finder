@@ -80,6 +80,6 @@ public class BuildConfigTest {
         mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        BuildConfig bc = mapper.readValue(json, BuildConfig.class);
+        mapper.readValue(json, BuildConfig.class);
     }
 }

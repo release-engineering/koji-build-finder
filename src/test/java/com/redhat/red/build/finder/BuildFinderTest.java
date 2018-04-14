@@ -16,17 +16,18 @@
 package com.redhat.red.build.finder;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +40,6 @@ public class BuildFinderTest {
     @Rule
     public final TemporaryFolder temp = new TemporaryFolder();
 
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
-
     private File target;
 
     @Before
@@ -53,8 +51,14 @@ public class BuildFinderTest {
     public void verifyDirectory() throws IOException {
         File folder = temp.newFolder();
         KojiChecksumType checksumType = KojiChecksumType.sha1;
+        BuildConfig config = new BuildConfig();
 
-        Main.main(new String[] {"-t", String.valueOf(checksumType), "-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
+        config.setChecksumOnly(true);
+        config.setChecksumType(checksumType);
+
+        DistributionAnalyzer da = new DistributionAnalyzer(Collections.singletonList(new File(target.getAbsolutePath())), config);
+        da.checksumFiles();
+        da.outputToFile(new File(folder, BuildFinder.getChecksumFilename(checksumType)));
 
         File[] file = folder.listFiles();
 
@@ -67,7 +71,14 @@ public class BuildFinderTest {
         File folder = temp.newFolder();
         KojiChecksumType checksumType = KojiChecksumType.md5;
 
-        Main.main(new String[] {"-t", String.valueOf(checksumType), "-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
+        BuildConfig config = new BuildConfig();
+
+        config.setChecksumOnly(true);
+        config.setChecksumType(checksumType);
+
+        DistributionAnalyzer da = new DistributionAnalyzer(Collections.singletonList(new File(target.getAbsolutePath())), config);
+        da.checksumFiles();
+        da.outputToFile(new File(folder, BuildFinder.getChecksumFilename(checksumType)));
 
         Map<String, Collection<String>> checksums = JSONUtils.loadChecksumsFile(new File(folder, BuildFinder.getChecksumFilename(checksumType)));
 
@@ -80,13 +91,13 @@ public class BuildFinderTest {
         Level level = root.getLevel();
 
         try {
-            File folder = temp.newFolder();
-
             root.setLevel(Level.INFO);
 
-            Main.main(new String[] {"-d", "-k", "-o", folder.getAbsolutePath(), target.getAbsolutePath()});
+            assertFalse(root.isDebugEnabled());
 
-            assertTrue(systemOutRule.getLog().contains(" DEBUG "));
+            Main.setDebug();
+
+            assertTrue(root.isDebugEnabled());
         } finally {
             root.setLevel(level);
         }

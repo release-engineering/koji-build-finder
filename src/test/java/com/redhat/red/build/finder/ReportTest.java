@@ -32,7 +32,6 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 
 import com.redhat.red.build.finder.report.BuildStatisticsReport;
@@ -45,9 +44,6 @@ import com.redhat.red.build.finder.report.Report;
 public class ReportTest {
     @Rule
     public final TemporaryFolder temp = new TemporaryFolder();
-
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
     private List<KojiBuild> builds;
 
@@ -152,7 +148,7 @@ public class ReportTest {
     }
 
     @Test
-    public void verifyBuildStatisticsReport() {
+    public void verifyBuildStatisticsReport() throws IOException {
         BuildStatisticsReport buildStatisticsReport = new BuildStatisticsReport(folder, builds);
         buildStatisticsReport.outputText();
         assertEquals(builds.size() - 1, buildStatisticsReport.getBuildStatistics().getNumberOfBuilds());
