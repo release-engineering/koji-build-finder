@@ -16,10 +16,20 @@
 package com.redhat.red.build.finder;
 
 import org.fusesource.jansi.Ansi;
+import org.fusesource.jansi.AnsiConsole;
 
 public final class AnsiUtils {
     private AnsiUtils() {
         throw new AssertionError();
+    }
+
+    public static void install() {
+        AnsiConsole.systemInstall();
+    }
+
+    public static void uninstall() {
+        AnsiUtils.reset();
+        AnsiConsole.systemUninstall();
     }
 
     public static void reset() {

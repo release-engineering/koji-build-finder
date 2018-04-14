@@ -42,7 +42,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
-import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,12 +106,9 @@ public final class Main {
     }
 
     public static void main(String[] args) {
-        AnsiConsole.systemInstall();
+        AnsiUtils.install();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            AnsiUtils.reset();
-            AnsiConsole.systemUninstall();
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> AnsiUtils.uninstall()));
 
         Options options = new Options();
 
