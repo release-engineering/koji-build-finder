@@ -28,13 +28,9 @@ public final class AnsiUtils {
     }
 
     public static void uninstall() {
-        AnsiUtils.reset();
-        AnsiConsole.systemUninstall();
-    }
-
-    public static void reset() {
         System.out.print(Ansi.ansi().reset());
         System.out.flush();
+        AnsiConsole.systemUninstall();
     }
 
     public static Object cyan(Object o) {
