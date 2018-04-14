@@ -107,6 +107,13 @@ public final class Main {
     }
 
     public static void main(String[] args) {
+        AnsiConsole.systemInstall();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            AnsiUtils.reset();
+            AnsiConsole.systemUninstall();
+        }));
+
         Options options = new Options();
 
         options.addOption(Option.builder("h").longOpt("help").desc("Show this help message.").build());
@@ -134,8 +141,6 @@ public final class Main {
         File outputDirectory = null;
 
         try {
-            AnsiConsole.systemInstall();
-
             List<File> files = new ArrayList<>();
 
             String[] unparsedArgs;
@@ -380,8 +385,6 @@ public final class Main {
         } catch (ParseException e) {
             e.printStackTrace();
             usage(options);
-        } finally {
-            AnsiConsole.systemUninstall();
         }
     }
 }

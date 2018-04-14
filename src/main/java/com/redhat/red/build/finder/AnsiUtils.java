@@ -22,6 +22,11 @@ public final class AnsiUtils {
         throw new AssertionError();
     }
 
+    public static void reset() {
+        System.out.print(Ansi.ansi().reset());
+        System.out.flush();
+    }
+
     public static Object cyan(Object o) {
         return new Object() {
             @Override
