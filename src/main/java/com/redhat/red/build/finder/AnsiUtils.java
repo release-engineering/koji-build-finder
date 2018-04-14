@@ -49,6 +49,15 @@ public final class AnsiUtils {
         };
     }
 
+    public static Object boldRed(Object o) {
+        return new Object() {
+            @Override
+            public String toString() {
+                return Ansi.ansi().fgRed().bold().a(o).reset().toString();
+            }
+        };
+    }
+
     public static Object boldYellow(Object o) {
         return new Object() {
             @Override
