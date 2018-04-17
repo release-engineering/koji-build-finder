@@ -15,7 +15,7 @@
  */
 package com.redhat.red.build.finder;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -94,13 +94,24 @@ public class FileObjectTrackingTest {
         System.setProperty("java.io.tmpdir", cache.getAbsolutePath());
 
         List<File> target = Collections.singletonList(TestUtils.loadFile("nested.zip"));
-        DistributionAnalyzer da = new DistributionAnalyzer(target, new BuildConfig());
+
+        BuildConfig config = new BuildConfig();
+
+        config.setArchiveExtensions(Collections.emptyList());
+
+        DistributionAnalyzer da = new DistributionAnalyzer(target, config);
+
         da.checksumFiles();
 
-        Object fCounter = getAbstractFileObjectCounter();
         Object sCounter = getFileSystemCounter();
-        assertTrue(fCounter instanceof Integer && ((Integer) fCounter) == 0);
-        assertTrue(sCounter instanceof Integer && ((Integer) sCounter) == 0);
+        int sCount = (Integer) sCounter;
+
+        assertEquals(0, sCount);
+
+        Object fCounter = getAbstractFileObjectCounter();
+        int fCount = (Integer) fCounter;
+
+        assertEquals(0, fCount);
     }
 
     /**
