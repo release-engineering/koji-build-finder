@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.collections4.MultiValuedMap;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMRules;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
@@ -100,8 +101,9 @@ public class FileObjectTrackingTest {
         config.setArchiveExtensions(Collections.emptyList());
 
         DistributionAnalyzer da = new DistributionAnalyzer(target, config);
+        MultiValuedMap<String, String> checksums = da.checksumFiles();
 
-        da.checksumFiles();
+        assertEquals(25, checksums.size());
 
         Object sCounter = getFileSystemCounter();
         int sCount = (Integer) sCounter;
