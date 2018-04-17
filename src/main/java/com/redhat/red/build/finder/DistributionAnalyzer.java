@@ -36,7 +36,6 @@ import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileType;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +101,7 @@ public class DistributionAnalyzer {
         String friendly = fo.getName().getFriendlyURI();
         String found = friendly.substring(friendly.indexOf(rootString) + rootString.length());
 
-        if (fo.getType().equals(FileType.FILE)) {
+        if (fo.isFile()) {
             boolean excludeExtension = config.getArchiveExtensions() != null && !config.getArchiveExtensions().isEmpty() && !config.getArchiveExtensions().stream().anyMatch(x -> x.equals(fo.getName().getExtension()));
             boolean excludeFile = false;
 
@@ -118,7 +117,7 @@ public class DistributionAnalyzer {
             }
         }
 
-        if (fo.getType().equals(FileType.FOLDER) || fo.getType().equals(FileType.FILE_OR_FOLDER)) {
+        if (fo.isFolder()) {
             for (FileObject file : fo.getChildren()) {
                 try {
                     listChildren(file);
