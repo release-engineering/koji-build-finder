@@ -133,10 +133,6 @@ public class DistributionAnalyzer {
     }
 
     private void listChildren(FileObject fo) throws IOException {
-        if (!includeFile(fo)) {
-            return;
-        }
-
         if (fo.isFile()) {
             if (isArchive(fo)) {
                 listArchive(fo);
@@ -147,7 +143,9 @@ public class DistributionAnalyzer {
 
             LOGGER.debug("Checksum: {} {}", checksum, found);
 
-            map.put(checksum, found);
+            if (includeFile(fo)) {
+                map.put(checksum, found);
+            }
         } else {
             for (FileObject file : fo.getChildren()) {
                 try {
