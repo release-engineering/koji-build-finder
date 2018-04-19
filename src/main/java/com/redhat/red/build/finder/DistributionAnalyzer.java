@@ -20,7 +20,6 @@ import static com.redhat.red.build.finder.AnsiUtils.red;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
@@ -33,7 +32,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.MultiMapUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
-import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
@@ -55,18 +53,29 @@ public class DistributionAnalyzer {
 
     private MultiValuedMap<String, String> map;
 
-    private final MessageDigest md;
-
     private StandardFileSystemManager sfs;
 
     private String rootString;
 
     private BuildConfig config;
 
+    public boolean includeFile(FileObject fo) {
+        boolean excludeExtension = config.getArchiveExtensions() != null && !config.getArchiveExtensions().isEmpty() && !config.getArchiveExtensions().stream().anyMatch(x -> x.equals(fo.getName().getExtension()));
+        boolean excludeFile = false;
+
+        if (!excludeExtension) {
+            String friendlyURI = fo.getName().getFriendlyURI();
+            excludeFile = config.getExcludes() != null && !config.getExcludes().isEmpty() && config.getExcludes().stream().anyMatch(friendlyURI::matches);
+        }
+
+        boolean include = (!excludeFile && !excludeExtension);
+
+        return include;
+    }
+
     public DistributionAnalyzer(List<File> files, BuildConfig config) {
         this.files = files;
         this.config = config;
-        this.md = DigestUtils.getDigest(config.getChecksumType().getAlgorithm());
         this.map = new ArrayListValuedHashMap<>();
     }
 
@@ -96,45 +105,55 @@ public class DistributionAnalyzer {
         return MultiMapUtils.unmodifiableMultiValuedMap(map);
     }
 
+    private String checksum(FileObject fo) throws IOException {
+        return Hex.encodeHexString(DigestUtils.digest(DigestUtils.getDigest(config.getChecksumType().getAlgorithm()), fo.getContent().getInputStream()));
+    }
+
+    private boolean isArchive(FileObject fo) {
+        return (!NON_ARCHIVE_SCHEMES.contains(fo.getName().getExtension()) && Stream.of(sfs.getSchemes()).anyMatch(s -> s.equals(fo.getName().getExtension())));
+    }
+
+    private String normalizePath(FileObject fo) {
+        String friendlyURI = fo.getName().getFriendlyURI();
+        String normalizedPath = friendlyURI.substring(friendlyURI.indexOf(rootString) + rootString.length());
+
+        return normalizedPath;
+    }
+
+    private void listArchive(FileObject fo) throws IOException {
+        LOGGER.debug("Creating file system for: {}", normalizePath(fo));
+
+        try (FileObject layered = sfs.createFileSystem(fo.getName().getExtension(), fo)) {
+            listChildren(layered);
+            sfs.closeFileSystem(layered.getFileSystem());
+        } catch (FileSystemException e) {
+            LOGGER.warn("Unable to process archive/compressed file: {}", red(normalizePath(fo)));
+            LOGGER.debug("Caught file system exception", e);
+        }
+    }
+
     private void listChildren(FileObject fo) throws IOException {
-        FileContent fc = fo.getContent();
-        String friendly = fo.getName().getFriendlyURI();
-        String found = friendly.substring(friendly.indexOf(rootString) + rootString.length());
-
-        if (fo.isFile()) {
-            boolean excludeExtension = config.getArchiveExtensions() != null && !config.getArchiveExtensions().isEmpty() && !config.getArchiveExtensions().stream().anyMatch(x -> x.equals(fo.getName().getExtension()));
-            boolean excludeFile = false;
-
-            if (!excludeExtension) {
-                excludeFile = config.getExcludes() != null && !config.getExcludes().isEmpty() && config.getExcludes().stream().anyMatch(friendly::matches);
-            }
-
-            if (!excludeFile && !excludeExtension) {
-                byte[] digest = DigestUtils.digest(md, fc.getInputStream());
-                String checksum = Hex.encodeHexString(digest);
-                map.put(checksum, found);
-                LOGGER.debug("Checksum: {} {}", checksum, found);
-            }
+        if (!includeFile(fo)) {
+            return;
         }
 
-        if (fo.isFolder()) {
+        if (fo.isFile()) {
+            if (isArchive(fo)) {
+                listArchive(fo);
+            }
+
+            String checksum = checksum(fo);
+            String found = normalizePath(fo);
+
+            LOGGER.debug("Checksum: {} {}", checksum, found);
+
+            map.put(checksum, found);
+        } else {
             for (FileObject file : fo.getChildren()) {
                 try {
                     listChildren(file);
                 } finally {
                     file.close();
-                }
-            }
-        } else {
-            if (Stream.of(sfs.getSchemes()).anyMatch(s -> s.equals(fo.getName().getExtension()) && !NON_ARCHIVE_SCHEMES.contains(fo.getName().getExtension()))) {
-                LOGGER.debug("Creating file system for: {}", found);
-
-                try (FileObject layered = sfs.createFileSystem(fo.getName().getExtension(), fo)) {
-                    listChildren(layered);
-                    sfs.closeFileSystem(layered.getFileSystem());
-                } catch (FileSystemException e) {
-                    LOGGER.warn("Unable to process archive/compressed file: {}", red(found));
-                    LOGGER.debug("Caught file system exception", e);
                 }
             }
         }
