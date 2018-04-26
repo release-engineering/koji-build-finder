@@ -15,6 +15,7 @@
  */
 package com.redhat.red.build.finder;
 
+import static com.redhat.red.build.finder.AnsiUtils.boldRed;
 import static com.redhat.red.build.finder.AnsiUtils.boldYellow;
 import static com.redhat.red.build.finder.AnsiUtils.cyan;
 import static com.redhat.red.build.finder.AnsiUtils.green;
@@ -105,6 +106,26 @@ public final class Main {
         }
     }
 
+    static void setDebug() {
+        ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        rootLogger.setLevel(Level.DEBUG);
+
+        LoggerContext loggerContext = rootLogger.getLoggerContext();
+
+        PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+        encoder.setContext(loggerContext);
+        encoder.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n");
+        encoder.start();
+
+        ConsoleAppender<ILoggingEvent> appender = (ConsoleAppender<ILoggingEvent>) rootLogger.getAppender("STDOUT");
+
+        if (appender != null) {
+            appender.setContext(loggerContext);
+            appender.setEncoder(encoder);
+            appender.start();
+        }
+    }
+
     public static void main(String[] args) {
         AnsiUtils.install();
 
@@ -154,23 +175,7 @@ public final class Main {
             }
 
             if (line.hasOption("debug")) {
-                ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-                rootLogger.setLevel(Level.DEBUG);
-
-                LoggerContext loggerContext = rootLogger.getLoggerContext();
-
-                PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-                encoder.setContext(loggerContext);
-                encoder.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n");
-                encoder.start();
-
-                ConsoleAppender<ILoggingEvent> appender = (ConsoleAppender<ILoggingEvent>) rootLogger.getAppender("STDOUT");
-
-                if (appender != null) {
-                    appender.setContext(loggerContext);
-                    appender.setEncoder(encoder);
-                    appender.start();
-                }
+                setDebug();
             }
 
             LOGGER.info("{} {} (SHA: {})", boldYellow(BuildFinder.getName()), boldYellow(BuildFinder.getVersion()), cyan(BuildFinder.getScmRevision()));
@@ -190,11 +195,18 @@ public final class Main {
             }
 
             File configFile = configPath.toFile();
-            BuildConfig config;
+            BuildConfig config = null;
 
             if (configFile.exists()) {
                 LOGGER.info("Using configuration file: {}", green(configFile));
-                config = mapper.readValue(configFile, BuildConfig.class);
+
+                try {
+                    config = mapper.readValue(configFile, BuildConfig.class);
+                } catch (IOException e) {
+                    LOGGER.error("Error reading configuration file: {}", boldRed(e.getMessage()));
+                    LOGGER.debug("Error", e);
+                    System.exit(1);
+                }
             } else {
                 LOGGER.info("Configuration file {} does not exist. Implicitly creating with defaults.", green(configFile));
                 config = new BuildConfig();
@@ -286,7 +298,12 @@ public final class Main {
                 }
 
                 if (configFile.canWrite()) {
-                    JSONUtils.dumpObjectToFile(config, configFile);
+                    try {
+                        JSONUtils.dumpObjectToFile(config, configFile);
+                    } catch (IOException e) {
+                        LOGGER.warn("Error writing configuration file: {}", red(e.getMessage()));
+                        LOGGER.debug("Error", e);
+                    }
                 } else {
                     LOGGER.warn("Could not write configuration file: {}", red(configFile));
                 }
@@ -310,18 +327,39 @@ public final class Main {
             }
 
             File checksumFile = new File(outputDirectory, BuildFinder.getChecksumFilename(config.getChecksumType()));
-            Map<String, Collection<String>> checksums;
+            Map<String, Collection<String>> checksums = Collections.emptyMap();
 
             LOGGER.info("Checksum type: {}", green(config.getChecksumType()));
 
             if (!checksumFile.exists()) {
                 LOGGER.info("Calculating checksums for files: {}", green(files));
+
                 DistributionAnalyzer da = new DistributionAnalyzer(files, config);
-                checksums = da.checksumFiles().asMap();
-                da.outputToFile(checksumFile);
+
+                try {
+                    checksums = da.checksumFiles().asMap();
+                } catch (IOException e) {
+                    LOGGER.error("Error getting checksums map: {}", boldRed(e.getMessage()));
+                    LOGGER.debug("Error", e);
+                    System.exit(1);
+                }
+
+                try {
+                    da.outputToFile(checksumFile);
+                } catch (IOException e) {
+                    LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
+                    LOGGER.debug("Error", e);
+                    System.exit(1);
+                }
             } else {
-                LOGGER.info("Loading checksums from file: {}", green(checksumFile));
-                checksums = JSONUtils.loadChecksumsFile(checksumFile);
+                try {
+                    LOGGER.info("Loading checksums from file: {}", green(checksumFile));
+                    checksums = JSONUtils.loadChecksumsFile(checksumFile);
+                } catch (IOException e) {
+                    LOGGER.error("Error loading checksums file: {}", boldRed(e.getMessage()));
+                    LOGGER.debug("Error", e);
+                    System.exit(1);
+                }
             }
 
             if (checksums.isEmpty()) {
@@ -329,31 +367,49 @@ public final class Main {
             }
 
             if (config.getChecksumOnly()) {
-                return;
+                System.exit(0);
             }
 
             File buildsFile = new File(outputDirectory, BuildFinder.getBuildsFilename());
-            Map<Integer, KojiBuild> builds = null;
+            Map<Integer, KojiBuild> builds = Collections.emptyMap();
             KojiClientSession session = null;
 
             try {
                 session = new KojiClientSession(config.getKojiHubURL(), krbService, krbPrincipal, krbPassword, krbCCache, krbKeytab);
             } catch (KojiClientException e) {
-                e.printStackTrace();
-            }
-
-            if (session == null) {
-                LOGGER.warn("Creating session failed");
-                return;
+                LOGGER.error("Failed to create Koji session: {}", boldRed(e.getMessage()));
+                LOGGER.debug("Koji Client Error", e);
+                System.exit(1);
             }
 
             if (buildsFile.exists()) {
                 LOGGER.info("Loading builds from file: {}", green(buildsFile.getPath()));
-                builds = JSONUtils.loadBuildsFile(buildsFile);
+                try {
+                    builds = JSONUtils.loadBuildsFile(buildsFile);
+                } catch (IOException e) {
+                    LOGGER.error("Error loading builds file: {}", boldRed(e.getMessage()));
+                    LOGGER.debug("Error", e);
+                    System.exit(1);
+                }
             } else {
                 BuildFinder bf = new BuildFinder(session, config);
-                builds = bf.findBuilds(checksums);
-                JSONUtils.dumpObjectToFile(builds, buildsFile);
+                bf.setOutputDirectory(outputDirectory);
+
+                try {
+                    builds = bf.findBuilds(checksums);
+                } catch (KojiClientException e) {
+                    LOGGER.error("Koji client error: {}", boldRed(e.getMessage()));
+                    LOGGER.debug("Koji Client Error", e);
+                    System.exit(1);
+                }
+
+                try {
+                    JSONUtils.dumpObjectToFile(builds, buildsFile);
+                } catch (IOException e) {
+                    LOGGER.error("Error writing builds file: {}", boldRed(e.getMessage()));
+                    LOGGER.debug("Error", e);
+                    System.exit(1);
+                }
             }
 
             if (!builds.isEmpty()) {
@@ -368,18 +424,31 @@ public final class Main {
                 reports.add(new ProductReport(outputDirectory, buildList));
                 reports.add(new NVRReport(outputDirectory, buildList));
                 reports.add(new GAVReport(outputDirectory, buildList));
-                reports.forEach(Report::outputText);
 
-                new HTMLReport(outputDirectory, files, buildList, config.getKojiWebURL(), Collections.unmodifiableList(reports)).outputHTML();
+                reports.forEach(report -> {
+                    try {
+                        report.outputText();
+                    } catch (IOException e) {
+                        LOGGER.error("Error writing {} report", boldRed(report.getName()));
+                        LOGGER.debug("Report error", e);
+                    }
+                });
+
+                Report report = new HTMLReport(outputDirectory, files, buildList, config.getKojiWebURL(), Collections.unmodifiableList(reports));
+
+                try {
+                    report.outputHTML();
+                } catch (IOException e) {
+                    LOGGER.error("Error writing {} report", boldRed(report.getName()));
+                    LOGGER.debug("Report error", e);
+                }
 
                 LOGGER.info("{}", boldYellow("DONE"));
             } else {
                 LOGGER.warn("Could not generate any reports since list of builds is empty. If this is unexpected, try removing the builds cache ({}) and try again.", buildsFile.getAbsolutePath());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (ParseException e) {
-            e.printStackTrace();
+            System.err.println("Error parsing command line: " + e.getMessage());
             usage(options);
         }
     }

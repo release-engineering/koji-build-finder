@@ -32,6 +32,10 @@ To see the available options, execute the command `java -jar target/koji-build-f
      -c,--config <file>                  Specify configuration file to use. Default:
                                          ${user.home}/.koji-build-finder/config.json.
      -d,--debug                          Enable debug logging.
+     -e,--archive-extension <extension>  Add a Koji archive type extension to
+                                         check. Default: [dll, dylib, ear, jar,
+                                         jdocbook, jdocbook-style, kar, plugin,
+                                         pom, rar, sar, so, war, xml].
      -h,--help                           Show this help message.
      -k,--checksum-only                  Only checksum files and do not find builds.
                                          Default: false.
@@ -76,11 +80,14 @@ On the first run, Koji Build Finder will write a starter configuration file. You
 The configuration file is in JSON format. The default configuration file, `config.json`, is as follows.
 
     {
+      "archive-extensions" : [ "dll", "dylib", "ear", "jar", "jdocbook", "jdocbook-style", "kar", "plugin", "pom", "rar", "sar", "so", "war", "xml" ],
       "archive-types" : [ "jar", "xml", "pom", "so", "dll", "dylib" ],
       "checksum-only" : false,
       "checksum-type" : "md5",
-      "excludes" : [ "^(?!.*/pom\\.xml$).*/.*\\.xml$" ],
+      "excludes" : [ "^(?!.*/pom\\.xml$).*/.*\\.xml$" ]
     }
+
+The `archive-extensions` option specifies the Koji archive type extensions to include in the archive search. If this option is given, it will override the `archive-types` option and only files matching the extensions will have their checksums taken.
 
 The `archive-types` option specifies the Koji archive types to include in the archive search.
 

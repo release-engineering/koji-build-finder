@@ -16,7 +16,6 @@
 package com.redhat.red.build.finder;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
@@ -119,8 +118,6 @@ public class DistributionAnalyzerTest {
         MultiValuedMap<String, String> checksums = da.checksumFiles();
 
         assertEquals(25, checksums.size());
-        assertFalse(systemOutRule.getLog().contains("zip:zip:file:"));
-        assertFalse(systemOutRule.getLog().contains("target/test-classes"));
     }
 
     @Test

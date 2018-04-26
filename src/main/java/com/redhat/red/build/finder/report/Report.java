@@ -19,14 +19,10 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import j2html.tags.ContainerTag;
 
 public abstract class Report {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Report.class);
-
     private String name;
 
     private String description;
@@ -39,40 +35,26 @@ public abstract class Report {
         return null;
     }
 
-    public boolean outputText() {
+    public void outputText() throws IOException {
         String text = renderText();
 
         if (text == null) {
-            return false;
+            return;
         }
 
-        try {
-            FileUtils.writeStringToFile(new File(outputDirectory, baseFilename + ".txt"), text, "UTF-8", false);
-        } catch (IOException e) {
-            LOGGER.error("File output error", e);
-            return false;
-        }
-
-        return true;
+        FileUtils.writeStringToFile(new File(outputDirectory, baseFilename + ".txt"), text, "UTF-8", false);
     }
 
     public abstract ContainerTag toHTML();
 
-    public boolean outputHTML() {
+    public void outputHTML() throws IOException {
         String html = renderText();
 
         if (html == null) {
-            return false;
+            return;
         }
 
-        try {
-            FileUtils.writeStringToFile(new File(outputDirectory, baseFilename + ".html"), html, "UTF-8", false);
-        } catch (IOException e) {
-            LOGGER.error("File output error", e);
-            return false;
-        }
-
-        return true;
+        FileUtils.writeStringToFile(new File(outputDirectory, baseFilename + ".html"), html, "UTF-8", false);
     }
 
     public String getName() {

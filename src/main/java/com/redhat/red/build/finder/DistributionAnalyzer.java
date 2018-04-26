@@ -38,6 +38,9 @@ import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
 public class DistributionAnalyzer {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionAnalyzer.class);
 
@@ -157,7 +160,7 @@ public class DistributionAnalyzer {
         }
     }
 
-    public boolean outputToFile(File file) {
-        return JSONUtils.dumpObjectToFile(map.asMap(), file);
+    public void outputToFile(File file) throws JsonGenerationException, JsonMappingException, IOException {
+        JSONUtils.dumpObjectToFile(map.asMap(), file);
     }
 }
