@@ -66,6 +66,8 @@ import ch.qos.logback.core.ConsoleAppender;
 public final class Main {
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
+    private static final String NAME = "koji-build-finder";
+
     private static final int TERM_WIDTH = 80;
 
     private Main() {
@@ -77,7 +79,7 @@ public final class Main {
 
         formatter.setSyntaxPrefix("Usage: ");
         formatter.setWidth(TERM_WIDTH);
-        formatter.printHelp(BuildFinder.getName() + " <files>", options);
+        formatter.printHelp(NAME + " <files>", options);
 
         System.exit(1);
     }
@@ -178,7 +180,7 @@ public final class Main {
                 setDebug();
             }
 
-            LOGGER.info("{} {} (SHA: {})", boldYellow(BuildFinder.getName()), boldYellow(BuildFinder.getVersion()), cyan(BuildFinder.getScmRevision()));
+            LOGGER.info("{} {} (SHA: {})", boldYellow(NAME), boldYellow(BuildFinder.getVersion()), cyan(BuildFinder.getScmRevision()));
 
             // Initial value taken from configuration value and then allow command line to override.
             ObjectMapper mapper = new ObjectMapper();

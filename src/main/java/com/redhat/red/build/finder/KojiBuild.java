@@ -47,6 +47,10 @@ public class KojiBuild {
 
     }
 
+    public KojiBuild(KojiBuildInfo buildInfo) {
+        this.buildInfo = buildInfo;
+    }
+
     public KojiBuild(KojiBuildInfo buildInfo, KojiTaskInfo taskInfo, KojiTaskRequest taskRequest, List<KojiLocalArchive> archives, List<KojiArchiveInfo> remoteArchives, List<KojiTagInfo> tags, List<String> types) {
         this.buildInfo = buildInfo;
         this.taskInfo = taskInfo;
@@ -132,7 +136,7 @@ public class KojiBuild {
 
         if (remoteArchives != null && mavenVersion != null) {
             String sourcesZipFilename = buildInfo.getMavenArtifactId() + "-" + buildInfo.getMavenVersion() + "-project-sources.tar.gz";
-            sourcesZip = remoteArchives.stream().filter(sArchive -> sArchive.getFilename().equals(sourcesZipFilename)).findAny().orElse(null);
+            sourcesZip = remoteArchives.stream().filter(sArchive -> sArchive.getFilename().equals(sourcesZipFilename)).findFirst().orElse(null);
             return sourcesZip;
         }
 
@@ -146,7 +150,7 @@ public class KojiBuild {
 
         if (remoteArchives != null && mavenVersion != null) {
             String sourcesZipFilename = buildInfo.getMavenArtifactId() + "-" + buildInfo.getMavenVersion() + "-scm-sources.zip";
-            sourcesZip = remoteArchives.stream().filter(sArchive -> sArchive.getFilename().equals(sourcesZipFilename)).findAny().orElse(null);
+            sourcesZip = remoteArchives.stream().filter(sArchive -> sArchive.getFilename().equals(sourcesZipFilename)).findFirst().orElse(null);
             return sourcesZip;
         }
 
@@ -160,7 +164,7 @@ public class KojiBuild {
 
         if (remoteArchives != null && mavenVersion != null) {
             String patchesZipFilename = buildInfo.getMavenArtifactId() + "-" + buildInfo.getMavenVersion() + "-patches.zip";
-            patchesZip = remoteArchives.stream().filter(pArchive -> pArchive.getFilename().equals(patchesZipFilename)).findAny().orElse(null);
+            patchesZip = remoteArchives.stream().filter(pArchive -> pArchive.getFilename().equals(patchesZipFilename)).findFirst().orElse(null);
             return patchesZip;
         }
 

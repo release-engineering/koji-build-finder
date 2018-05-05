@@ -15,24 +15,20 @@
  */
 package com.redhat.red.build.finder;
 
-import java.util.Collection;
+import java.util.List;
 
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 
 public class KojiLocalArchive {
     private KojiArchiveInfo archive;
 
-    private Collection<String> files;
+    private List<String> files;
 
     public KojiLocalArchive() {
 
     }
 
-    public KojiLocalArchive(KojiArchiveInfo archive) {
-        this.archive = archive;
-    }
-
-    public KojiLocalArchive(KojiArchiveInfo archive, Collection<String> files) {
+    public KojiLocalArchive(KojiArchiveInfo archive, List<String> files) {
         this.archive = archive;
         this.files = files;
     }
@@ -45,11 +41,11 @@ public class KojiLocalArchive {
         this.archive = archive;
     }
 
-    public Collection<String> getFiles() {
+    public List<String> getFiles() {
         return files;
     }
 
-    public void setFiles(Collection<String> files) {
+    public void setFiles(List<String> files) {
         this.files = files;
     }
 }

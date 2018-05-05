@@ -58,6 +58,8 @@ import j2html.tags.ContainerTag;
 import j2html.tags.Tag;
 
 public class HTMLReport extends Report {
+    private static final String NAME = "Koji Build Finder";
+
     private static final String HTML_STYLE = ""
             + "body { font-family: Verdana, Helvetica, Arial, sans-serif; font-size: 13px; }\n"
             + "table { width: 100%; border-style: solid; border-width: 1px; border-collapse: collapse; }\n"
@@ -145,7 +147,7 @@ public class HTMLReport extends Report {
                             )), each(reports, report ->
                                 div(attrs("#div-" + report.getBaseFilename()), report.toHTML()))
                         ),
-                        div(attrs("#div-footer"), footer().attr(Attr.CLASS, "footer").attr(Attr.ID, "footer").with(text("Created: " + new Date() + " by "), a().withHref("https://github.com/release-engineering/koji-build-finder/").with(text(BuildFinder.getName())), text(" " + BuildFinder.getVersion() + " (SHA: "), a().withHref("https://github.com/release-engineering/koji-build-finder/commit/" + BuildFinder.getScmRevision()).with(text(BuildFinder.getScmRevision() + ")"))))
+                        div(attrs("#div-footer"), footer().attr(Attr.CLASS, "footer").attr(Attr.ID, "footer").with(text("Created: " + new Date() + " by "), a().withHref("https://github.com/release-engineering/koji-build-finder/").with(text(NAME)), text(" " + BuildFinder.getVersion() + " (SHA: "), a().withHref("https://github.com/release-engineering/koji-build-finder/commit/" + BuildFinder.getScmRevision()).with(text(BuildFinder.getScmRevision() + ")"))))
                     )
                 );
     }

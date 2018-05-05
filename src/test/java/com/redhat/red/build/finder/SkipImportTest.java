@@ -27,9 +27,11 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.redhat.red.build.koji.KojiClientException;
+
 public class SkipImportTest  {
     @Test
-    public void verifySkipImport() throws Exception {
+    public void verifyMultiImportsKeepEarliest() throws KojiClientException {
         final String checksum = "2e7e85f0ee97afde716231a6c792492a";
         final List<String> filenames = Collections.unmodifiableList(Arrays.asList("commons-lang-2.6-redhat-2.jar"));
         MockKojiClientSession session = new MockKojiClientSession("skip-import-test");
