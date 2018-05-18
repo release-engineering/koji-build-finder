@@ -54,7 +54,7 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiTagInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskRequest;
 
-public class BuildFinder extends Thread {
+public class BuildFinder {
     private static final String CHECKSUMS_FILENAME_BASENAME = "checksums-";
 
     private static final String BUILDS_FILENAME = "builds.json";
@@ -74,8 +74,6 @@ public class BuildFinder extends Thread {
     private List<String> archiveExtensions;
 
     public BuildFinder(ClientSession session, BuildConfig config) {
-        setName("BuildFinder");
-
         this.session = session;
         this.config = config;
         this.outputDirectory = new File("");
