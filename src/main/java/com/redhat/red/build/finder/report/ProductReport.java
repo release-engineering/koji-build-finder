@@ -65,7 +65,7 @@ public class ProductReport extends Report {
 
         MultiValuedMap<String, KojiBuild> prodMap = new ArrayListValuedHashMap<>();
 
-        for (KojiBuild build: builds) {
+        for (KojiBuild build : builds) {
             if (build.getTaskRequest() == null || build.getTaskRequest().asBuildRequest() == null || build.getTaskRequest().asBuildRequest().getTarget() == null) {
                   continue;
             }
