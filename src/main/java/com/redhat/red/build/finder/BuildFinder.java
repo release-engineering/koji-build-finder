@@ -192,16 +192,9 @@ public class BuildFinder {
 
         addArchiveToBuild(build, archive, filenames);
 
-        List<String> buildTypes = null;
-
-        if (buildInfo.getTypeNames() != null) {
-            buildTypes = new ArrayList<>();
-            buildTypes.addAll(buildInfo.getTypeNames());
-        }
-
         build.setRemoteArchives(allArchives);
         build.setTags(tags);
-        build.setTypes(buildTypes);
+        build.setTypes(buildInfo.getTypeNames());
 
         return build;
     }
