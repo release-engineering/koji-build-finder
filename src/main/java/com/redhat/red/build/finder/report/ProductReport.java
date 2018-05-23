@@ -58,7 +58,7 @@ public class ProductReport extends Report {
         setBaseFilename("products");
         setOutputDirectory(outputDirectory);
 
-        List<String> targets = builds.stream().filter(b -> b.getTaskRequest() != null && b.getTaskRequest().asBuildRequest() != null && b.getTaskRequest().asBuildRequest().getTarget() != null).map(b -> b.getTaskRequest().asBuildRequest().getTarget()).collect(Collectors.toList());
+        List<String> targets = builds.stream().skip(1).filter(b -> b.getTaskRequest() != null && b.getTaskRequest().asBuildRequest() != null && b.getTaskRequest().asBuildRequest().getTarget() != null).map(b -> b.getTaskRequest().asBuildRequest().getTarget()).collect(Collectors.toList());
         Map<String, Long> map = targets.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         List<Map.Entry<String, Long>> countList = map.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
         Collections.reverse(countList);
