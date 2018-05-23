@@ -44,9 +44,7 @@ public class NVRReport extends Report {
         setBaseFilename("nvr");
         setOutputDirectory(outputDirectory);
 
-        List<KojiBuildInfo> buildInfos = builds.stream().map(KojiBuild::getBuildInfo).collect(Collectors.toList());
-        buildInfos.remove(0);
-        this.nvrs = buildInfos.stream().map(KojiBuildInfo::getNvr).collect(Collectors.toList());
+        this.nvrs = builds.stream().skip(1).map(KojiBuild::getBuildInfo).map(KojiBuildInfo::getNvr).collect(Collectors.toList());
         this.nvrs.sort(String::compareToIgnoreCase);
     }
 
