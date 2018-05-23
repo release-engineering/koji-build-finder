@@ -89,14 +89,12 @@ public class BuildFinder {
 
         buildInfo.setId(0);
         buildInfo.setPackageId(0);
-        buildInfo.setBuildState(KojiBuildState.COMPLETE);
+        buildInfo.setBuildState(KojiBuildState.ALL);
         buildInfo.setName("not found");
         buildInfo.setVersion("not found");
         buildInfo.setRelease("not found");
 
         KojiBuild build = new KojiBuild(buildInfo);
-
-        build.setArchives(new ArrayList<>());
 
         builds.put(0, build);
     }
@@ -245,10 +243,6 @@ public class BuildFinder {
 
         LOGGER.debug("Adding all filenames with archive id {} with files {}", archive.getArchiveId(), filenames);
 
-        if (build.getArchives() == null) {
-            build.setArchives(new ArrayList<>());
-        }
-
         Optional<KojiLocalArchive> matchingArchive = build.getArchives().stream().filter(a -> a.getArchive().getArchiveId().equals(archive.getArchiveId())).findFirst();
 
         if (matchingArchive.isPresent()) {
@@ -274,6 +268,20 @@ public class BuildFinder {
         build.getArchives().sort((KojiLocalArchive a1, KojiLocalArchive a2) -> a1.getArchive().getFilename().compareTo(a2.getArchive().getFilename()));
     }
 
+    /**
+     * Given a list of builds sorted by id, return the best build chosen in the following order:
+     *
+     * <ol>
+     *   <li>Complete tagged non-imported builds</li>
+     *   <li>Complete tagged imported builds</li>
+     *   <li>Complete untagged builds</li>
+     *   <li>Builds with the highest id</li>
+     * </ol>
+     *
+     * @param foundBuilds the list of builds in order of increasing id
+     * @param archives the archives which are contained in the list of found builds
+     * @return the best build
+     */
     private KojiBuild findBestBuild(List<KojiBuild> foundBuilds, List<KojiArchiveInfo> archives) {
          archives.forEach(archive -> {
             KojiBuild duplicateBuild = builds.get(archive.getBuildId());
@@ -281,15 +289,9 @@ public class BuildFinder {
             if (duplicateBuild != null) {
                 LOGGER.debug("Marking archive id {} as duplicate for build {}", archive.getArchiveId(), duplicateBuild.getBuildInfo().getId());
 
-                if (duplicateBuild.getDuplicateArchives() == null) {
-                    List<KojiArchiveInfo> duplicateArchiveList = new ArrayList<>();
-                    duplicateArchiveList.add(archive);
-                    duplicateBuild.setDuplicateArchives(duplicateArchiveList);
-                } else {
-                    if (!duplicateBuild.getDuplicateArchives().contains(archive)) {
-                        duplicateBuild.getDuplicateArchives().add(archive);
-                    }
-                }
+               if (!duplicateBuild.getDuplicateArchives().contains(archive)) {
+                   duplicateBuild.getDuplicateArchives().add(archive);
+               }
             }
         });
 
@@ -322,7 +324,7 @@ public class BuildFinder {
         }
 
         if (!completedBuilds.isEmpty()) {
-            KojiBuild b = completedBuilds.get(0);
+            KojiBuild b = completedBuilds.get(foundBuilds.size() - 1);
 
             LOGGER.debug("Found suitable completed build {} for checksum {}", b.getBuildInfo().getId(), archives.get(0).getChecksum());
 
