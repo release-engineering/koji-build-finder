@@ -15,6 +15,7 @@
  */
 package com.redhat.red.build.finder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +50,8 @@ public class KojiBuild {
 
     public KojiBuild(KojiBuildInfo buildInfo) {
         this.buildInfo = buildInfo;
+        this.archives = new ArrayList<>();
+        this.duplicateArchives = new ArrayList<>();
     }
 
     public KojiBuild(KojiBuildInfo buildInfo, KojiTaskInfo taskInfo, KojiTaskRequest taskRequest, List<KojiLocalArchive> archives, List<KojiArchiveInfo> remoteArchives, List<KojiTagInfo> tags, List<String> types) {
@@ -123,10 +126,6 @@ public class KojiBuild {
 
     public void setDuplicateArchives(List<KojiArchiveInfo> duplicateArchives) {
         this.duplicateArchives = duplicateArchives;
-    }
-
-    public boolean containsDuplicateArchive(KojiArchiveInfo archive) {
-        return (duplicateArchives != null && duplicateArchives.contains(archive));
     }
 
     @JsonIgnore
