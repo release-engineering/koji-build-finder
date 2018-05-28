@@ -43,6 +43,10 @@ public class KojiClientSession implements ClientSession {
 
     private KojiSessionInfo session;
 
+    public KojiClientSession(KojiClient client) {
+        this.client = client;
+    }
+
     public KojiClientSession(KojiConfig config, PasswordManager passwordManager, ExecutorService executorService) throws KojiClientException {
         client = new KojiClient(config, passwordManager, executorService);
     }

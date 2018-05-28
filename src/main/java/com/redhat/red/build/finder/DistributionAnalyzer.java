@@ -141,12 +141,12 @@ public class DistributionAnalyzer {
                 listArchive(fo);
             }
 
-            String checksum = checksum(fo);
-            String found = normalizePath(fo);
-
-            LOGGER.debug("Checksum: {} {}", checksum, found);
-
             if (includeFile(fo)) {
+                String checksum = checksum(fo);
+                String found = normalizePath(fo);
+
+                LOGGER.debug("Checksum: {} {}", checksum, found);
+
                 map.put(checksum, found);
             }
         } else {

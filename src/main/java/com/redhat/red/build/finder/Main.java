@@ -386,6 +386,7 @@ public final class Main {
 
             if (buildsFile.exists()) {
                 LOGGER.info("Loading builds from file: {}", green(buildsFile.getPath()));
+
                 try {
                     builds = JSONUtils.loadBuildsFile(buildsFile);
                 } catch (IOException e) {
