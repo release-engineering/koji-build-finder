@@ -19,14 +19,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class BuildConfigTest {
     @Rule
@@ -46,12 +44,8 @@ public class BuildConfigTest {
 
     @Test
     public void verifyMapping() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-
-        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-
         String json = "{\"archive-types\":[\"jar\"],\"excludes\":\"^(?!.*/pom\\\\.xml$).*/.*\\\\.xml$\",\"checksum-only\":true,\"checksum-type\":\"md5\",\"koji-hub-url\":\"\",\"koji-web-url\":\"\"}";
-        BuildConfig bc = mapper.readValue(json, BuildConfig.class);
+        BuildConfig bc = BuildConfig.load(json);
 
         assertTrue(bc.getChecksumOnly());
         assertTrue(bc.getArchiveTypes().size() == 1 && bc.getArchiveTypes().get(0).equals("jar"));
@@ -61,11 +55,7 @@ public class BuildConfigTest {
     public void verifyMappingWithDefaults() throws IOException {
         String json = "{\"koji-hub-url\":\"https://my.url.com\",\"koji-web-url\":\"https://my.url.com/brew\"}";
 
-        ObjectMapper mapper = new ObjectMapper();
-
-        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-
-        BuildConfig bc = mapper.readValue(json, BuildConfig.class);
+        BuildConfig bc = BuildConfig.load(json);
 
         assertTrue(bc.getKojiHubURL().equals("https://my.url.com"));
         assertFalse(bc.getChecksumOnly());
@@ -75,11 +65,19 @@ public class BuildConfigTest {
     public void verifyIgnoreUnknownProperties() throws IOException {
         String json = "{\"foo\":\"bar\"}";
 
-        ObjectMapper mapper = new ObjectMapper();
+        BuildConfig.load(json);
+    }
 
-        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    @Test
+    public void verifySave() throws IOException {
+        String json = "{\"archive-types\":[\"jar\"],\"excludes\":\"^(?!.*/pom\\\\.xml$).*/.*\\\\.xml$\",\"checksum-only\":true,\"checksum-type\":\"md5\",\"koji-hub-url\":\"\",\"koji-web-url\":\"\"}";
+        BuildConfig bc = BuildConfig.load(json);
+        File file = temp.newFile();
 
-        mapper.readValue(json, BuildConfig.class);
+        bc.save(file);
+
+        BuildConfig bc2 = BuildConfig.load(file);
+
+        assertEquals(bc.toString(), bc2.toString());
     }
 }

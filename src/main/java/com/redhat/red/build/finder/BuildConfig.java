@@ -15,9 +15,14 @@
  */
 package com.redhat.red.build.finder;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redhat.red.build.koji.model.json.util.KojiObjectMapper;
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
 public class BuildConfig {
@@ -41,6 +46,27 @@ public class BuildConfig {
 
     @JsonProperty("koji-web-url")
     private String kojiWebURL;
+
+    public static BuildConfig load(File file) throws IOException {
+        return getMapper().readValue(file, BuildConfig.class);
+    }
+
+    public static BuildConfig load(String json) throws IOException {
+        return getMapper().readValue(json, BuildConfig.class);
+    }
+
+    public void save(File file) throws IOException {
+        JSONUtils.dumpObjectToFile(this, file);
+    }
+
+    private static ObjectMapper getMapper() {
+        ObjectMapper mapper = new KojiObjectMapper();
+
+        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        return mapper;
+    }
 
     public List<String> getArchiveExtensions() {
         if (archiveExtensions == null) {

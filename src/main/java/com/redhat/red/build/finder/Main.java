@@ -203,9 +203,9 @@ public final class Main {
                 LOGGER.info("Using configuration file: {}", green(configFile));
 
                 try {
-                    config = mapper.readValue(configFile, BuildConfig.class);
+                    config = BuildConfig.load(configFile);
                 } catch (IOException e) {
-                    LOGGER.error("Error reading configuration file: {}", boldRed(e.getMessage()));
+                    LOGGER.error("Error loading configuration file: {}", e.getMessage());
                     LOGGER.debug("Error", e);
                     System.exit(1);
                 }
@@ -301,7 +301,7 @@ public final class Main {
 
                 if (configFile.canWrite()) {
                     try {
-                        JSONUtils.dumpObjectToFile(config, configFile);
+                        config.save(configFile);
                     } catch (IOException e) {
                         LOGGER.warn("Error writing configuration file: {}", red(e.getMessage()));
                         LOGGER.debug("Error", e);
