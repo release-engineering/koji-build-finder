@@ -18,6 +18,7 @@ package com.redhat.red.build.finder;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -39,7 +40,7 @@ public class BuildConfig {
     private KojiChecksumType checksumType;
 
     @JsonProperty("excludes")
-    private List<String> excludes;
+    private List<Pattern> excludes;
 
     @JsonProperty("koji-hub-url")
     private String kojiHubURL;
@@ -116,7 +117,7 @@ public class BuildConfig {
         this.checksumType = checksumType;
     }
 
-    public List<String> getExcludes() {
+    public List<Pattern> getExcludes() {
         if (excludes == null) {
             excludes = ConfigDefaults.EXCLUDES;
         }
@@ -124,7 +125,7 @@ public class BuildConfig {
         return excludes;
     }
 
-    public void setExcludes(List<String> excludes) {
+    public void setExcludes(List<Pattern> excludes) {
         this.excludes = excludes;
     }
 

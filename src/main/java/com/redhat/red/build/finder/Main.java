@@ -23,31 +23,19 @@ import static com.redhat.red.build.finder.AnsiUtils.red;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.red.build.finder.report.BuildStatisticsReport;
 import com.redhat.red.build.finder.report.GAVReport;
 import com.redhat.red.build.finder.report.HTMLReport;
@@ -62,53 +50,389 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Help.Ansi;
+import picocli.CommandLine.ITypeConverter;
+import picocli.CommandLine.IVersionProvider;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
+import picocli.CommandLine.ParseResult;
+import picocli.CommandLine.Spec;
 
-public final class Main {
+@Command(abbreviateSynopsis = true, name = "koji-build-finder", description = "Finds builds in Koji.", showDefaultValues = true, versionProvider = Main.ManifestVersionProvider.class, mixinStandardHelpOptions = true)
+public final class Main implements Callable<Void> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
-    private static final String NAME = "koji-build-finder";
+    @Spec
+    private CommandSpec commandSpec;
 
-    private static final int TERM_WIDTH = 80;
+    @Option(names = {"-c", "--config"}, paramLabel = "FILE", description = "Specify configuration file to use.")
+    private File configFile = new File(ConfigDefaults.CONFIG);
 
-    private Main() {
-        throw new AssertionError();
+    @Option(names = {"-d", "--debug"}, description = "Enable debug logging.")
+    private boolean debug = false;
+
+    @Option(names = {"-q", "--quiet"}, description = "Disable all logging.")
+    private boolean quiet = false;
+
+    @Option(names = {"-k", "--checksum-only"}, description = "Only checksum files and do not find builds.")
+    private boolean checksumOnly = ConfigDefaults.CHECKSUM_ONLY;
+
+    @Option(names = {"-t", "--checksum-type"}, paramLabel = "CHECKSUM", description = "Set checksum type (${COMPLETION-CANDIDATES}).")
+    private KojiChecksumType checksumType = ConfigDefaults.CHECKSUM_TYPE;
+
+    @Option(names = {"-a", "--archive-type"}, paramLabel = "STRING", description = "Add a Koji archive type to check.", converter = FilenameConverter.class)
+    private List<String> archiveTypes = ConfigDefaults.ARCHIVE_TYPES;
+
+    @Option(names = {"-e", "--archive-extension"}, paramLabel = "STRING", description = "Add a Koji archive type extension to check.", converter = FilenameConverter.class)
+    private List<String> archiveExtensions = ConfigDefaults.ARCHIVE_EXTENSIONS;
+
+    @Option(names = {"-x", "--exclude"}, paramLabel = "PATTERN", description = "Add a pattern to exclude from build lookup.")
+    private List<Pattern> excludes = ConfigDefaults.EXCLUDES;
+
+    @Option(names = {"--koji-hub-url"}, paramLabel = "URL", description = "Set Koji hub URL.")
+    private URL kojiHubURL;
+
+    @Option(names = {"--koji-web-url"}, paramLabel = "URL", description = "Set Koji web URL.")
+    private URL kojiWebURL;
+
+    @Option(names = {"--krb-ccache"}, paramLabel = "FILE", description = "Set location of Kerberos credential cache.")
+    private File krbCCache;
+
+    @Option(names = {"--krb-keytab"}, paramLabel = "FILE", description = "Set location of Kerberos keytab.")
+    private File krbKeytab;
+
+    @Option(names = {"--krb-service"}, paramLabel = "STRING", description = "Set Kerberos client service.")
+    private String krbService;
+
+    @Option(names = {"--krb-principal"}, paramLabel = "STRING", description = "Set Kerberos client principal.")
+    private String krbPrincipal;
+
+    @Option(names = {"--krb-password"}, paramLabel = "STRING", description = "Set Kerberos password.")
+    private String krbPassword;
+
+    @Option(names = {"-o", "--output-directory"}, paramLabel = "FILE", description = "Set output directory.")
+    private File outputDirectory;
+
+    @Parameters(arity = "1..*", paramLabel = "FILE", description = "One or more files.")
+    private List<File> files;
+
+    public Main() {
+
     }
 
-    private static void usage(Options options) {
-        HelpFormatter formatter = new HelpFormatter();
+    public static void main(String... args) {
+        Main main = new Main();
 
-        formatter.setSyntaxPrefix("Usage: ");
-        formatter.setWidth(TERM_WIDTH);
-        formatter.printHelp(NAME + " <files>", options);
+        try {
+            Ansi ansi = System.getProperty("picocli.ansi") == null ? Ansi.ON : Ansi.AUTO;
+            CommandLine.call(main, System.out, ansi, args);
+        } catch (Exception e) {
+            LOGGER.error("{}", boldRed(e.getMessage()), e);
+            LOGGER.debug("Error", e);
+            System.exit(1);
+        }
 
-        System.exit(1);
+        System.exit(0);
     }
 
-    private static void verifyURL(String key, String value, CommandLine line, File configFile) throws ParseException {
-        String location = null;
+    public BuildConfig setupBuildConfig(ParseResult parseResult) throws IOException {
+        BuildConfig config;
 
-        if (line.hasOption(key)) {
-            location = "on the command line";
+        if (configFile.exists()) {
+            config = BuildConfig.load(configFile);
         } else {
-            location = "in the configuration file";
+            LOGGER.info("Configuration file {} does not exist. Implicitly creating with defaults.", green(configFile));
+            config = new BuildConfig();
+        }
 
-            if (configFile != null) {
-                location += " (" + configFile.getAbsolutePath() + ")";
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("-k")) {
+            config.setChecksumOnly(checksumOnly);
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("-t")) {
+            config.setChecksumType(checksumType);
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("-a")) {
+            config.setArchiveTypes(archiveTypes);
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("-e")) {
+            config.setArchiveExtensions(archiveExtensions);
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("-x")) {
+            config.setExcludes(excludes);
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--koji-hub-url")) {
+            config.setKojiHubURL(kojiHubURL.toString());
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--koji-web-url")) {
+            config.setKojiWebURL(kojiWebURL.toString());
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--krb-ccache")) {
+            LOGGER.debug("Kerberos ccache: {}", krbCCache);
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--krb-keytab")) {
+            LOGGER.debug("Kerberos keytab {}", krbKeytab);
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--krb-service")) {
+            LOGGER.debug("Kerberos service: {}", krbService);
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--krb-principal")) {
+            LOGGER.debug("Kerberos principal: {}", krbPrincipal);
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--krb-password")) {
+            LOGGER.debug("Read Kerberos password");
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("-o")) {
+            LOGGER.info("Output will be stored in directory: {}", green(outputDirectory));
+        }
+
+        return config;
+    }
+
+    public void writeConfiguration(File configFile, BuildConfig config) {
+        if (!configFile.exists()) {
+            File configDir = configFile.getParentFile();
+
+            if (configDir != null && !configDir.exists()) {
+                boolean created = configDir.mkdirs();
+
+                if (!created) {
+                    LOGGER.warn("Failed to create directory: {}", red(configDir));
+                }
+            }
+
+            if (configFile.canWrite()) {
+                try {
+                    JSONUtils.dumpObjectToFile(config, configFile);
+                } catch (IOException e) {
+                    LOGGER.warn("Error writing configuration file: {}", red(e.getMessage()));
+                    LOGGER.debug("Error", e);
+                }
+            } else {
+                LOGGER.warn("Could not write configuration file: {}", red(configFile));
+            }
+        }
+    }
+
+    public List<File> createFileList(List<File> files) {
+        List<File> inputs = new ArrayList<>();
+
+        for (File file : files) {
+            if (!file.canRead()) {
+                LOGGER.warn("Could not read file: {}", file.getPath());
+                continue;
+            }
+
+            if (file.isDirectory()) {
+                LOGGER.debug("Adding all files in directory: {}", file.getPath());
+                inputs.addAll(FileUtils.listFiles(file, null, true));
+            } else {
+                LOGGER.debug("Adding file: {}", file.getPath());
+                inputs.add(file);
             }
         }
 
-        if (value == null || value.isEmpty()) {
-            throw new ParseException("You must specify a non-empty value for " + key + " " + location + ".");
+        return inputs;
+    }
+
+    @Override
+    public Void call() throws Exception {
+        if (quiet) {
+            disableLogging();
+        } else if (debug) {
+            enableDebugLogging();
         }
 
+        LOGGER.info("{}", green("                          __  __.         __.__                         "));
+        LOGGER.info("{}", green("                         |  |/ _|____    |__|__|                        "));
+        LOGGER.info("{}", green("                         |    < /  _ \\   |  |  |                        "));
+        LOGGER.info("{}", green("                         |  |  (  <_> )  |  |  |                        "));
+        LOGGER.info("{}", green("                         |__|__ \\____/\\__|  |__|                        "));
+        LOGGER.info("{}", green("________      .__.__      .___\\__________.__           .___            "));
+        LOGGER.info("{}", green("\\____   \\__ __|__|  |   __| _/ \\_   _____|__| ____   __| _/___________ "));
+        LOGGER.info("{}", green(" |  |  _|  |  |  |  |  / __ |   |    __) |  |/    \\ / __ _/ __ \\_  __ \\"));
+        LOGGER.info("{}", green(" |  |   |  |  |  |  |_/ /_/ |   |     \\  |  |   |  / /_/ \\  ___/|  | \\/)"));
+        LOGGER.info("{}", green(" |____  |____/|__|____\\____ |   \\___  /  |__|___|  \\____ |\\___  |__|   "));
+        LOGGER.info("{}", green("      \\/                   \\/       \\/           \\/     \\/    \\/       "));
+        LOGGER.info("{} (SHA: {})", boldYellow(BuildFinder.getVersion()), cyan(BuildFinder.getScmRevision()));
+        LOGGER.info("{}", green(""));
+
+        LOGGER.info("Using configuration: {}", green(configFile));
+
+        BuildConfig config = null;
+
         try {
-            new URL(value);
-        } catch (MalformedURLException e) {
-            throw new ParseException("The value specified for " + key + " (" + value + ") " + location + " is malformed.");
+            config = setupBuildConfig(commandSpec.commandLine().getParseResult());
+        } catch (IOException e) {
+            LOGGER.error("Error reading configuration file: {}", boldRed(e.getMessage()));
+            LOGGER.debug("Error", e);
+            System.exit(1);
+        }
+
+        LOGGER.debug("Configuration:\n{}", config);
+
+        writeConfiguration(configFile, config);
+
+        List<File> inputs = createFileList(files);
+
+        File checksumFile = new File(outputDirectory, BuildFinder.getChecksumFilename(config.getChecksumType()));
+        Map<String, Collection<String>> checksums = null;
+
+        LOGGER.info("Checksum type: {}", green(config.getChecksumType()));
+
+        if (!checksumFile.exists()) {
+            LOGGER.info("Calculating checksums for files: {}", green(inputs));
+
+            DistributionAnalyzer da = new DistributionAnalyzer(inputs, config);
+
+            try {
+                checksums = da.checksumFiles().asMap();
+            } catch (IOException e) {
+                LOGGER.error("Error getting checksums map: {}", boldRed(e.getMessage()));
+                LOGGER.debug("Error", e);
+                System.exit(1);
+            }
+
+            try {
+                da.outputToFile(checksumFile);
+            } catch (IOException e) {
+                LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
+                LOGGER.debug("Error", e);
+                System.exit(1);
+            }
+        } else {
+            try {
+                LOGGER.info("Loading checksums from file: {}", green(checksumFile));
+                checksums = JSONUtils.loadChecksumsFile(checksumFile);
+            } catch (IOException e) {
+                LOGGER.error("Error loading checksums file: {}", boldRed(e.getMessage()));
+                LOGGER.debug("Error", e);
+                System.exit(1);
+            }
+        }
+
+        if (checksums == null || checksums.isEmpty()) {
+            LOGGER.warn("The list of checksums is empty. If this is unexpected, try removing the checksum cache ({}) and try again.", checksumFile.getAbsolutePath());
+        }
+
+        if (config.getChecksumOnly()) {
+            System.exit(0);
+        }
+
+        KojiClientSession session = null;
+        BuildFinder finder = null;
+        Map<Integer, KojiBuild> builds = null;
+        File buildsFile = new File(outputDirectory, BuildFinder.getBuildsFilename());
+
+        if (buildsFile.exists()) {
+            LOGGER.info("Loading builds from file: {}", green(buildsFile.getPath()));
+
+            try {
+                builds = JSONUtils.loadBuildsFile(buildsFile);
+            } catch (IOException e) {
+                LOGGER.error("Error loading builds file: {}", boldRed(e.getMessage()));
+                LOGGER.debug("Error", e);
+                System.exit(1);
+            }
+        } else {
+            try {
+                session = new KojiClientSession(config.getKojiHubURL(), krbService, krbPrincipal, krbPassword, krbCCache != null ? krbCCache.getPath() : null, krbKeytab != null ? krbKeytab.getPath() : null);
+                finder = new BuildFinder(session, config);
+
+                finder.setOutputDirectory(outputDirectory);
+
+                builds = finder.findBuilds(checksums);
+                JSONUtils.dumpObjectToFile(builds, buildsFile);
+            } catch (KojiClientException e) {
+                LOGGER.error("Failed to find builds: {}", boldRed(e.getMessage()));
+                LOGGER.debug("Koji Client Error", e);
+                System.exit(1);
+            } catch (IOException e) {
+                LOGGER.error("Error writing builds file: {}", boldRed(e.getMessage()));
+                LOGGER.debug("Error", e);
+                System.exit(1);
+            }
+        }
+
+        if (builds != null && !builds.isEmpty()) {
+            LOGGER.info("Generating reports");
+
+            List<KojiBuild> buildList = new ArrayList<>(builds.values());
+            List<Report> reports = new ArrayList<>();
+
+            reports.add(new BuildStatisticsReport(outputDirectory, buildList));
+            reports.add(new ProductReport(outputDirectory, buildList));
+            reports.add(new NVRReport(outputDirectory, buildList));
+            reports.add(new GAVReport(outputDirectory, buildList));
+
+            reports.forEach(report -> {
+                try {
+                    report.outputText();
+                } catch (IOException e) {
+                    LOGGER.error("Error writing {} report", boldRed(report.getName()));
+                    LOGGER.debug("Report error", e);
+                }
+            });
+
+            Report report = new HTMLReport(outputDirectory, files, buildList, config.getKojiWebURL(), Collections.unmodifiableList(reports));
+
+            try {
+                report.outputHTML();
+            } catch (IOException e) {
+                LOGGER.error("Error writing {} report", boldRed(report.getName()));
+                LOGGER.debug("Report error", e);
+            }
+
+            LOGGER.info("{}", boldYellow("DONE"));
+        } else {
+            LOGGER.warn("Could not generate any reports since list of builds is empty. If this is unexpected, try removing the builds cache ({}) and try again.", buildsFile.getAbsolutePath());
+        }
+
+        return null;
+    }
+
+    static class ManifestVersionProvider implements IVersionProvider {
+        ManifestVersionProvider() {
+
+        }
+
+        @Override
+        public String[] getVersion() throws Exception {
+            return new String[] {BuildFinder.getVersion() + " (SHA: " + BuildFinder.getScmRevision() + ")"};
         }
     }
 
-    static void setDebug() {
+   static class FilenameConverter implements ITypeConverter<String> {
+        @Override
+        public String convert(String value) throws Exception {
+            if (value.matches(".*[\\/:\"*?<>|]+.*")) {
+                throw new IllegalArgumentException("Invalid name");
+            }
+
+            return value;
+        }
+    }
+
+    private static void disableLogging() {
+        ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        rootLogger.setLevel(Level.OFF);
+    }
+
+    private static void enableDebugLogging() {
         ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         rootLogger.setLevel(Level.DEBUG);
 
@@ -125,334 +449,6 @@ public final class Main {
             appender.setContext(loggerContext);
             appender.setEncoder(encoder);
             appender.start();
-        }
-    }
-
-    public static void main(String[] args) {
-        AnsiUtils.install();
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> AnsiUtils.uninstall()));
-
-        Options options = new Options();
-
-        options.addOption(Option.builder("h").longOpt("help").desc("Show this help message.").build());
-        options.addOption(Option.builder("c").longOpt("config").numberOfArgs(1).argName("file").required(false).desc("Specify configuration file to use. Default: " + ConfigDefaults.CONFIG + ".").build());
-        options.addOption(Option.builder("d").longOpt("debug").desc("Enable debug logging.").build());
-        options.addOption(Option.builder("k").longOpt("checksum-only").numberOfArgs(0).required(false).desc("Only checksum files and do not find builds. Default: " + ConfigDefaults.CHECKSUM_ONLY + ".").build());
-        options.addOption(Option.builder("t").longOpt("checksum-type").argName("type").numberOfArgs(1).required(false).type(String.class).desc("Set checksum type (" + Arrays.stream(KojiChecksumType.values()).map(KojiChecksumType::name).collect(Collectors.joining(", ")) + "). Default: " + ConfigDefaults.CHECKSUM_TYPE + ".").build());
-        options.addOption(Option.builder("a").longOpt("archive-type").argName("type").numberOfArgs(1).required(false).desc("Add a Koji archive type to check. Default: [" + ConfigDefaults.ARCHIVE_TYPES.stream().collect(Collectors.joining(", ")) + "].").type(List.class).build());
-        options.addOption(Option.builder("e").longOpt("archive-extension").argName("extension").numberOfArgs(1).required(false).desc("Add a Koji archive type extension to check. Default: [" + ConfigDefaults.ARCHIVE_EXTENSIONS.stream().collect(Collectors.joining(", ")) + "].").type(List.class).build());
-        options.addOption(Option.builder("x").longOpt("exclude").numberOfArgs(1).argName("pattern").required(false).desc("Add a pattern to exclude from build lookup. Default: [" + ConfigDefaults.EXCLUDES.stream().collect(Collectors.joining(", ")) + "].").build());
-        options.addOption(Option.builder().longOpt("koji-hub-url").numberOfArgs(1).argName("url").required(false).desc("Set Koji hub URL.").build());
-        options.addOption(Option.builder().longOpt("koji-web-url").numberOfArgs(1).argName("url").required(false).desc("Set Koji web URL.").build());
-        options.addOption(Option.builder().longOpt("krb-ccache").numberOfArgs(1).argName("ccache").required(false).desc("Set location of Kerberos credential cache.").build());
-        options.addOption(Option.builder().longOpt("krb-keytab").numberOfArgs(1).argName("keytab").required(false).desc("Set location of Kerberos keytab.").build());
-        options.addOption(Option.builder().longOpt("krb-service").numberOfArgs(1).argName("service").required(false).desc("Set Kerberos client service.").build());
-        options.addOption(Option.builder().longOpt("krb-principal").numberOfArgs(1).argName("principal").required(false).desc("Set Kerberos client principal.").build());
-        options.addOption(Option.builder().longOpt("krb-password").numberOfArgs(1).argName("password").required(false).desc("Set Kerberos password.").build());
-        options.addOption(Option.builder("o").longOpt("output-directory").numberOfArgs(1).argName("directory").required(false).desc("Set output directory.").build());
-
-        String krbCCache = null;
-        String krbKeytab = null;
-        String krbService = null;
-        String krbPrincipal = null;
-        String krbPassword = null;
-        File outputDirectory = null;
-
-        try {
-            List<File> files = new ArrayList<>();
-
-            String[] unparsedArgs;
-
-            CommandLineParser parser = new DefaultParser();
-
-            CommandLine line = parser.parse(options, args);
-
-            unparsedArgs = line.getArgs();
-
-            if (line.hasOption("help")) {
-                usage(options);
-            } else if (unparsedArgs.length == 0) {
-                throw new ParseException("Must specify at least one file");
-            }
-
-            if (line.hasOption("debug")) {
-                setDebug();
-            }
-
-            LOGGER.info("{} {} (SHA: {})", boldYellow(NAME), boldYellow(BuildFinder.getVersion()), cyan(BuildFinder.getScmRevision()));
-
-            // Initial value taken from configuration value and then allow command line to override.
-            ObjectMapper mapper = new ObjectMapper();
-
-            mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-            Path configPath = null;
-
-            if (line.hasOption("config")) {
-                configPath = Paths.get(line.getOptionValue("config"));
-            } else {
-                configPath = Paths.get(ConfigDefaults.CONFIG);
-            }
-
-            File configFile = configPath.toFile();
-            BuildConfig config = null;
-
-            if (configFile.exists()) {
-                LOGGER.info("Using configuration file: {}", green(configFile));
-
-                try {
-                    config = BuildConfig.load(configFile);
-                } catch (IOException e) {
-                    LOGGER.error("Error loading configuration file: {}", e.getMessage());
-                    LOGGER.debug("Error", e);
-                    System.exit(1);
-                }
-            } else {
-                LOGGER.info("Configuration file {} does not exist. Implicitly creating with defaults.", green(configFile));
-                config = new BuildConfig();
-            }
-
-            if (line.hasOption("checksum-only")) {
-                config.setChecksumOnly(Boolean.TRUE);
-            }
-
-            if (line.hasOption("checksum-type")) {
-                config.setChecksumType(KojiChecksumType.valueOf(line.getOptionValue("checksum-type")));
-            }
-
-            if (line.hasOption("archive-type")) {
-                @SuppressWarnings("unchecked")
-                List<String> a = (List<String>) line.getParsedOptionValue("archive-types");
-                config.setArchiveTypes(a);
-            }
-
-            if (line.hasOption("archive-extension")) {
-                @SuppressWarnings("unchecked")
-                List<String> e = (List<String>) line.getParsedOptionValue("archive-extension");
-                config.setArchiveExtensions(e);
-            }
-
-            if (line.hasOption("exclude")) {
-                @SuppressWarnings("unchecked")
-                List<String> x = (List<String>) line.getParsedOptionValue("exclude");
-                config.setExcludes(x);
-            }
-
-            if (line.hasOption("koji-hub-url")) {
-                config.setKojiHubURL(line.getOptionValue("koji-hub-url"));
-            }
-
-            if (!config.getChecksumOnly()) {
-                verifyURL("koji-hub-url", config.getKojiHubURL(), line, configFile);
-            }
-
-            if (line.hasOption("koji-web-url")) {
-                config.setKojiWebURL(line.getOptionValue("koji-web-url"));
-            }
-
-            if (!config.getChecksumOnly()) {
-                verifyURL("koji-web-url", config.getKojiWebURL(), line, configFile);
-            }
-
-            if (line.hasOption("krb-ccache")) {
-                krbCCache = line.getOptionValue("krb-ccache");
-                LOGGER.debug("Kerberos ccache: {}", krbCCache);
-            }
-
-            if (line.hasOption("krb-keytab")) {
-                krbKeytab = line.getOptionValue("krb-keytab");
-                LOGGER.debug("Kerberos keytab {}", krbKeytab);
-            }
-
-            if (line.hasOption("krb-service")) {
-                krbService = line.getOptionValue("krb-service");
-                LOGGER.debug("Kerberos service: {}", krbService);
-            }
-
-            if (line.hasOption("krb-principal")) {
-                krbPrincipal = line.getOptionValue("krb-principal");
-                LOGGER.debug("Kerberos principal: {}", krbPrincipal);
-            }
-
-            if (line.hasOption("krb-password")) {
-                krbPassword = line.getOptionValue("krb-password");
-                LOGGER.debug("Read Kerberos password");
-            }
-
-            if (line.hasOption("output-directory")) {
-                outputDirectory = new File(line.getOptionValue("output-directory"));
-                LOGGER.info("Output will be stored in directory: {}", green(outputDirectory));
-            }
-
-            LOGGER.debug("Configuration {} ", config);
-
-            if (!configFile.exists()) {
-                File configDir = configFile.getParentFile();
-
-                if (configDir != null && !configDir.exists()) {
-                    boolean created = configDir.mkdirs();
-
-                    if (!created) {
-                        LOGGER.warn("Failed to create directory: {}", red(configDir));
-                    }
-                }
-
-                if (configFile.canWrite()) {
-                    try {
-                        config.save(configFile);
-                    } catch (IOException e) {
-                        LOGGER.warn("Error writing configuration file: {}", red(e.getMessage()));
-                        LOGGER.debug("Error", e);
-                    }
-                } else {
-                    LOGGER.warn("Could not write configuration file: {}", red(configFile));
-                }
-            }
-
-            for (String unparsedArg : unparsedArgs) {
-                File file = new File(unparsedArg);
-
-                if (!file.canRead()) {
-                    LOGGER.warn("Could not read file: {}", file.getPath());
-                    continue;
-                }
-
-                if (file.isDirectory()) {
-                    LOGGER.debug("Adding all files in directory: {}", file.getPath());
-                    files.addAll(FileUtils.listFiles(file, null, true));
-                } else {
-                    LOGGER.debug("Adding file: {}", file.getPath());
-                    files.add(new File(unparsedArg));
-                }
-            }
-
-            File checksumFile = new File(outputDirectory, BuildFinder.getChecksumFilename(config.getChecksumType()));
-            Map<String, Collection<String>> checksums = Collections.emptyMap();
-
-            LOGGER.info("Checksum type: {}", green(config.getChecksumType()));
-
-            if (!checksumFile.exists()) {
-                LOGGER.info("Calculating checksums for files: {}", green(files));
-
-                DistributionAnalyzer da = new DistributionAnalyzer(files, config);
-
-                try {
-                    checksums = da.checksumFiles().asMap();
-                } catch (IOException e) {
-                    LOGGER.error("Error getting checksums map: {}", boldRed(e.getMessage()));
-                    LOGGER.debug("Error", e);
-                    System.exit(1);
-                }
-
-                try {
-                    da.outputToFile(checksumFile);
-                } catch (IOException e) {
-                    LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
-                    LOGGER.debug("Error", e);
-                    System.exit(1);
-                }
-            } else {
-                try {
-                    LOGGER.info("Loading checksums from file: {}", green(checksumFile));
-                    checksums = JSONUtils.loadChecksumsFile(checksumFile);
-                } catch (IOException e) {
-                    LOGGER.error("Error loading checksums file: {}", boldRed(e.getMessage()));
-                    LOGGER.debug("Error", e);
-                    System.exit(1);
-                }
-            }
-
-            if (checksums.isEmpty()) {
-                LOGGER.warn("The list of checksums is empty. If this is unexpected, try removing the checksum cache ({}) and try again.", checksumFile.getAbsolutePath());
-            }
-
-            if (config.getChecksumOnly()) {
-                System.exit(0);
-            }
-
-            File buildsFile = new File(outputDirectory, BuildFinder.getBuildsFilename());
-            Map<Integer, KojiBuild> builds = Collections.emptyMap();
-            KojiClientSession session = null;
-
-            try {
-                session = new KojiClientSession(config.getKojiHubURL(), krbService, krbPrincipal, krbPassword, krbCCache, krbKeytab);
-            } catch (KojiClientException e) {
-                LOGGER.error("Failed to create Koji session: {}", boldRed(e.getMessage()));
-                LOGGER.debug("Koji Client Error", e);
-                System.exit(1);
-            }
-
-            if (buildsFile.exists()) {
-                LOGGER.info("Loading builds from file: {}", green(buildsFile.getPath()));
-
-                try {
-                    builds = JSONUtils.loadBuildsFile(buildsFile);
-                } catch (IOException e) {
-                    LOGGER.error("Error loading builds file: {}", boldRed(e.getMessage()));
-                    LOGGER.debug("Error", e);
-                    System.exit(1);
-                }
-            } else {
-                BuildFinder bf = new BuildFinder(session, config);
-                bf.setOutputDirectory(outputDirectory);
-
-                try {
-                    builds = bf.findBuilds(checksums);
-                } catch (KojiClientException e) {
-                    LOGGER.error("Koji client error: {}", boldRed(e.getMessage()));
-                    LOGGER.debug("Koji Client Error", e);
-                    System.exit(1);
-                }
-
-                try {
-                    JSONUtils.dumpObjectToFile(builds, buildsFile);
-                } catch (IOException e) {
-                    LOGGER.error("Error writing builds file: {}", boldRed(e.getMessage()));
-                    LOGGER.debug("Error", e);
-                    System.exit(1);
-                }
-            }
-
-            if (!builds.isEmpty()) {
-                LOGGER.info("Generating reports");
-                List<KojiBuild> buildList = new ArrayList<>(builds.values());
-
-                Collections.sort(buildList, (b1, b2) -> Integer.compare(b1.getBuildInfo().getId(), b2.getBuildInfo().getId()));
-                buildList = Collections.unmodifiableList(buildList);
-
-                List<Report> reports = new ArrayList<>();
-                reports.add(new BuildStatisticsReport(outputDirectory, buildList));
-                reports.add(new ProductReport(outputDirectory, buildList));
-                reports.add(new NVRReport(outputDirectory, buildList));
-                reports.add(new GAVReport(outputDirectory, buildList));
-
-                reports.forEach(report -> {
-                    try {
-                        report.outputText();
-                    } catch (IOException e) {
-                        LOGGER.error("Error writing {} report", boldRed(report.getName()));
-                        LOGGER.debug("Report error", e);
-                    }
-                });
-
-                Report report = new HTMLReport(outputDirectory, files, buildList, config.getKojiWebURL(), Collections.unmodifiableList(reports));
-
-                try {
-                    report.outputHTML();
-                } catch (IOException e) {
-                    LOGGER.error("Error writing {} report", boldRed(report.getName()));
-                    LOGGER.debug("Report error", e);
-                }
-
-                LOGGER.info("{}", boldYellow("DONE"));
-            } else {
-                LOGGER.warn("Could not generate any reports since list of builds is empty. If this is unexpected, try removing the builds cache ({}) and try again.", buildsFile.getAbsolutePath());
-            }
-        } catch (ParseException e) {
-            System.err.println("Error parsing command line: " + e.getMessage());
-            usage(options);
         }
     }
 }

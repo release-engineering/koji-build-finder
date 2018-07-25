@@ -140,6 +140,11 @@
         <version>4.0.2</version>
       </dependency>
       <dependency>
+        <groupId>info.picocli</groupId>
+         <artifactId>picocli</artifactId>
+         <version>3.3.0</version>
+      </dependency>
+      <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>4.12</version>
@@ -159,7 +164,14 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-vfs2</artifactId>
         <version>2.2</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
+      <!-- Required dependency for kojiji (jhttpc) -->
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcprov-jdk15on</artifactId>
@@ -213,6 +225,7 @@
         <artifactId>byteman-bmunit</artifactId>
         <version>4.0.2</version>
       </dependency>
+      <!-- Required dependency for commons-vfs2 -->
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>jcl-over-slf4j</artifactId>
@@ -275,6 +288,10 @@
     <dependency>
       <groupId>com.redhat.red.build</groupId>
       <artifactId>kojiji</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>info.picocli</groupId>
+      <artifactId>picocli</artifactId>
     </dependency>
     <dependency>
       <groupId>io.dropwizard.metrics</groupId>

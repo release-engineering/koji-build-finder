@@ -16,7 +16,6 @@
 package com.redhat.red.build.finder;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -29,12 +28,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
-
-import ch.qos.logback.classic.Level;
 
 public class BuildFinderTest {
     @Rule
@@ -83,23 +78,5 @@ public class BuildFinderTest {
         Map<String, Collection<String>> checksums = JSONUtils.loadChecksumsFile(new File(folder, BuildFinder.getChecksumFilename(checksumType)));
 
         assertEquals(1, checksums.size());
-    }
-
-    @Test
-    public void verifyDebug() throws IOException {
-        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        Level level = root.getLevel();
-
-        try {
-            root.setLevel(Level.INFO);
-
-            assertFalse(root.isDebugEnabled());
-
-            Main.setDebug();
-
-            assertTrue(root.isDebugEnabled());
-        } finally {
-            root.setLevel(level);
-        }
     }
 }

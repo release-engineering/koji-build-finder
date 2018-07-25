@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 
@@ -35,7 +36,7 @@ public abstract class ConfigDefaults {
 
     public static final String CONFIG = FileUtils.getUserDirectoryPath() + File.separator + ".koji-build-finder" + File.separator + "config.json";
 
-    public static final List<String> EXCLUDES = Collections.unmodifiableList(Arrays.asList("^(?!.*/pom\\.xml$).*/.*\\.xml$"));
+    public static final List<Pattern> EXCLUDES = Collections.unmodifiableList(Arrays.asList(Pattern.compile("^(?!.*/pom\\.xml$).*/.*\\.xml$")));
 
     public static final String KOJI_HUB_URL = "";
 

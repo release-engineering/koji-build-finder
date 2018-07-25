@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.apache.commons.codec.binary.Hex;
@@ -68,7 +69,7 @@ public class DistributionAnalyzer {
 
         if (!excludeExtension) {
             String friendlyURI = fo.getName().getFriendlyURI();
-            excludeFile = config.getExcludes() != null && !config.getExcludes().isEmpty() && config.getExcludes().stream().anyMatch(friendlyURI::matches);
+            excludeFile = config.getExcludes() != null && !config.getExcludes().isEmpty() && config.getExcludes().stream().map(Pattern::pattern).anyMatch(friendlyURI::matches);
         }
 
         boolean include = (!excludeFile && !excludeExtension);
