@@ -19,15 +19,20 @@ import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
 
 public final class AnsiUtils {
+    static {
+        install();
+    }
+
     private AnsiUtils() {
         throw new AssertionError();
     }
 
-    public static void install() {
+    private static void install() {
         AnsiConsole.systemInstall();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> uninstall()));
     }
 
-    public static void uninstall() {
+    private static void uninstall() {
         System.out.print(Ansi.ansi().reset());
         System.out.flush();
         AnsiConsole.systemUninstall();
