@@ -434,9 +434,12 @@ public final class Main implements Callable<Void> {
 
     private static void enableDebugLogging() {
         ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+
         rootLogger.setLevel(Level.DEBUG);
 
         LoggerContext loggerContext = rootLogger.getLoggerContext();
+
+        loggerContext.getLoggerList().forEach(logger -> logger.setLevel(Level.DEBUG));
 
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(loggerContext);
