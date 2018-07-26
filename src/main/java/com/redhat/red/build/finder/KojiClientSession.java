@@ -15,6 +15,8 @@
  */
 package com.redhat.red.build.finder;
 
+import static com.redhat.red.build.finder.AnsiUtils.green;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -22,6 +24,8 @@ import java.util.concurrent.Executors;
 
 import org.commonjava.util.jhttpc.auth.MemoryPasswordManager;
 import org.commonjava.util.jhttpc.auth.PasswordManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.redhat.red.build.koji.KojiClient;
 import com.redhat.red.build.koji.KojiClientException;
@@ -37,6 +41,8 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiTaskInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskRequest;
 
 public class KojiClientSession implements ClientSession {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KojiClientSession.class);
+
     private static final int DEFAULT_THREAD_COUNT = 1;
 
     private KojiClient client;
@@ -59,6 +65,7 @@ public class KojiClientSession implements ClientSession {
         client = new KojiClient(new SimpleKojiConfigBuilder().withKojiURL(url).withKrbService(krbService).withKrbCCache(krbCCache).withKrbKeytab(krbKeytab).withKrbPrincipal(krbPrincipal).withKrbPassword(krbPassword).build(), new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT));
 
         if (krbService != null && ((krbPrincipal != null && krbPassword != null) || krbCCache != null || krbKeytab != null)) {
+            LOGGER.info("Logging into Kerberos service: {}", green(krbService));
             session = client.login();
         }
     }
