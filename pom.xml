@@ -85,7 +85,7 @@
     <version.org.apache.maven.plugins.maven-failsafe-plugin>2.22.0</version.org.apache.maven.plugins.maven-failsafe-plugin>
     <version.org.apache.maven.plugins.maven-jxr-plugin>2.5</version.org.apache.maven.plugins.maven-jxr-plugin>
     <version.org.apache.maven.plugins.maven-pmd-plugin>3.10.0</version.org.apache.maven.plugins.maven-pmd-plugin>
-    <version.org.apache.maven.plugins.maven-project-info-reports-plugin>3.0.0</version.org.apache.maven.plugins.maven-project-info-reports-plugin>
+    <version.org.apache.maven.plugins.maven-project-info-reports-plugin>2.9</version.org.apache.maven.plugins.maven-project-info-reports-plugin>
     <version.org.apache.maven.plugins.maven-shade-plugin>3.1.1</version.org.apache.maven.plugins.maven-shade-plugin>
     <version.org.apache.maven.plugins.maven-surefire-plugin>2.22.0</version.org.apache.maven.plugins.maven-surefire-plugin>
     <version.org.apache.maven.plugins.maven-surefire-report-plugin>2.22.0</version.org.apache.maven.plugins.maven-surefire-report-plugin>
