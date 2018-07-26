@@ -1,0 +1,10 @@
+language: java
+
+os:
+  - linux
+  - osx
+
+script: "mvn -B clean install"
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
