@@ -61,12 +61,15 @@ import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParseResult;
 import picocli.CommandLine.Spec;
 
-@Command(abbreviateSynopsis = true, name = "koji-build-finder", description = "Finds builds in Koji.", showDefaultValues = true, versionProvider = Main.ManifestVersionProvider.class, mixinStandardHelpOptions = true)
+@Command(abbreviateSynopsis = true, description = "Finds builds in Koji.", mixinStandardHelpOptions = true, name = "koji-build-finder", showDefaultValues = true, sortOptions = true, versionProvider = Main.ManifestVersionProvider.class)
 public final class Main implements Callable<Void> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     @Spec
     private CommandSpec commandSpec;
+
+    @Option(names = {"-a", "--archive-type"}, paramLabel = "STRING", description = "Add a Koji archive type to check.", converter = FilenameConverter.class)
+    private List<String> archiveTypes = ConfigDefaults.ARCHIVE_TYPES;
 
     @Option(names = {"-c", "--config"}, paramLabel = "FILE", description = "Specify configuration file to use.")
     private File configFile = new File(ConfigDefaults.CONFIG);
@@ -74,23 +77,11 @@ public final class Main implements Callable<Void> {
     @Option(names = {"-d", "--debug"}, description = "Enable debug logging.")
     private boolean debug = false;
 
-    @Option(names = {"-q", "--quiet"}, description = "Disable all logging.")
-    private boolean quiet = false;
-
-    @Option(names = {"-k", "--checksum-only"}, description = "Only checksum files and do not find builds.")
-    private boolean checksumOnly = ConfigDefaults.CHECKSUM_ONLY;
-
-    @Option(names = {"-t", "--checksum-type"}, paramLabel = "CHECKSUM", description = "Set checksum type (${COMPLETION-CANDIDATES}).")
-    private KojiChecksumType checksumType = ConfigDefaults.CHECKSUM_TYPE;
-
-    @Option(names = {"-a", "--archive-type"}, paramLabel = "STRING", description = "Add a Koji archive type to check.", converter = FilenameConverter.class)
-    private List<String> archiveTypes = ConfigDefaults.ARCHIVE_TYPES;
-
     @Option(names = {"-e", "--archive-extension"}, paramLabel = "STRING", description = "Add a Koji archive type extension to check.", converter = FilenameConverter.class)
     private List<String> archiveExtensions = ConfigDefaults.ARCHIVE_EXTENSIONS;
 
-    @Option(names = {"-x", "--exclude"}, paramLabel = "PATTERN", description = "Add a pattern to exclude from build lookup.")
-    private List<Pattern> excludes = ConfigDefaults.EXCLUDES;
+    @Option(names = {"-k", "--checksum-only"}, description = "Only checksum files and do not find builds.")
+    private boolean checksumOnly = ConfigDefaults.CHECKSUM_ONLY;
 
     @Option(names = {"--koji-hub-url"}, paramLabel = "URL", description = "Set Koji hub URL.")
     private URL kojiHubURL;
@@ -104,17 +95,26 @@ public final class Main implements Callable<Void> {
     @Option(names = {"--krb-keytab"}, paramLabel = "FILE", description = "Set location of Kerberos keytab.")
     private File krbKeytab;
 
-    @Option(names = {"--krb-service"}, paramLabel = "STRING", description = "Set Kerberos client service.")
-    private String krbService;
+    @Option(names = {"--krb-password"}, paramLabel = "STRING", description = "Set Kerberos password.")
+    private String krbPassword;
 
     @Option(names = {"--krb-principal"}, paramLabel = "STRING", description = "Set Kerberos client principal.")
     private String krbPrincipal;
 
-    @Option(names = {"--krb-password"}, paramLabel = "STRING", description = "Set Kerberos password.")
-    private String krbPassword;
+    @Option(names = {"--krb-service"}, paramLabel = "STRING", description = "Set Kerberos client service.")
+    private String krbService;
 
     @Option(names = {"-o", "--output-directory"}, paramLabel = "FILE", description = "Set output directory.")
     private File outputDirectory;
+
+    @Option(names = {"-q", "--quiet"}, description = "Disable all logging.")
+    private boolean quiet = false;
+
+    @Option(names = {"-t", "--checksum-type"}, paramLabel = "CHECKSUM", description = "Set checksum type (${COMPLETION-CANDIDATES}).")
+    private KojiChecksumType checksumType = ConfigDefaults.CHECKSUM_TYPE;
+
+    @Option(names = {"-x", "--exclude"}, paramLabel = "PATTERN", description = "Add a pattern to exclude from build lookup.")
+    private List<Pattern> excludes = ConfigDefaults.EXCLUDES;
 
     @Parameters(arity = "1..*", paramLabel = "FILE", description = "One or more files.")
     private List<File> files;
