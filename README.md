@@ -2,7 +2,16 @@
 
 [Koji Build Finder](https://github.com/release-engineering/koji-build-finder/) iterates over any files or directories in the input, recursively scanning any supported (possibly compressed) archive types, locating the associated Koji build for each file matching any given Koji archive type. It attempts to find at least one Koji build containing the file checksum (duplicate builds result in a warning) and records files that don't have any corresponding Koji build to a file. For files with a corresponding Koji build, if the Koji build does not have a corresponding Koji task, it reports the build as an *import*. For builds with a corresponding Koji task, it writes information about the build to a file. Additionally, it writes various reports about the builds.
 
-### Development
+## Build Status
+
+| Name      | Description                | Badge                      |
+| --------- | -------------------------- | -------------------------- |
+| AppVeyor  | Build Status (Windows)     | [![Build Status (AppVeyor)](https://ci.appveyor.com/api/projects/status/775lq2o1chu7abn5?svg=true)](https://ci.appveyor.com/project/dwalluck/koji-build-finder-6o7ag) |
+| Travis CI | Build Status (Linux/OS X)  | [![Build Status (Travis CI)](https://api.travis-ci.com/release-engineering/koji-build-finder.svg)](https://travis-ci.com/release-engineering/koji-build-finder) |
+| Codecov   | Code Coverage              | [![Code Coverage](https://codecov.io/gh/release-engineering/koji-build-finder/graph/badge.svg)](https://codecov.io/gh/release-engineering/koji-build-finder) |
+| Snyk      | Known Vulnerabilities      | [![Known Vulnerabilities](https://snyk.io/test/github/release-engineering/koji-build-finder/badge.svg)](https://snyk.io/test/github/release-engineering/koji-build-finder) |
+
+## Development
 
 An example `codestyle-eclipse.xml` code formatting style is supplied for [Eclipse](https://www.eclipse.org/ide/). An example `codestyle-intellij.xml` code formatting style is supplied for [IntelliJ IDEA](https://www.jetbrains.com/idea/).
 
