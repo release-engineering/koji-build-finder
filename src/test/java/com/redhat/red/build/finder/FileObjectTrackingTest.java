@@ -16,6 +16,7 @@
 package com.redhat.red.build.finder;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +24,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.lang3.JavaVersion;
+import org.apache.commons.lang3.SystemUtils;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMRules;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
@@ -91,6 +94,8 @@ public class FileObjectTrackingTest {
         )
     })
     public void verifyObjectCreation() throws IOException {
+        assumeFalse(SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_9));
+
         File cache = temp.newFolder();
         System.setProperty("java.io.tmpdir", cache.getAbsolutePath());
 
