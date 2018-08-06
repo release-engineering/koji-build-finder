@@ -92,7 +92,7 @@ public class KojiPerformanceIT extends AbstractKojiPerformanceIT {
                 List<Object> args = new ArrayList<>(MAX_CONNECTIONS);
 
                 for (int j = 0; j < MAX_CONNECTIONS; j++) {
-                    args.add(new Integer(getBuilds().get(j)));
+                    args.add(getBuilds().get(j));
                 }
 
                 getKojiClient().multiCall(Constants.GET_BUILD, args, KojiBuildInfo.class, getSession());

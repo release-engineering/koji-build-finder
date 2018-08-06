@@ -62,18 +62,18 @@
     <version.com.fasterxml.jackson.core>2.9.6</version.com.fasterxml.jackson.core>
     <version.com.github.stefanbirkner>1.18.0</version.com.github.stefanbirkner>
     <version.com.j2html>1.3.0</version.com.j2html>
-    <version.com.redhat.red.build.kojiji>2.5</version.com.redhat.red.build.kojiji>
-    <version.info.picocli>3.3.0</version.info.picocli>
+    <version.com.redhat.red.build.kojiji>2.6-SNAPSHOT</version.com.redhat.red.build.kojiji>
+    <version.info.picocli>3.4.0</version.info.picocli>
     <version.io.dropwizard.metrics>4.0.3</version.io.dropwizard.metrics>
     <version.junit>4.12</version.junit>
-    <version.net.sourceforge.pmd>6.5.0</version.net.sourceforge.pmd>
+    <version.net.sourceforge.pmd>6.6.0</version.net.sourceforge.pmd>
     <version.org.apache.commons.commons-collections4>4.2</version.org.apache.commons.commons-collections4>
     <version.org.apache.commons.commons-compress>1.17</version.org.apache.commons.commons-compress>
     <version.org.apache.commons.commons-lang3>3.7</version.org.apache.commons.commons-lang3>
     <version.org.apache.commons.commons-vfs2>2.2</version.org.apache.commons.commons-vfs2>
     <version.org.bouncycastle>1.60</version.org.bouncycastle>
     <version.org.codehaus.mojo.versions-maven-plugin>2.5</version.org.codehaus.mojo.versions-maven-plugin>
-    <version.org.commonjava.rwx>2.2</version.org.commonjava.rwx>
+    <version.org.commonjava.rwx>2.3-SNAPSHOT</version.org.commonjava.rwx>
     <version.org.commonjava.util>1.8</version.org.commonjava.util>
     <version.org.fusesource.jansi>1.17.1</version.org.fusesource.jansi>
     <version.org.jboss.byteman>4.0.4</version.org.jboss.byteman>
@@ -418,6 +418,11 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>${version.org.apache.maven.plugins.maven-failsafe-plugin}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jxr-plugin</artifactId>
           <version>${version.org.apache.maven.plugins.maven-jxr-plugin}</version>
         </plugin>
@@ -455,6 +460,11 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>${version.org.apache.maven.plugins.maven-project-info-reports-plugin}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${version.org.apache.maven.plugins.maven-surefire-plugin}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -520,7 +530,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
-          <forkCount>0</forkCount>
           <includes>
             <include>**/*IT.java</include>
           </includes>
@@ -604,12 +613,25 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>com/redhat/red/build/finder/JSONUtils$*.class</exclude>
-          </excludes>
-        </configuration>
         <executions>
+          <execution>
+            <id>jacoco-merge</id>
+            <goals>
+              <goal>merge</goal>
+            </goals>
+            <configuration>
+              <fileSets>
+                <fileSet>
+                  <directory>${project.build.directory}</directory>
+                  <includes>
+                    <include>jacoco.exec</include>
+                    <include>jacoco-it.exec</include>
+                  </includes>
+                </fileSet>
+              </fileSets>
+              <destFile>${project.build.directory}/jacoco.exec</destFile>
+            </configuration>
+          </execution>
           <execution>
             <id>jacoco-initialize</id>
             <goals>

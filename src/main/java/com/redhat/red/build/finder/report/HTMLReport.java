@@ -44,6 +44,7 @@ import static j2html.TagCreator.tr;
 import static j2html.TagCreator.ul;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -70,13 +71,13 @@ public class HTMLReport extends Report {
             + "td { border-style: solid; border-width: 1px; text-align: left; vertical-align: top; font-size: small; }\n"
             + "footer { font-size: smaller; }";
 
-    private String kojiwebUrl;
+    private URL kojiwebUrl;
 
     private List<KojiBuild> builds;
 
     private List<Report> reports;
 
-    public HTMLReport(File outputDirectory, Collection<File> files, List<KojiBuild> builds, String kojiwebUrl, List<Report> reports) {
+    public HTMLReport(File outputDirectory, Collection<File> files, List<KojiBuild> builds, URL kojiwebUrl, List<Report> reports) {
         setName("Build Report for " + String.join(", ", files.stream().map(File::getName).collect(Collectors.toList())));
         setDescription("List of analyzed artifacts whether or not they were found in a Koji build");
         setBaseFilename("output");

@@ -17,6 +17,7 @@ package com.redhat.red.build.finder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -25,26 +26,38 @@ import java.io.IOException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class BuildConfigTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BuildConfigTest.class);
+
     @Rule
     public final TemporaryFolder temp = new TemporaryFolder();
 
     @Test
-    public void verifyDefaults() {
+    public void verifyDefaults() throws JsonProcessingException {
         BuildConfig bc = new BuildConfig();
 
-        assertEquals(bc.getArchiveTypes(), ConfigDefaults.ARCHIVE_TYPES);
-        assertEquals(bc.getChecksumType(), ConfigDefaults.CHECKSUM_TYPE);
-        assertEquals(bc.getChecksumOnly(), ConfigDefaults.CHECKSUM_ONLY);
-        assertEquals(bc.getExcludes(), ConfigDefaults.EXCLUDES);
-        assertEquals(bc.getKojiHubURL(), ConfigDefaults.KOJI_HUB_URL);
-        assertEquals(bc.getKojiWebURL(), ConfigDefaults.KOJI_WEB_URL);
+        String s = JSONUtils.dumpString(bc);
+
+        LOGGER.debug("Default configuration:\n{}", s);
+
+        assertNotNull(s);
+
+        assertEquals(ConfigDefaults.ARCHIVE_TYPES, bc.getArchiveTypes());
+        assertEquals(ConfigDefaults.CHECKSUM_TYPE, bc.getChecksumType());
+        assertEquals(ConfigDefaults.CHECKSUM_ONLY, bc.getChecksumOnly());
+        assertEquals(ConfigDefaults.EXCLUDES, bc.getExcludes());
+        assertEquals(ConfigDefaults.KOJI_HUB_URL, bc.getKojiHubURL());
+        assertEquals(ConfigDefaults.KOJI_WEB_URL, bc.getKojiWebURL());
     }
 
     @Test
     public void verifyMapping() throws IOException {
-        String json = "{\"archive-types\":[\"jar\"],\"excludes\":\"^(?!.*/pom\\\\.xml$).*/.*\\\\.xml$\",\"checksum-only\":true,\"checksum-type\":\"md5\",\"koji-hub-url\":\"\",\"koji-web-url\":\"\"}";
+        String json = "{\"archive-types\":[\"jar\"],\"excludes\":\"^(?!.*/pom\\\\.xml$).*/.*\\\\.xml$\",\"checksum-only\":true,\"checksum-type\":\"md5\"}";
         BuildConfig bc = BuildConfig.load(json);
 
         assertTrue(bc.getChecksumOnly());
@@ -53,11 +66,12 @@ public class BuildConfigTest {
 
     @Test
     public void verifyMappingWithDefaults() throws IOException {
-        String json = "{\"koji-hub-url\":\"https://my.url.com\",\"koji-web-url\":\"https://my.url.com/brew\"}";
+        String json = "{\"koji-hub-url\":\"https://my.url.com/hub\",\"koji-web-url\":\"https://my.url.com/web\"}";
 
         BuildConfig bc = BuildConfig.load(json);
 
-        assertTrue(bc.getKojiHubURL().equals("https://my.url.com"));
+        assertTrue(bc.getKojiHubURL().toExternalForm().equals("https://my.url.com/hub"));
+        assertTrue(bc.getKojiWebURL().toExternalForm().equals("https://my.url.com/web"));
         assertFalse(bc.getChecksumOnly());
     }
 
@@ -70,7 +84,7 @@ public class BuildConfigTest {
 
     @Test
     public void verifySave() throws IOException {
-        String json = "{\"archive-types\":[\"jar\"],\"excludes\":\"^(?!.*/pom\\\\.xml$).*/.*\\\\.xml$\",\"checksum-only\":true,\"checksum-type\":\"md5\",\"koji-hub-url\":\"\",\"koji-web-url\":\"\"}";
+        String json = "{\"archive-types\":[\"jar\"],\"excludes\":\"^(?!.*/pom\\\\.xml$).*/.*\\\\.xml$\",\"checksum-only\":true,\"checksum-type\":\"md5\"}";
         BuildConfig bc = BuildConfig.load(json);
         File file = temp.newFile();
 

@@ -21,8 +21,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
-
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -35,7 +33,7 @@ import com.redhat.red.build.koji.model.json.util.KojiObjectMapper;
 
 public final class JSONUtils {
     private JSONUtils() {
-        throw new AssertionError();
+
     }
 
     public static String dumpString(Object obj) throws JsonProcessingException {
@@ -50,8 +48,6 @@ public final class JSONUtils {
         ObjectMapper mapper = new KojiObjectMapper();
 
         mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
-
-        FileUtils.forceMkdirParent(file);
 
         mapper.writerWithDefaultPrettyPrinter().writeValue(file, object);
     }

@@ -160,6 +160,18 @@ public class ReportTest {
     }
 
     @Test
+    public void verifyBuildStatisticsReportEmptyBuilds() throws IOException {
+        BuildStatisticsReport buildStatisticsReport = new BuildStatisticsReport(folder, Collections.emptyList());
+        buildStatisticsReport.outputText();
+        assertEquals(0, buildStatisticsReport.getBuildStatistics().getNumberOfBuilds());
+        assertEquals(0, buildStatisticsReport.getBuildStatistics().getNumberOfImportedBuilds());
+        assertEquals(0, buildStatisticsReport.getBuildStatistics().getNumberOfArchives());
+        assertEquals(0, buildStatisticsReport.getBuildStatistics().getNumberOfImportedArchives());
+        assertEquals(0.00D, buildStatisticsReport.getBuildStatistics().getPercentOfBuildsImported(), 0);
+        assertEquals(0.00D, buildStatisticsReport.getBuildStatistics().getPercentOfArchivesImported(), 0);
+    }
+
+    @Test
     public void verifyProductReport() throws IOException {
         ProductReport productReport = new ProductReport(folder, builds);
         productReport.outputText();

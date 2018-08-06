@@ -28,6 +28,12 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiTaskInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskRequest;
 
 public class KojiBuild {
+    private static final String KEY_VERSION = "version";
+
+    private static final String KEY_MAVEN = "maven";
+
+    private static final String KEY_BUILD_SYSTEM = "build_system";
+
     private KojiBuildInfo buildInfo;
 
     private KojiTaskInfo taskInfo;
@@ -172,12 +178,12 @@ public class KojiBuild {
 
     @JsonIgnore
     public boolean isImport() {
-        return !((buildInfo != null && buildInfo.getExtra() != null && buildInfo.getExtra().containsKey("build_system")) || (taskInfo != null));
+        return !((buildInfo != null && buildInfo.getExtra() != null && buildInfo.getExtra().containsKey(KEY_BUILD_SYSTEM)) || (taskInfo != null));
     }
 
     @JsonIgnore
     public boolean isMaven() {
-        return ((buildInfo != null && buildInfo.getExtra() != null && buildInfo.getExtra().containsKey("maven")) || (taskInfo != null && taskInfo.getMethod() != null && taskInfo.getMethod().equals("maven")));
+        return ((buildInfo != null && buildInfo.getExtra() != null && buildInfo.getExtra().containsKey(KEY_MAVEN)) || (taskInfo != null && taskInfo.getMethod() != null && taskInfo.getMethod().equals(KEY_MAVEN)));
     }
 
     @JsonIgnore
@@ -218,11 +224,11 @@ public class KojiBuild {
                 return null;
             }
 
-            if (extra.containsKey("build_system")) {
-                String buildSystem = (String) extra.get("build_system");
+            if (extra.containsKey(KEY_BUILD_SYSTEM)) {
+                String buildSystem = (String) extra.get(KEY_BUILD_SYSTEM);
 
-                if (extra.containsKey("version")) {
-                    String version = (String) extra.get("version");
+                if (extra.containsKey(KEY_VERSION)) {
+                    String version = (String) extra.get(KEY_VERSION);
 
                     if (version != null) {
                         buildSystem += (" " + version);

@@ -24,12 +24,12 @@ public final class AnsiUtils {
     }
 
     private AnsiUtils() {
-        throw new AssertionError();
+
     }
 
     private static void install() {
         AnsiConsole.systemInstall();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> uninstall()));
+        Runtime.getRuntime().addShutdownHook(new Thread(AnsiUtils::uninstall));
     }
 
     private static void uninstall() {

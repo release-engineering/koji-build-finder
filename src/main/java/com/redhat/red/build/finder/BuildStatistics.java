@@ -64,7 +64,7 @@ public class BuildStatistics {
     }
 
     public double getPercentOfBuildsImported() {
-        if (builds.size() == 0) {
+        if (builds.isEmpty()) {
             return 0;
         }
 
@@ -72,7 +72,7 @@ public class BuildStatistics {
     }
 
     public double getPercentOfArchivesImported() {
-        if (builds.size() == 0) {
+        if (builds.isEmpty()) {
             return 0;
         }
 

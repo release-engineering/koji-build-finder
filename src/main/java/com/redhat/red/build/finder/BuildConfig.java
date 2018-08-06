@@ -17,6 +17,7 @@ package com.redhat.red.build.finder;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -43,10 +44,14 @@ public class BuildConfig {
     private List<Pattern> excludes;
 
     @JsonProperty("koji-hub-url")
-    private String kojiHubURL;
+    private URL kojiHubURL;
 
     @JsonProperty("koji-web-url")
-    private String kojiWebURL;
+    private URL kojiWebURL;
+
+    public BuildConfig() {
+
+    }
 
     public static BuildConfig load(File file) throws IOException {
         return getMapper().readValue(file, BuildConfig.class);
@@ -129,7 +134,7 @@ public class BuildConfig {
         this.excludes = excludes;
     }
 
-    public String getKojiHubURL() {
+    public URL getKojiHubURL() {
         if (kojiHubURL == null) {
             kojiHubURL = ConfigDefaults.KOJI_HUB_URL;
         }
@@ -137,11 +142,11 @@ public class BuildConfig {
         return kojiHubURL;
     }
 
-    public void setKojiHubURL(String kojiHubURL) {
+    public void setKojiHubURL(URL kojiHubURL) {
         this.kojiHubURL = kojiHubURL;
     }
 
-    public String getKojiWebURL() {
+    public URL getKojiWebURL() {
         if (kojiWebURL == null) {
             kojiWebURL = ConfigDefaults.KOJI_WEB_URL;
         }
@@ -149,7 +154,7 @@ public class BuildConfig {
         return kojiWebURL;
     }
 
-    public void setKojiWebURL(String kojiWebURL) {
+    public void setKojiWebURL(URL kojiWebURL) {
         this.kojiWebURL = kojiWebURL;
     }
 

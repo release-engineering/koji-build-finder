@@ -16,6 +16,7 @@
 package com.redhat.red.build.finder;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +27,10 @@ import org.apache.commons.io.FileUtils;
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
 public abstract class ConfigDefaults {
+    private ConfigDefaults() {
+
+    }
+
     public static final List<String> ARCHIVE_TYPES = Collections.unmodifiableList(Arrays.asList("jar", "xml", "pom", "so", "dll", "dylib"));
 
     public static final List<String> ARCHIVE_EXTENSIONS = Collections.unmodifiableList(Arrays.asList("dll", "dylib", "ear", "jar", "jdocbook", "jdocbook-style", "kar", "plugin", "pom", "rar", "sar", "so", "war", "xml"));
@@ -38,7 +43,7 @@ public abstract class ConfigDefaults {
 
     public static final List<Pattern> EXCLUDES = Collections.unmodifiableList(Arrays.asList(Pattern.compile("^(?!.*/pom\\.xml$).*/.*\\.xml$")));
 
-    public static final String KOJI_HUB_URL = "";
+    public static final URL KOJI_HUB_URL = null;
 
-    public static final String KOJI_WEB_URL = "";
+    public static final URL KOJI_WEB_URL = null;
 }

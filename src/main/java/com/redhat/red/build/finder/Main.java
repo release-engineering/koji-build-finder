@@ -169,11 +169,11 @@ public final class Main implements Callable<Void> {
         }
 
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("--koji-hub-url")) {
-            config.setKojiHubURL(kojiHubURL.toString());
+            config.setKojiHubURL(kojiHubURL);
         }
 
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("--koji-web-url")) {
-            config.setKojiWebURL(kojiWebURL.toString());
+            config.setKojiWebURL(kojiWebURL);
         }
 
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("--krb-ccache")) {
@@ -350,7 +350,14 @@ public final class Main implements Callable<Void> {
             }
         } else {
             try {
-                session = new KojiClientSession(config.getKojiHubURL(), krbService, krbPrincipal, krbPassword, krbCCache != null ? krbCCache.getPath() : null, krbKeytab != null ? krbKeytab.getPath() : null);
+                if (krbService != null && ((krbPrincipal != null && krbPassword != null) || krbCCache != null || krbKeytab != null)) {
+                    LOGGER.info("Creating Koji session with Kerberos service: {}", green(krbService));
+                    session = new KojiClientSession(config.getKojiHubURL(), krbService, krbPrincipal, krbPassword, krbCCache, krbKeytab);
+                } else {
+                   LOGGER.info("Creating anonymous Koji session");
+                    session = new KojiClientSession(config.getKojiHubURL());
+                }
+
                 finder = new BuildFinder(session, config);
 
                 finder.setOutputDirectory(outputDirectory);

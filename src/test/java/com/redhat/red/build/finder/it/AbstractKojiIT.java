@@ -17,6 +17,7 @@ package com.redhat.red.build.finder.it;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.Executors;
@@ -75,13 +76,13 @@ public abstract class AbstractKojiIT {
 
         this.config = mapper.readValue(configFile, BuildConfig.class);
 
-        final String kojiHubURL = config.getKojiHubURL();
+        final URL kojiHubURL = config.getKojiHubURL();
 
-        if (kojiHubURL == null || kojiHubURL.isEmpty()) {
+        if (kojiHubURL == null) {
             throw new IOException("You must set koji-hub-url in: " + configFile.getAbsolutePath());
         }
 
-        final SimpleKojiConfig kojiConfig = new SimpleKojiConfigBuilder().withKojiURL(kojiHubURL).withMaxConnections(MAX_CONNECTIONS).build();
+        final SimpleKojiConfig kojiConfig = new SimpleKojiConfigBuilder().withKojiURL(kojiHubURL.toExternalForm()).withMaxConnections(MAX_CONNECTIONS).build();
 
         this.kojiClient = new KojiClient(kojiConfig, new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT), REGISTRY);
 

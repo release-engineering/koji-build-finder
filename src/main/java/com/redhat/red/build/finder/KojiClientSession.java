@@ -15,8 +15,8 @@
  */
 package com.redhat.red.build.finder;
 
-import static com.redhat.red.build.finder.AnsiUtils.green;
-
+import java.io.File;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -24,8 +24,6 @@ import java.util.concurrent.Executors;
 
 import org.commonjava.util.jhttpc.auth.MemoryPasswordManager;
 import org.commonjava.util.jhttpc.auth.PasswordManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.redhat.red.build.koji.KojiClient;
 import com.redhat.red.build.koji.KojiClientException;
@@ -41,14 +39,13 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiTaskInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskRequest;
 
 public class KojiClientSession implements ClientSession {
-    private static final Logger LOGGER = LoggerFactory.getLogger(KojiClientSession.class);
-
     private static final int DEFAULT_THREAD_COUNT = 1;
 
     private KojiClient client;
 
     private KojiSessionInfo session;
 
+    // FIXME: remove this, then be sure to close()
     public KojiClientSession(KojiClient client) {
         this.client = client;
     }
@@ -57,17 +54,13 @@ public class KojiClientSession implements ClientSession {
         client = new KojiClient(config, passwordManager, executorService);
     }
 
-    public KojiClientSession(String url) throws KojiClientException {
-        client = new KojiClient(new SimpleKojiConfigBuilder().withKojiURL(url).build(), new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT));
+    public KojiClientSession(URL url) throws KojiClientException {
+        client = new KojiClient(new SimpleKojiConfigBuilder().withKojiURL(url.toExternalForm()).build(), new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT));
     }
 
-    public KojiClientSession(String url, String krbService, String krbPrincipal, String krbPassword, String krbCCache, String krbKeytab) throws KojiClientException {
-        client = new KojiClient(new SimpleKojiConfigBuilder().withKojiURL(url).withKrbService(krbService).withKrbCCache(krbCCache).withKrbKeytab(krbKeytab).withKrbPrincipal(krbPrincipal).withKrbPassword(krbPassword).build(), new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT));
-
-        if (krbService != null && ((krbPrincipal != null && krbPassword != null) || krbCCache != null || krbKeytab != null)) {
-            LOGGER.info("Logging into Kerberos service: {}", green(krbService));
-            session = client.login();
-        }
+    public KojiClientSession(URL url, String krbService, String krbPrincipal, String krbPassword, File krbCCache, File krbKeytab) throws KojiClientException {
+        client = new KojiClient(new SimpleKojiConfigBuilder().withKojiURL(url != null ? url.toExternalForm() : null).withKrbService(krbService).withKrbCCache(krbCCache != null ? krbCCache.getPath() : null).withKrbKeytab(krbKeytab != null ? krbKeytab.getPath() : null).withKrbPrincipal(krbPrincipal).withKrbPassword(krbPassword).build(), new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT));
+        session = client.login();
     }
 
     @Override
