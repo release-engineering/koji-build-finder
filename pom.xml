@@ -62,7 +62,7 @@
     <version.com.fasterxml.jackson.core>2.9.6</version.com.fasterxml.jackson.core>
     <version.com.github.stefanbirkner>1.18.0</version.com.github.stefanbirkner>
     <version.com.j2html>1.3.0</version.com.j2html>
-    <version.com.redhat.red.build.kojiji>2.6-SNAPSHOT</version.com.redhat.red.build.kojiji>
+    <version.com.redhat.red.build.kojiji>2.5</version.com.redhat.red.build.kojiji>
     <version.info.picocli>3.4.0</version.info.picocli>
     <version.io.dropwizard.metrics>4.0.3</version.io.dropwizard.metrics>
     <version.junit>4.12</version.junit>
@@ -73,7 +73,7 @@
     <version.org.apache.commons.commons-vfs2>2.2</version.org.apache.commons.commons-vfs2>
     <version.org.bouncycastle>1.60</version.org.bouncycastle>
     <version.org.codehaus.mojo.versions-maven-plugin>2.5</version.org.codehaus.mojo.versions-maven-plugin>
-    <version.org.commonjava.rwx>2.3-SNAPSHOT</version.org.commonjava.rwx>
+    <version.org.commonjava.rwx>2.2</version.org.commonjava.rwx>
     <version.org.commonjava.util>1.8</version.org.commonjava.util>
     <version.org.fusesource.jansi>1.17.1</version.org.fusesource.jansi>
     <version.org.jboss.byteman>4.0.4</version.org.jboss.byteman>
