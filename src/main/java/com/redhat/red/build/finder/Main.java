@@ -352,7 +352,19 @@ public final class Main implements Callable<Void> {
             System.exit(1);
         }
 
-        LOGGER.debug("Configuration:\n{}", config);
+        LOGGER.debug("{}", config);
+
+        if (!config.getChecksumOnly()) {
+            if (config.getKojiHubURL() == null) {
+                LOGGER.error("Must set koji-hub-url");
+                System.exit(1);
+            }
+
+            if (config.getKojiWebURL() == null) {
+                LOGGER.error("Must set koji-web-url");
+                System.exit(1);
+            }
+        }
 
         writeConfiguration(configFile, config);
 
@@ -429,7 +441,7 @@ public final class Main implements Callable<Void> {
                     LOGGER.info("Creating Koji session with Kerberos service: {}", green(krbService));
                     session = new KojiClientSession(config.getKojiHubURL(), krbService, krbPrincipal, krbPassword, krbCCache, krbKeytab);
                 } else {
-                   LOGGER.info("Creating anonymous Koji session");
+                    LOGGER.info("Creating anonymous Koji session");
                     session = new KojiClientSession(config.getKojiHubURL());
                 }
 
@@ -451,7 +463,7 @@ public final class Main implements Callable<Void> {
                 LOGGER.debug("Koji Client Error", e);
                 System.exit(1);
             } catch (IOException e) {
-                LOGGER.error("Error writing builds file: {}", boldRed(e.getMessage()));
+                LOGGER.error("Error finding builds: {}", boldRed(e.getMessage()));
                 LOGGER.debug("Error", e);
                 System.exit(1);
             }
