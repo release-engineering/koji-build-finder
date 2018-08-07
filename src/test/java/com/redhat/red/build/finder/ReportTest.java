@@ -82,7 +82,7 @@ public class ReportTest {
         assertNull(builds.get(0).getSourcesZip());
         assertNull(builds.get(0).getPatchesZip());
         assertNull(builds.get(0).getProjectSourcesTgz());
-        assertNull(builds.get(0).getDuplicateArchives());
+        assertTrue(builds.get(0).getDuplicateArchives().isEmpty());
         assertNotNull(builds.get(0).toString());
 
         assertTrue(builds.get(1).isImport());
@@ -107,7 +107,7 @@ public class ReportTest {
         assertNotNull(builds.get(3).getPatchesZip());
         assertNotNull(builds.get(3).getProjectSourcesTgz());
         assertNotNull(builds.get(3).getTaskRequest().asMavenBuildRequest().getProperties());
-        assertNull(builds.get(3).getDuplicateArchives());
+        assertTrue(builds.get(3).getDuplicateArchives().isEmpty());
         assertNotNull(builds.get(3).toString());
 
         assertTrue(builds.get(4).isMaven());
@@ -117,7 +117,7 @@ public class ReportTest {
         assertNotNull(builds.get(4).getProjectSourcesTgz());
         assertNotNull(builds.get(4).getBuildInfo().getExtra());
         assertTrue((builds.get(4).getMethod().equals("PNC")));
-        assertNull(builds.get(4).getDuplicateArchives());
+        assertTrue(builds.get(4).getDuplicateArchives().isEmpty());
         assertNotNull(builds.get(4).toString());
 
         assertFalse(builds.get(5).isMaven());
@@ -125,7 +125,7 @@ public class ReportTest {
         assertNull(builds.get(5).getSourcesZip());
         assertNull(builds.get(5).getPatchesZip());
         assertNull(builds.get(5).getProjectSourcesTgz());
-        assertNull(builds.get(5).getDuplicateArchives());
+        assertTrue(builds.get(5).getDuplicateArchives().isEmpty());
         assertNotNull(builds.get(5).toString());
     }
 

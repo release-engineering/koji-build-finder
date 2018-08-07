@@ -15,11 +15,19 @@
  */
 package com.redhat.red.build.finder;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.List;
 
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 
-public class KojiLocalArchive {
+public class KojiLocalArchive implements Externalizable {
+    private static final long serialVersionUID = -6388497659567932834L;
+
+    private static int VERSION = 1;
+
     private KojiArchiveInfo archive;
 
     private List<String> files;
@@ -47,5 +55,25 @@ public class KojiLocalArchive {
 
     public void setFiles(List<String> files) {
         this.files = files;
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeInt(VERSION);
+        out.writeObject(archive);
+        out.writeObject(files);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        int version = in.readInt();
+
+        if (version != 1) {
+            throw new IOException("Invalid version: " + version);
+        }
+
+        archive = (KojiArchiveInfo) in.readObject();
+        files = (List<String>) in.readObject();
     }
 }

@@ -34,11 +34,20 @@ public class BuildConfig {
     @JsonProperty("archive-types")
     private List<String> archiveTypes;
 
+    @JsonProperty("cache-lifespan")
+    private Long cacheLifespan;
+
+    @JsonProperty("cache-max-idle")
+    private Long cacheMaxIdle;
+
     @JsonProperty("checksum-only")
     private Boolean checksumOnly;
 
     @JsonProperty("checksum-type")
     private KojiChecksumType checksumType;
+
+    @JsonProperty("disable-cache")
+    private Boolean disableCache;
 
     @JsonProperty("excludes")
     private List<Pattern> excludes;
@@ -48,6 +57,12 @@ public class BuildConfig {
 
     @JsonProperty("koji-web-url")
     private URL kojiWebURL;
+
+    @JsonProperty("use-builds-file")
+    private Boolean useBuildsFile;
+
+    @JsonProperty("use-checksums-file")
+    private Boolean useChecksumsFile;
 
     public BuildConfig() {
 
@@ -98,6 +113,30 @@ public class BuildConfig {
         this.archiveTypes = archiveTypes;
     }
 
+    public long getCacheLifespan() {
+        if (cacheLifespan == null) {
+            cacheLifespan = ConfigDefaults.CACHE_LIFESPAN;
+        }
+
+        return cacheLifespan;
+    }
+
+    public void setCacheLifespan(long cacheLifespan) {
+        this.cacheLifespan = cacheLifespan;
+    }
+
+    public long getCacheMaxIdle() {
+        if (cacheMaxIdle == null) {
+            cacheMaxIdle = ConfigDefaults.CACHE_MAX_IDLE;
+        }
+
+        return cacheMaxIdle;
+    }
+
+    public void setCacheMaxIdle(long cacheMaxIdle) {
+        this.cacheMaxIdle = cacheMaxIdle;
+    }
+
     public boolean getChecksumOnly() {
         if (checksumOnly == null) {
             checksumOnly = ConfigDefaults.CHECKSUM_ONLY;
@@ -120,6 +159,18 @@ public class BuildConfig {
 
     public void setChecksumType(KojiChecksumType checksumType) {
         this.checksumType = checksumType;
+    }
+
+    public boolean getDisableCache() {
+        if (disableCache == null) {
+            disableCache = ConfigDefaults.DISABLE_CACHE;
+        }
+
+        return disableCache;
+    }
+
+    public void setDisableCache(boolean disableCache) {
+        this.disableCache = disableCache;
     }
 
     public List<Pattern> getExcludes() {
@@ -158,16 +209,46 @@ public class BuildConfig {
         this.kojiWebURL = kojiWebURL;
     }
 
+    public boolean getUseBuildsFile() {
+        if (useBuildsFile == null) {
+            useBuildsFile = ConfigDefaults.USE_BUILDS_FILE;
+        }
+
+        return useBuildsFile;
+    }
+
+    public void setUseBuildsFile(boolean useBuildsFile) {
+        this.useBuildsFile = useBuildsFile;
+    }
+
+
+    public boolean getUseChecksumsFile() {
+        if (useChecksumsFile == null) {
+            useChecksumsFile = ConfigDefaults.USE_CHECKSUMS_FILE;
+        }
+
+        return useChecksumsFile;
+    }
+
+    public void setUseChecksumsFile(boolean useChecksumsFile) {
+        this.useChecksumsFile = useChecksumsFile;
+    }
+
     @Override
     public String toString() {
         return "BuildConfig{"
             + "\n\tarchiveExtensions=" + getArchiveExtensions()
             + ", \n\tarchiveTypes=" + getArchiveTypes()
+            + ", \n\tcacheLifespan=" + getCacheLifespan()
+            + ", \n\tcacheMaxIdle=" + getCacheMaxIdle()
             + ", \n\tchecksumOnly=" + getChecksumOnly()
             + ", \n\tchecksumType=" + getChecksumType()
+            + ", \n\tdisableCache=" + getDisableCache()
             + ", \n\texcludes=" + getExcludes()
-            + ", \n\tkojiHubURL='" + getKojiHubURL()
-            + '\'' + ", \n\tkojiWebURL='" + getKojiWebURL()
-            + '\'' + '}';
+            + ", \n\tkojiHubURL=" + getKojiHubURL()
+            + ", \n\tkojiWebURL=" + getKojiWebURL()
+            + ", \n\tuseBuildsFile=" + getUseBuildsFile()
+            + ", \n\tuseChecksumsFile='" + getUseChecksumsFile()
+            + "}";
     }
 }

@@ -102,7 +102,7 @@ public class MainTest {
         String krbPrincipal = "test@TEST.ABC";
         String krbService = "testService";
 
-        String[] args = new String[] {"-o", outputDirectory.toString(), "-c", configFile.toString(), "-k", "-t", "sha256", "-x", "", "-a", "jar", "-e", "jar", "--koji-hub-url", hubURL.toString(), "--koji-web-url", webURL.toString(), "--krb-ccache", krbCcache.toString(), "--krb-keytab", krbKeytab.toString(), "--krb-principal", krbPrincipal, "--krb-service", krbService.toString(), "--krb-password", krbPassword.toString(), inputFile.toString()};
+        String[] args = new String[] {"-o", outputDirectory.toString(), "-c", configFile.toString(), "--disable-cache", "-k", "-t", "sha256", "-x", "", "-a", "jar", "-e", "jar", "--koji-hub-url", hubURL.toString(), "--koji-web-url", webURL.toString(), "--krb-ccache", krbCcache.toString(), "--krb-keytab", krbKeytab.toString(), "--krb-principal", krbPrincipal, "--krb-service", krbService.toString(), "--krb-password", krbPassword.toString(), inputFile.toString()};
 
         ParseResult parseResult = parseCommandLine(new Main(), args);
 
@@ -145,7 +145,7 @@ public class MainTest {
         File configFile = TestUtils.loadFile("config.json");
         File inputFile = TestUtils.loadFile("nested.war");
 
-        String[] args = new String[] {"--output-directory", outputDirectory.toString(), "--config", configFile.toString(), "--checksum-only", "--checksum-type", "sha256", inputFile.toString()};
+        String[] args = new String[] {"--output-directory", outputDirectory.toString(), "--config", configFile.toString(), "--disable-cache", "--checksum-only", "--checksum-type", "sha256", inputFile.toString()};
 
         ParseResult parseResult = parseCommandLine(new Main(), args);
 
@@ -182,7 +182,7 @@ public class MainTest {
 
             assertFalse(root.isDebugEnabled());
 
-            String[] args = new String[] {"--output-directory", outputDirectory.toString(), "--config", configFile.toString(), "--checksum-only", "--checksum-type", "md5", "--debug", inputFile.toString()};
+            String[] args = new String[] {"--output-directory", outputDirectory.toString(), "--config", configFile.toString(), "--disable-cache", "--checksum-only", "--checksum-type", "md5", "--debug", inputFile.toString()};
 
             ParseResult parseResult = parseCommandLine(new Main(), args);
 
@@ -226,7 +226,7 @@ public class MainTest {
 
             assertTrue(root.isEnabledFor(Level.INFO));
 
-            String[] args = new String[] {"--output-directory", outputDirectory.toString(), "--config", configFile.toString(), "--checksum-only", "--checksum-type", "md5", "--quiet", inputFile.toString()};
+            String[] args = new String[] {"--output-directory", outputDirectory.toString(), "--config", configFile.toString(), "--disable-cache", "--checksum-only", "--checksum-type", "md5", "--quiet", inputFile.toString()};
 
             ParseResult parseResult = parseCommandLine(new Main(), args);
 

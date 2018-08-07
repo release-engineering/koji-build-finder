@@ -38,6 +38,8 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
+import org.infinispan.Cache;
+import org.infinispan.manager.EmbeddedCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,11 +75,27 @@ public class BuildFinder {
 
     private List<String> archiveExtensions;
 
+    private Cache<String, Integer> checksumCache;
+
+    private Cache<Integer, KojiBuild> buildCache;
+
+    private EmbeddedCacheManager cacheManager;
+
     public BuildFinder(ClientSession session, BuildConfig config) {
+        this(session, config, null);
+    }
+
+    public BuildFinder(ClientSession session, BuildConfig config, EmbeddedCacheManager cacheManager) {
         this.session = session;
         this.config = config;
         this.outputDirectory = new File("");
         this.checksumMap = new ArrayListValuedHashMap<>();
+        this.cacheManager = cacheManager;
+
+        if (cacheManager != null) {
+            this.buildCache = cacheManager.getCache("builds");
+            this.checksumCache = cacheManager.getCache("checksums");
+        }
 
         initBuilds();
     }
@@ -138,14 +156,28 @@ public class BuildFinder {
     }
 
     private KojiBuild lookupBuild(int buildId, String checksum, KojiArchiveInfo archive, Collection<String> filenames) throws KojiClientException {
-        if (builds.containsKey(buildId)) {
+        KojiBuild cachedBuild = builds.get(buildId);
+
+        if (cachedBuild != null) {
             LOGGER.debug("Build id: {} checksum: {} archive: {} filenames: {} is in cache", buildId, checksum, archive.getArchiveId(), filenames);
 
-            KojiBuild build = builds.get(buildId);
+            addArchiveToBuild(cachedBuild, archive, filenames);
 
-            addArchiveToBuild(build, archive, filenames);
+            return cachedBuild;
+        }
 
-            return build;
+        if (cacheManager != null) {
+            cachedBuild = buildCache.get(buildId);
+
+            if (cachedBuild != null) {
+                builds.put(buildId, cachedBuild);
+
+                LOGGER.debug("Build id: {} checksum: {} archive: {} filenames: {} is in global cache", buildId, checksum, archive.getArchiveId(), filenames);
+
+                addArchiveToBuild(cachedBuild, archive, filenames);
+
+                return cachedBuild;
+            }
         }
 
         LOGGER.debug("Build id: {} checksum: {} archive: {} filenames: {} is not cached", buildId, checksum, archive.getArchiveId(), filenames);
@@ -195,6 +227,12 @@ public class BuildFinder {
         build.setRemoteArchives(allArchives);
         build.setTags(tags);
         build.setTypes(buildInfo.getTypeNames());
+
+        if (cacheManager != null) {
+            LOGGER.debug("Putting build id {} in global cache", buildId);
+
+            buildCache.put(buildId, build);
+        }
 
         return build;
     }
@@ -255,7 +293,7 @@ public class BuildFinder {
         } else {
              build.getArchives().add(new KojiLocalArchive(archive, filenames));
 
-            LOGGER.debug("Added new archive id {} to build id {} with {} archives", archive.getArchiveId(), archive.getBuildId(), build.getArchives().size());
+             LOGGER.debug("Added new archive id {} to build id {} with {} archives", archive.getArchiveId(), archive.getBuildId(), build.getArchives().size());
         }
 
         build.getArchives().sort((KojiLocalArchive a1, KojiLocalArchive a2) -> a1.getArchive().getFilename().compareTo(a2.getArchive().getFilename()));
@@ -291,7 +329,11 @@ public class BuildFinder {
         List<KojiBuild> cachedBuilds = foundBuilds.stream().filter(b -> builds.get(b.getBuildInfo().getId()) != null).collect(Collectors.toList());
 
         if (!cachedBuilds.isEmpty()) {
-            return cachedBuilds.get(cachedBuilds.size() - 1);
+            KojiBuild b = cachedBuilds.get(cachedBuilds.size() - 1);
+
+            LOGGER.debug("Found suitable cached build id {}", b.getBuildInfo().getId());
+
+            return b;
         }
 
         LOGGER.debug("Found {} builds containing archive with checksum {}", foundBuilds.size(), archives.get(0).getChecksum());
@@ -362,10 +404,33 @@ public class BuildFinder {
 
             LOGGER.debug("Looking up archives for checksum: {}", checksum);
 
-            if (checksumMap.containsKey(checksum)) {
-                LOGGER.debug("Found cached checksum for checksum {}", checksum);
+            if (cacheManager != null) {
+                Integer cachedBuildId = checksumCache.get(checksum);
 
-                Collection<Integer> ids = checksumMap.get(checksum);
+                if (cachedBuildId != null) {
+                    KojiBuild cachedBuild = buildCache.get(cachedBuildId);
+
+                    if (cachedBuild != null) {
+                        List<KojiArchiveInfo> archives = cachedBuild.getRemoteArchives().stream().filter(a -> a.getBuildId().intValue() == cachedBuild.getBuildInfo().getId() && a.getChecksum().equals(checksum)).collect(Collectors.toList());
+                        String archiveFilenames = archives.stream().map(KojiArchiveInfo::getFilename).collect(Collectors.joining(", "));
+
+                        archives.forEach(a -> {
+                            LOGGER.info("Found build: id: {} nvr: {} checksum: {} archive: {} (cached)", green(cachedBuild.getBuildInfo().getId()), green(cachedBuild.getBuildInfo().getNvr()), green(checksum), green(archiveFilenames));
+
+                            addArchiveToBuild(cachedBuild, a, filenames);
+                        });
+
+                        builds.put(cachedBuild.getBuildInfo().getId(), cachedBuild);
+
+                        continue;
+                    }
+                }
+            }
+
+            Collection<Integer> ids = checksumMap.get(checksum);
+
+            if (!ids.isEmpty()) {
+                LOGGER.debug("Found cached checksum for checksum {} with ids {}", checksum, ids);
 
                 for (int id : ids) {
                     KojiBuild build = builds.get(id);
@@ -442,6 +507,10 @@ public class BuildFinder {
             LOGGER.info("Found build: id: {} nvr: {} checksum: {} archive: {}", green(bestBuild.getBuildInfo().getId()), green(bestBuild.getBuildInfo().getNvr()), green(checksum), green(archiveFilenames));
 
             builds.put(bestBuild.getBuildInfo().getId(), bestBuild);
+
+            if (cacheManager != null) {
+                checksumCache.put(checksum, bestBuild.getBuildInfo().getId());
+            }
 
             LOGGER.debug("Number of builds found: {}", builds.size());
         }

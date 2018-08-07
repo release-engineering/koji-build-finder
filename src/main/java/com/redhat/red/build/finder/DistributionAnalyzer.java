@@ -36,6 +36,8 @@ import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
+import org.infinispan.Cache;
+import org.infinispan.manager.EmbeddedCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +65,10 @@ public class DistributionAnalyzer {
 
     private BuildConfig config;
 
+    private Cache<String, MultiValuedMap<String, String>> fileCache;
+
+    private EmbeddedCacheManager cacheManager;
+
     public boolean includeFile(FileObject fo) {
         boolean excludeExtension = config.getArchiveExtensions() != null && !config.getArchiveExtensions().isEmpty() && !config.getArchiveExtensions().stream().anyMatch(x -> x.equals(fo.getName().getExtension()));
         boolean excludeFile = false;
@@ -78,9 +84,19 @@ public class DistributionAnalyzer {
     }
 
     public DistributionAnalyzer(List<File> files, BuildConfig config) {
+        this(files, config, null);
+    }
+
+    public DistributionAnalyzer(List<File> files, BuildConfig config, EmbeddedCacheManager cacheManager) {
         this.files = files;
         this.config = config;
         this.map = new ArrayListValuedHashMap<>();
+
+        this.cacheManager = cacheManager;
+
+        if (cacheManager != null) {
+            this.fileCache = cacheManager.getCache("files");
+        }
     }
 
     public MultiValuedMap<String, String> checksumFiles() throws IOException {
@@ -92,8 +108,37 @@ public class DistributionAnalyzer {
         try {
             for (File file : files) {
                 try (FileObject fo = sfs.resolveFile(file.getAbsolutePath())) {
+                    String checksum = null;
+                    MultiValuedMap<String, String> map = null;
+                    boolean doPut = false;
+
+                    if (cacheManager != null) {
+                        checksum = checksum(fo);
+                        map = fileCache.get(checksum);
+
+                        if (map != null) {
+                            if (this.map == null) {
+                                this.map = map;
+                            } else {
+                                this.map.putAll(map);
+                            }
+
+                            LOGGER.info("Loaded checksums for file {} (checksum {}) from cache", green(file.getName()), green(checksum));
+                        } else {
+                            LOGGER.info("File {} (checksum {}) not found in cache", green(file.getName()), green(checksum));
+
+                            this.map = new ArrayListValuedHashMap<>();
+                            doPut = true;
+                        }
+                    }
+
                     rootString = fo.getName().getFriendlyURI().substring(0, fo.getName().getFriendlyURI().indexOf(fo.getName().getBaseName()));
                     listChildren(fo);
+
+                    if (fileCache != null && doPut) {
+                        fileCache.put(checksum, this.map);
+                        doPut = false;
+                    }
                 }
             }
         } finally {
@@ -131,7 +176,8 @@ public class DistributionAnalyzer {
             listChildren(layered);
             sfs.closeFileSystem(layered.getFileSystem());
         } catch (FileSystemException e) {
-            LOGGER.warn("Unable to process archive/compressed file: {}", red(normalizePath(fo)));
+            // TODO: store checksum/filename/error so that we can flag the file
+            LOGGER.warn("Unable to process archive/compressed file: {}: {}", red(normalizePath(fo)), red(e.getMessage()));
             LOGGER.debug("Caught file system exception", e);
         }
     }

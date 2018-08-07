@@ -30,6 +30,7 @@
   <logger name="org.apache.kerby" level="WARN" />
   <logger name="org.commonjava.util.jhttpc" level="WARN" />
   <logger name="org.commonjava.rwx" level="WARN" />
+  <logger name="org.infinispan" level="WARN" />
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />

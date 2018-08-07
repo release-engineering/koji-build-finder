@@ -15,9 +15,17 @@
  */
 package com.redhat.red.build.finder;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import org.infinispan.commons.marshall.AdvancedExternalizer;
+import org.infinispan.commons.marshall.SerializeWith;
+import org.infinispan.commons.util.Util;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
@@ -27,6 +35,7 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiTagInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskRequest;
 
+@SerializeWith(KojiBuild.KojiBuildExternalizer.class)
 public class KojiBuild {
     private static final String KEY_VERSION = "version";
 
@@ -38,20 +47,21 @@ public class KojiBuild {
 
     private KojiTaskInfo taskInfo;
 
-    private KojiTaskRequest taskRequest;
+    private transient KojiTaskRequest taskRequest;
 
-    private List<KojiLocalArchive> archives;
+    private transient List<KojiLocalArchive> archives;
 
     private List<KojiArchiveInfo> remoteArchives;
 
     private List<KojiTagInfo> tags;
 
-    private List<String> types;
+    private transient List<String> types;
 
-    private List<KojiArchiveInfo> duplicateArchives;
+    private transient List<KojiArchiveInfo> duplicateArchives;
 
     public KojiBuild() {
-
+        this.archives = new ArrayList<>();
+        this.duplicateArchives = new ArrayList<>();
     }
 
     public KojiBuild(KojiBuildInfo buildInfo) {
@@ -87,6 +97,12 @@ public class KojiBuild {
     }
 
     public KojiTaskRequest getTaskRequest() {
+        if (taskRequest == null) {
+            if (taskInfo != null && taskInfo.getRequest() != null) {
+                taskRequest = new KojiTaskRequest(taskInfo.getRequest());
+            }
+        }
+
         return taskRequest;
     }
 
@@ -119,6 +135,12 @@ public class KojiBuild {
     }
 
     public List<String> getTypes() {
+        if (types == null) {
+            if (buildInfo != null && buildInfo.getTypeNames() != null) {
+                types = buildInfo.getTypeNames();
+            }
+        }
+
         return types;
     }
 
@@ -196,7 +218,7 @@ public class KojiBuild {
             }
         }
 
-        if (taskRequest != null) {
+        if (getTaskRequest() != null) {
             KojiBuildRequest buildRequest = taskRequest.asBuildRequest();
 
             if (buildRequest != null) {
@@ -247,5 +269,53 @@ public class KojiBuild {
         return "KojiBuild [buildInfo=" + buildInfo + ", taskInfo=" + taskInfo + ", taskRequest=" + taskRequest
                 + ", archives=" + archives + ", remoteArchives=" + remoteArchives + ", tags=" + tags
                 + ", duplicateArchives=" + duplicateArchives + "]";
+    }
+
+    public static class KojiBuildExternalizer implements AdvancedExternalizer<KojiBuild> {
+        private static final long serialVersionUID = 8698588352614405297L;
+
+        private static final int VERSION = 1;
+
+        private static final Integer ID = (Character.getNumericValue('K') << 16) | (Character.getNumericValue('B') << 8) | Character.getNumericValue('F');
+
+        @Override
+        public void writeObject(ObjectOutput output, KojiBuild build) throws IOException {
+            output.writeInt(VERSION);
+            output.writeObject(build.buildInfo);
+            output.writeObject(build.taskInfo);
+            output.writeObject(build.remoteArchives);
+            output.writeObject(build.tags);
+            output.writeObject(build.types);
+         }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public KojiBuild readObject(ObjectInput input) throws IOException, ClassNotFoundException {
+            int version = input.readInt();
+
+            if (version != 1) {
+                throw new IOException("Invalid version: " + version);
+            }
+
+            KojiBuild build = new KojiBuild();
+
+            build.setBuildInfo((KojiBuildInfo) input.readObject());
+            build.setTaskInfo((KojiTaskInfo) input.readObject());
+            build.setRemoteArchives((List<KojiArchiveInfo>) input.readObject());
+            build.setTags((List<KojiTagInfo>) input.readObject());
+            build.setTypes((List<String>) input.readObject());
+
+            return build;
+        }
+
+        @Override
+        public Set<Class<? extends KojiBuild>> getTypeClasses() {
+            return Util.<Class<? extends KojiBuild>>asSet(KojiBuild.class);
+        }
+
+        @Override
+        public Integer getId() {
+            return ID;
+        }
     }
 }

@@ -38,6 +38,11 @@ To see the available options, execute the command `java -jar target/koji-build-f
     Usage: koji-build-finder [OPTIONS] FILE...
     Finds builds in Koji.
           FILE...                One or more files.
+          --cache-lifespan=LONG  Specify cache lifespan.
+                                   Default: -1
+          --cache-max-idle=LONG  Specify cache maximum idle time.
+                                   Default: -1
+          --disable-cache        Disable local cache.
           --koji-hub-url=URL     Set Koji hub URL.
           --koji-web-url=URL     Set Koji web URL.
           --krb-ccache=FILE      Set location of Kerberos credential cache.
@@ -45,6 +50,8 @@ To see the available options, execute the command `java -jar target/koji-build-f
           --krb-password=STRING  Set Kerberos password.
           --krb-principal=STRING Set Kerberos client principal.
           --krb-service=STRING   Set Kerberos client service.
+          --use-builds-file      Use builds file.
+          --use-checksums-file   Use checksums file.
       -a, --archive-type=STRING  Add a Koji archive type to check.
                                    Default: [jar, xml, pom, so, dll, dylib]
       -c, --config=FILE          Specify configuration file to use.
@@ -97,9 +104,14 @@ The configuration file is in JSON format. The default configuration file, `confi
     {
       "archive-extensions" : [ "dll", "dylib", "ear", "jar", "jdocbook", "jdocbook-style", "kar", "plugin", "pom", "rar", "sar", "so", "war", "xml" ],
       "archive-types" : [ "jar", "xml", "pom", "so", "dll", "dylib" ],
+      "cache-lifespan" : -1,
+      "cache-max-idle" : -1,
       "checksum-only" : false,
       "checksum-type" : "md5",
-      "excludes" : [ "^(?!.*/pom\\.xml$).*/.*\\.xml$" ]
+      "disable-cache" : false,
+      "excludes" : [ "^(?!.*/pom\\.xml$).*/.*\\.xml$" ],
+      "use-builds-file" : false,
+      "use-checksums-file" : false
     }
 
 The `archive-extensions` option specifies the Koji archive type extensions to include in the archive search. If this option is given, it will override the `archive-types` option and only files matching the extensions will have their checksums taken.

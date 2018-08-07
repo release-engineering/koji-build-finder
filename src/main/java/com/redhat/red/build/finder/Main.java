@@ -33,6 +33,12 @@ import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.infinispan.configuration.cache.Configuration;
+import org.infinispan.configuration.cache.ConfigurationBuilder;
+import org.infinispan.configuration.global.GlobalConfiguration;
+import org.infinispan.configuration.global.GlobalConfigurationBuilder;
+import org.infinispan.manager.DefaultCacheManager;
+import org.infinispan.manager.EmbeddedCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,17 +71,28 @@ import picocli.CommandLine.Spec;
 public final class Main implements Callable<Void> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
+    private static EmbeddedCacheManager cacheManager;
+
     @Spec
     private CommandSpec commandSpec;
 
     @Option(names = {"-a", "--archive-type"}, paramLabel = "STRING", description = "Add a Koji archive type to check.", converter = FilenameConverter.class)
     private List<String> archiveTypes = ConfigDefaults.ARCHIVE_TYPES;
 
+    @Option(names = {"--cache-lifespan"}, paramLabel = "LONG", description = "Specify cache lifespan.")
+    private Long cacheLifespan = ConfigDefaults.CACHE_LIFESPAN;
+
+    @Option(names = {"--cache-max-idle"}, paramLabel = "LONG", description = "Specify cache maximum idle time.")
+    private Long cacheMaxIdle = ConfigDefaults.CACHE_MAX_IDLE;
+
     @Option(names = {"-c", "--config"}, paramLabel = "FILE", description = "Specify configuration file to use.")
     private File configFile = new File(ConfigDefaults.CONFIG);
 
     @Option(names = {"-d", "--debug"}, description = "Enable debug logging.")
     private boolean debug = false;
+
+    @Option(names = {"--disable-cache"}, description = "Disable local cache.")
+    private boolean disableCache = ConfigDefaults.DISABLE_CACHE;
 
     @Option(names = {"-e", "--archive-extension"}, paramLabel = "STRING", description = "Add a Koji archive type extension to check.", converter = FilenameConverter.class)
     private List<String> archiveExtensions = ConfigDefaults.ARCHIVE_EXTENSIONS;
@@ -113,6 +130,12 @@ public final class Main implements Callable<Void> {
     @Option(names = {"-t", "--checksum-type"}, paramLabel = "CHECKSUM", description = "Set checksum type (${COMPLETION-CANDIDATES}).")
     private KojiChecksumType checksumType = ConfigDefaults.CHECKSUM_TYPE;
 
+    @Option(names = {"--use-builds-file"}, description = "Use builds file.")
+    private boolean useBuildsFile = ConfigDefaults.USE_BUILDS_FILE;
+
+    @Option(names = {"--use-checksums-file"}, description = "Use checksums file.")
+    private boolean useChecksumsFile = ConfigDefaults.USE_CHECKSUMS_FILE;
+
     @Option(names = {"-x", "--exclude"}, paramLabel = "PATTERN", description = "Add a pattern to exclude from build lookup.")
     private List<Pattern> excludes = ConfigDefaults.EXCLUDES;
 
@@ -133,6 +156,8 @@ public final class Main implements Callable<Void> {
             LOGGER.error("{}", boldRed(e.getMessage()), e);
             LOGGER.debug("Error", e);
             System.exit(1);
+        } finally {
+            closeCaches();
         }
 
         System.exit(0);
@@ -146,6 +171,21 @@ public final class Main implements Callable<Void> {
         } else {
             LOGGER.info("Configuration file {} does not exist. Implicitly creating with defaults.", green(configFile));
             config = new BuildConfig();
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--cache-lifespan")) {
+            config.setCacheLifespan(cacheLifespan);
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--cache-max-idle")) {
+            config.setCacheMaxIdle(cacheMaxIdle);
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--disable-cache")) {
+            config.setDisableCache(disableCache);
+            LOGGER.info("Local cache is disabled");
+        } else {
+            LOGGER.info("Using local cache: lifespan: {}, maxIdle: {}", green(config.getCacheLifespan()), green(config.getCacheMaxIdle()));
         }
 
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("-k")) {
@@ -196,11 +236,44 @@ public final class Main implements Callable<Void> {
             LOGGER.debug("Read Kerberos password");
         }
 
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--use-builds-file")) {
+            config.setUseBuildsFile(useBuildsFile);
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--use-checksums-file")) {
+            config.setUseChecksumsFile(useChecksumsFile);
+        }
+
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("-o")) {
             LOGGER.info("Output will be stored in directory: {}", green(outputDirectory));
         }
 
         return config;
+    }
+
+    private static void initCaches(BuildConfig config) {
+        KojiBuild.KojiBuildExternalizer externalizer = new KojiBuild.KojiBuildExternalizer();
+        GlobalConfiguration globalConfig = new GlobalConfigurationBuilder().serialization().addAdvancedExternalizer(externalizer.getId(), externalizer).build();
+
+        cacheManager = new DefaultCacheManager(globalConfig);
+
+        String location = new File(ConfigDefaults.CONFIG).getParent();
+        Configuration configuration = new ConfigurationBuilder().expiration().lifespan(config.getCacheLifespan()).maxIdle(config.getCacheMaxIdle()).wakeUpInterval(-1L).persistence().passivation(false).addSingleFileStore().shared(false).preload(true).fetchPersistentState(true).purgeOnStartup(false).location(location).build();
+
+        cacheManager.defineConfiguration("files", configuration);
+        cacheManager.defineConfiguration("checksums", configuration);
+        cacheManager.defineConfiguration("builds", configuration);
+    }
+
+    private static void closeCaches() {
+        try {
+            if (cacheManager != null) {
+                cacheManager.close();
+                cacheManager = null;
+            }
+        } catch (IOException e) {
+            LOGGER.debug("Error", e);
+        }
     }
 
     public void writeConfiguration(File configFile, BuildConfig config) {
@@ -215,15 +288,11 @@ public final class Main implements Callable<Void> {
                 }
             }
 
-            if (configFile.canWrite()) {
-                try {
-                    JSONUtils.dumpObjectToFile(config, configFile);
-                } catch (IOException e) {
-                    LOGGER.warn("Error writing configuration file: {}", red(e.getMessage()));
-                    LOGGER.debug("Error", e);
-                }
-            } else {
-                LOGGER.warn("Could not write configuration file: {}", red(configFile));
+            try {
+                JSONUtils.dumpObjectToFile(config, configFile);
+            } catch (IOException e) {
+                LOGGER.warn("Error writing configuration file: {}", red(e.getMessage()));
+                LOGGER.debug("Error", e);
             }
         }
     }
@@ -294,10 +363,23 @@ public final class Main implements Callable<Void> {
 
         LOGGER.info("Checksum type: {}", green(config.getChecksumType()));
 
-        if (!checksumFile.exists()) {
+        if (config.getUseChecksumsFile() && checksumFile.exists()) {
+            try {
+                LOGGER.info("Loading checksums from file: {}", green(checksumFile));
+                checksums = JSONUtils.loadChecksumsFile(checksumFile);
+            } catch (IOException e) {
+                LOGGER.error("Error loading checksums file: {}", boldRed(e.getMessage()));
+                LOGGER.debug("Error", e);
+                System.exit(1);
+            }
+        } else {
             LOGGER.info("Calculating checksums for files: {}", green(inputs));
 
-            DistributionAnalyzer da = new DistributionAnalyzer(inputs, config);
+            if (cacheManager == null && !config.getDisableCache()) {
+                initCaches(config);
+            }
+
+            DistributionAnalyzer da = new DistributionAnalyzer(inputs, config, cacheManager);
 
             try {
                 checksums = da.checksumFiles().asMap();
@@ -307,21 +389,14 @@ public final class Main implements Callable<Void> {
                 System.exit(1);
             }
 
-            try {
-                da.outputToFile(checksumFile);
-            } catch (IOException e) {
-                LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
-                LOGGER.debug("Error", e);
-                System.exit(1);
-            }
-        } else {
-            try {
-                LOGGER.info("Loading checksums from file: {}", green(checksumFile));
-                checksums = JSONUtils.loadChecksumsFile(checksumFile);
-            } catch (IOException e) {
-                LOGGER.error("Error loading checksums file: {}", boldRed(e.getMessage()));
-                LOGGER.debug("Error", e);
-                System.exit(1);
+            if (config.getUseChecksumsFile()) {
+                try {
+                    da.outputToFile(checksumFile);
+                } catch (IOException e) {
+                    LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
+                    LOGGER.debug("Error", e);
+                    System.exit(1);
+                }
             }
         }
 
@@ -338,7 +413,7 @@ public final class Main implements Callable<Void> {
         Map<Integer, KojiBuild> builds = null;
         File buildsFile = new File(outputDirectory, BuildFinder.getBuildsFilename());
 
-        if (buildsFile.exists()) {
+        if (config.getUseBuildsFile() && buildsFile.exists()) {
             LOGGER.info("Loading builds from file: {}", green(buildsFile.getPath()));
 
             try {
@@ -358,12 +433,19 @@ public final class Main implements Callable<Void> {
                     session = new KojiClientSession(config.getKojiHubURL());
                 }
 
-                finder = new BuildFinder(session, config);
+                if (cacheManager == null && !config.getDisableCache()) {
+                    initCaches(config);
+                }
+
+                finder = new BuildFinder(session, config, cacheManager);
 
                 finder.setOutputDirectory(outputDirectory);
 
                 builds = finder.findBuilds(checksums);
-                JSONUtils.dumpObjectToFile(builds, buildsFile);
+
+                if (config.getUseBuildsFile()) {
+                    JSONUtils.dumpObjectToFile(builds, buildsFile);
+                }
             } catch (KojiClientException e) {
                 LOGGER.error("Failed to find builds: {}", boldRed(e.getMessage()));
                 LOGGER.debug("Koji Client Error", e);

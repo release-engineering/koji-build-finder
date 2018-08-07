@@ -35,15 +35,25 @@ public abstract class ConfigDefaults {
 
     public static final List<String> ARCHIVE_EXTENSIONS = Collections.unmodifiableList(Arrays.asList("dll", "dylib", "ear", "jar", "jdocbook", "jdocbook-style", "kar", "plugin", "pom", "rar", "sar", "so", "war", "xml"));
 
+    public static final Long CACHE_LIFESPAN = -1L;
+
+    public static final Long CACHE_MAX_IDLE = -1L;
+
     public static final Boolean CHECKSUM_ONLY = Boolean.FALSE;
 
     public static final KojiChecksumType CHECKSUM_TYPE = KojiChecksumType.md5;
 
     public static final String CONFIG = FileUtils.getUserDirectoryPath() + File.separator + ".koji-build-finder" + File.separator + "config.json";
 
+    public static final Boolean DISABLE_CACHE = Boolean.FALSE;
+
     public static final List<Pattern> EXCLUDES = Collections.unmodifiableList(Arrays.asList(Pattern.compile("^(?!.*/pom\\.xml$).*/.*\\.xml$")));
 
     public static final URL KOJI_HUB_URL = null;
 
     public static final URL KOJI_WEB_URL = null;
+
+    public static final Boolean USE_BUILDS_FILE = Boolean.FALSE;
+
+    public static final Boolean USE_CHECKSUMS_FILE = Boolean.FALSE;
 }
