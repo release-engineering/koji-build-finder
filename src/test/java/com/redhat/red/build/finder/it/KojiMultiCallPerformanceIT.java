@@ -37,7 +37,7 @@ public class KojiMultiCallPerformanceIT extends AbstractKojiPerformanceIT {
 
             try {
                 for (List<Integer> chunk : chunks) {
-                    getKojiClient().multiCall(Constants.GET_BUILD, (List) chunk, KojiBuildInfo.class, getSession());
+                    getKojiClientSession().multiCall(Constants.GET_BUILD, (List) chunk, KojiBuildInfo.class, null);
                 }
 
             } finally {

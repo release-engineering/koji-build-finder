@@ -36,11 +36,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.red.build.finder.BuildConfig;
 import com.redhat.red.build.finder.ConfigDefaults;
-import com.redhat.red.build.koji.KojiClient;
+import com.redhat.red.build.finder.KojiClientSession;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.config.SimpleKojiConfig;
 import com.redhat.red.build.koji.config.SimpleKojiConfigBuilder;
-import com.redhat.red.build.koji.model.xmlrpc.KojiSessionInfo;
 
 public abstract class AbstractKojiIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractKojiIT.class);
@@ -49,9 +48,7 @@ public abstract class AbstractKojiIT {
 
     private ScheduledReporter reporter;
 
-    private KojiClient kojiClient;
-
-    private KojiSessionInfo session;
+    private KojiClientSession session;
 
     private BuildConfig config;
 
@@ -84,18 +81,14 @@ public abstract class AbstractKojiIT {
 
         final SimpleKojiConfig kojiConfig = new SimpleKojiConfigBuilder().withKojiURL(kojiHubURL.toExternalForm()).withMaxConnections(MAX_CONNECTIONS).build();
 
-        this.kojiClient = new KojiClient(kojiConfig, new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT), REGISTRY);
+        this.session = new KojiClientSession(kojiConfig, new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT), REGISTRY);
 
         this.reporter = Slf4jReporter.forRegistry(REGISTRY).outputTo(LOGGER).convertRatesTo(TimeUnit.SECONDS).convertDurationsTo(TimeUnit.SECONDS).build();
 
         reporter.start(600, TimeUnit.SECONDS);
     }
 
-    public KojiClient getKojiClient() {
-        return kojiClient;
-    }
-
-    public KojiSessionInfo getSession() {
+    public KojiClientSession getKojiClientSession() {
         return session;
     }
 
@@ -105,8 +98,8 @@ public abstract class AbstractKojiIT {
 
     @After
     public void tearDown() {
-        if (kojiClient != null) {
-            kojiClient.close();
+        if (session != null) {
+            session.close();
         }
 
         if (reporter != null) {

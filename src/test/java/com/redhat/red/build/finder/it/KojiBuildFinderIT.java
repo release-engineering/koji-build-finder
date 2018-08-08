@@ -34,7 +34,6 @@ import com.codahale.metrics.Timer;
 import com.redhat.red.build.finder.BuildFinder;
 import com.redhat.red.build.finder.ClientSession;
 import com.redhat.red.build.finder.DistributionAnalyzer;
-import com.redhat.red.build.finder.KojiClientSession;
 import com.redhat.red.build.koji.KojiClientException;
 
 public class KojiBuildFinderIT extends AbstractKojiIT {
@@ -76,7 +75,7 @@ public class KojiBuildFinderIT extends AbstractKojiIT {
         final Timer.Context context2 = timer2.time();
 
         try {
-            final ClientSession session = new KojiClientSession(getKojiClient());
+            final ClientSession session = getKojiClientSession();
             final BuildFinder finder = new BuildFinder(session, getConfig());
 
             finder.findBuilds(map);

@@ -246,7 +246,7 @@ public class BuildFinder {
             KojiLocalArchive existingArchive = matchingArchive.get();
             filenames = existingArchive.getFiles();
 
-            LOGGER.debug("Adding not-found checksum {} to existing archive {}", existingArchive.getArchive().getArchiveId());
+            LOGGER.debug("Adding not-found checksum {} to existing archive id {}", existingArchive.getArchive().getChecksum(), existingArchive.getArchive().getArchiveId());
 
             filenames.addAll(files);
         } else {
@@ -261,7 +261,7 @@ public class BuildFinder {
 
             tmpArchive.setArchiveId(-1 * (buildZero.getArchives().size() + 1));
 
-            LOGGER.debug("Adding not-found checksum {} to new archive {}", tmpArchive.getArchiveId());
+            LOGGER.debug("Adding not-found checksum {} to new archive {}", checksum, tmpArchive.getArchiveId());
 
             buildZero.getArchives().add(new KojiLocalArchive(tmpArchive, filenames));
         }
@@ -368,7 +368,7 @@ public class BuildFinder {
 
         KojiBuild b = foundBuilds.get(foundBuilds.size() - 1);
 
-        LOGGER.warn("Could not find suitable build for checksum {}. Keeping latest", red(archives.get(0).getChecksum()), red(b.getBuildInfo().getId()));
+        LOGGER.warn("Could not find suitable build for checksum {} for build id {}. Keeping latest", red(archives.get(0).getChecksum()), red(b.getBuildInfo().getId()));
 
         return b;
     }
@@ -389,7 +389,7 @@ public class BuildFinder {
               String checksum = entry.getKey();
 
             if (checksum.equals(EMPTY_MD5)) {
-                LOGGER.debug("Found empty file for checksum", checksum);
+                LOGGER.debug("Found empty file for checksum {}", checksum);
                 continue;
             }
 
@@ -519,7 +519,7 @@ public class BuildFinder {
 
         session.enrichArchiveTypeInfo(archiveInfos);
 
-        return builds;
+        return Collections.unmodifiableMap(builds);
     }
 
     public static String getVersion() {

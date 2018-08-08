@@ -34,7 +34,7 @@ public class SkipImportTest  {
     public void verifyMultiImportsKeepEarliest() throws KojiClientException {
         final String checksum = "2e7e85f0ee97afde716231a6c792492a";
         final List<String> filenames = Collections.unmodifiableList(Arrays.asList("commons-lang-2.6-redhat-2.jar"));
-        MockKojiClientSession session = new MockKojiClientSession("skip-import-test");
+        ClientSession session = new MockKojiClientSession("skip-import-test");
         BuildConfig config = new BuildConfig();
         BuildFinder finder = new BuildFinder(session, config);
         Map<String, Collection<String>> checksumTable = Collections.singletonMap(checksum, filenames);

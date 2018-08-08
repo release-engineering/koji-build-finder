@@ -36,7 +36,7 @@ public class KojiPerformanceIT extends AbstractKojiPerformanceIT {
 
             try {
                 for (int j = 0; j < MAX_CONNECTIONS; j++) {
-                    getKojiClient().getBuildInfo(getBuilds().get(j), getSession());
+                    getKojiClientSession().getBuildInfo(getBuilds().get(j), null);
                 }
             } finally {
                 context.stop();
@@ -59,7 +59,7 @@ public class KojiPerformanceIT extends AbstractKojiPerformanceIT {
 
                     threads[j] = new Thread(() -> {
                         try {
-                            getKojiClient().getBuildInfo(buildId, getSession());
+                            getKojiClientSession().getBuildInfo(buildId, null);
                         } catch (KojiClientException e) {
                             throw new RuntimeException(e);
                         }
@@ -95,7 +95,7 @@ public class KojiPerformanceIT extends AbstractKojiPerformanceIT {
                     args.add(getBuilds().get(j));
                 }
 
-                getKojiClient().multiCall(Constants.GET_BUILD, args, KojiBuildInfo.class, getSession());
+                getKojiClientSession().multiCall(Constants.GET_BUILD, args, KojiBuildInfo.class, null);
             } finally {
                 context.stop();
             }

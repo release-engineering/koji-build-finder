@@ -420,7 +420,6 @@ public final class Main implements Callable<Void> {
             System.exit(0);
         }
 
-        KojiClientSession session = null;
         BuildFinder finder = null;
         Map<Integer, KojiBuild> builds = null;
         File buildsFile = new File(outputDirectory, BuildFinder.getBuildsFilename());
@@ -436,13 +435,13 @@ public final class Main implements Callable<Void> {
                 System.exit(1);
             }
         } else {
-            try {
-                if (krbService != null && ((krbPrincipal != null && krbPassword != null) || krbCCache != null || krbKeytab != null)) {
+            boolean isKerberos = krbService != null && krbPrincipal != null && krbPassword != null || krbCCache != null || krbKeytab != null;
+
+            try (KojiClientSession session = isKerberos ? new KojiClientSession(config.getKojiHubURL(), krbService, krbPrincipal, krbPassword, krbCCache, krbKeytab) : new KojiClientSession(config.getKojiHubURL())) {
+                if (isKerberos) {
                     LOGGER.info("Creating Koji session with Kerberos service: {}", green(krbService));
-                    session = new KojiClientSession(config.getKojiHubURL(), krbService, krbPrincipal, krbPassword, krbCCache, krbKeytab);
                 } else {
-                    LOGGER.info("Creating anonymous Koji session");
-                    session = new KojiClientSession(config.getKojiHubURL());
+                    LOGGER.info("Created anonymous Koji session");
                 }
 
                 if (cacheManager == null && !config.getDisableCache()) {

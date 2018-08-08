@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 import org.commonjava.util.jhttpc.auth.MemoryPasswordManager;
 import org.commonjava.util.jhttpc.auth.PasswordManager;
 
+import com.codahale.metrics.MetricRegistry;
 import com.redhat.red.build.koji.KojiClient;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.config.KojiConfig;
@@ -38,68 +39,65 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiTagInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskRequest;
 
-public class KojiClientSession implements ClientSession {
+public class KojiClientSession extends KojiClient implements ClientSession {
     private static final int DEFAULT_THREAD_COUNT = 1;
-
-    private KojiClient client;
 
     private KojiSessionInfo session;
 
-    // FIXME: remove this, then be sure to close()
-    public KojiClientSession(KojiClient client) {
-        this.client = client;
-    }
-
     public KojiClientSession(KojiConfig config, PasswordManager passwordManager, ExecutorService executorService) throws KojiClientException {
-        client = new KojiClient(config, passwordManager, executorService);
+        super(config, passwordManager, executorService);
     }
 
     public KojiClientSession(URL url) throws KojiClientException {
-        client = new KojiClient(new SimpleKojiConfigBuilder().withKojiURL(url.toExternalForm()).build(), new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT));
+        super(new SimpleKojiConfigBuilder().withKojiURL(url.toExternalForm()).build(), new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT));
     }
 
     public KojiClientSession(URL url, String krbService, String krbPrincipal, String krbPassword, File krbCCache, File krbKeytab) throws KojiClientException {
-        client = new KojiClient(new SimpleKojiConfigBuilder().withKojiURL(url != null ? url.toExternalForm() : null).withKrbService(krbService).withKrbCCache(krbCCache != null ? krbCCache.getPath() : null).withKrbKeytab(krbKeytab != null ? krbKeytab.getPath() : null).withKrbPrincipal(krbPrincipal).withKrbPassword(krbPassword).build(), new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT));
-        session = client.login();
+        super(new SimpleKojiConfigBuilder().withKojiURL(url != null ? url.toExternalForm() : null).withKrbService(krbService).withKrbCCache(krbCCache != null ? krbCCache.getPath() : null).withKrbKeytab(krbKeytab != null ? krbKeytab.getPath() : null).withKrbPrincipal(krbPrincipal).withKrbPassword(krbPassword).build(), new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT));
+        session = super.login();
+    }
+
+    public KojiClientSession(KojiConfig config, PasswordManager passwordManager, ExecutorService executorService, MetricRegistry registry) throws KojiClientException {
+        super(config, passwordManager, executorService, registry);
     }
 
     @Override
     public List<KojiArchiveInfo> listArchives(KojiArchiveQuery query) throws KojiClientException {
-        return client.listArchives(query, session);
+        return super.listArchives(query, session);
     }
 
     @Override
     public Map<String, KojiArchiveType> getArchiveTypeMap() throws KojiClientException {
-        return client.getArchiveTypeMap(session);
+        return super.getArchiveTypeMap(session);
     }
 
     @Override
     public KojiBuildInfo getBuild(int buildId) throws KojiClientException {
-        return client.getBuildInfo(buildId, session);
+        return super.getBuildInfo(buildId, session);
     }
 
     @Override
     public KojiTaskInfo getTaskInfo(int taskId, boolean request) throws KojiClientException {
-        return client.getTaskInfo(taskId, request, session);
+        return super.getTaskInfo(taskId, request, session);
     }
 
     @Override
     public KojiTaskRequest getTaskRequest(int taskId) throws KojiClientException {
-        return client.getTaskRequest(taskId, session);
+        return super.getTaskRequest(taskId, session);
     }
 
     @Override
     public List<KojiTagInfo> listTags(int id) throws KojiClientException {
-        return client.listTags(id, session);
+        return super.listTags(id, session);
     }
 
     @Override
     public void enrichArchiveTypeInfo(List<KojiArchiveInfo> archiveInfos) throws KojiClientException {
-        client.enrichArchiveTypeInfo(archiveInfos, session);
+        super.enrichArchiveTypeInfo(archiveInfos, session);
     }
 
     @Override
     public void close() {
-        client.close();
+        super.close();
     }
 }
