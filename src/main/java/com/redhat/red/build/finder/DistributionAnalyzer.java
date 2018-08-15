@@ -69,20 +69,6 @@ public class DistributionAnalyzer {
 
     private EmbeddedCacheManager cacheManager;
 
-    public boolean includeFile(FileObject fo) {
-        boolean excludeExtension = config.getArchiveExtensions() != null && !config.getArchiveExtensions().isEmpty() && !config.getArchiveExtensions().stream().anyMatch(x -> x.equals(fo.getName().getExtension()));
-        boolean excludeFile = false;
-
-        if (!excludeExtension) {
-            String friendlyURI = fo.getName().getFriendlyURI();
-            excludeFile = config.getExcludes() != null && !config.getExcludes().isEmpty() && config.getExcludes().stream().map(Pattern::pattern).anyMatch(friendlyURI::matches);
-        }
-
-        boolean include = (!excludeFile && !excludeExtension);
-
-        return include;
-    }
-
     public DistributionAnalyzer(List<File> files, BuildConfig config) {
         this(files, config, null);
     }
@@ -110,34 +96,34 @@ public class DistributionAnalyzer {
                 try (FileObject fo = sfs.resolveFile(file.getAbsolutePath())) {
                     String checksum = null;
                     MultiValuedMap<String, String> map = null;
-                    boolean doPut = false;
 
                     if (cacheManager != null) {
                         checksum = checksum(fo);
                         map = fileCache.get(checksum);
 
                         if (map != null) {
-                            if (this.map == null) {
-                                this.map = map;
-                            } else {
-                                this.map.putAll(map);
-                            }
-
+                            this.map.putAll(map);
                             LOGGER.info("Loaded checksums for file {} (checksum {}) from cache", green(file.getName()), green(checksum));
                         } else {
                             LOGGER.info("File {} (checksum {}) not found in cache", green(file.getName()), green(checksum));
-
-                            this.map = new ArrayListValuedHashMap<>();
-                            doPut = true;
                         }
                     }
 
-                    rootString = fo.getName().getFriendlyURI().substring(0, fo.getName().getFriendlyURI().indexOf(fo.getName().getBaseName()));
-                    listChildren(fo);
+                    if (map == null) {
+                        LOGGER.info("Finding checksums for file: {}", green(file.getName()));
+                        rootString = fo.getName().getFriendlyURI().substring(0, fo.getName().getFriendlyURI().indexOf(fo.getName().getBaseName()));
+                        map = new ArrayListValuedHashMap<>();
+                        listChildren(fo, map);
 
-                    if (fileCache != null && doPut) {
-                        fileCache.put(checksum, this.map);
-                        doPut = false;
+                        if (cacheManager != null) {
+                            fileCache.put(checksum, map);
+                        }
+
+                        if (this.map == null) {
+                            this.map = map;
+                        } else {
+                            this.map.putAll(map);
+                        }
                     }
                 }
             }
@@ -169,11 +155,11 @@ public class DistributionAnalyzer {
         return normalizedPath;
     }
 
-    private void listArchive(FileObject fo) throws IOException {
+    private void listArchive(FileObject fo, MultiValuedMap<String, String> map) throws IOException {
         LOGGER.debug("Creating file system for: {}", normalizePath(fo));
 
         try (FileObject layered = sfs.createFileSystem(fo.getName().getExtension(), fo)) {
-            listChildren(layered);
+            listChildren(layered, map);
             sfs.closeFileSystem(layered.getFileSystem());
         } catch (FileSystemException e) {
             // TODO: store checksum/filename/error so that we can flag the file
@@ -182,10 +168,24 @@ public class DistributionAnalyzer {
         }
     }
 
-    private void listChildren(FileObject fo) throws IOException {
+    private boolean includeFile(FileObject fo) {
+        boolean excludeExtension = config.getArchiveExtensions() != null && !config.getArchiveExtensions().isEmpty() && !config.getArchiveExtensions().stream().anyMatch(x -> x.equals(fo.getName().getExtension()));
+        boolean excludeFile = false;
+
+        if (!excludeExtension) {
+            String friendlyURI = fo.getName().getFriendlyURI();
+            excludeFile = config.getExcludes() != null && !config.getExcludes().isEmpty() && config.getExcludes().stream().map(Pattern::pattern).anyMatch(friendlyURI::matches);
+        }
+
+        boolean include = (!excludeFile && !excludeExtension);
+
+        return include;
+    }
+
+    private void listChildren(FileObject fo, MultiValuedMap<String, String> map) throws IOException {
         if (fo.isFile()) {
             if (isArchive(fo)) {
-                listArchive(fo);
+                listArchive(fo, map);
             }
 
             if (includeFile(fo)) {
@@ -199,7 +199,7 @@ public class DistributionAnalyzer {
         } else {
             for (FileObject file : fo.getChildren()) {
                 try {
-                    listChildren(file);
+                    listChildren(file, map);
                 } finally {
                     file.close();
                 }
