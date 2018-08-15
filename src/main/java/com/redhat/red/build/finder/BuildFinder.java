@@ -359,7 +359,7 @@ public class BuildFinder {
         }
 
         if (!completedBuilds.isEmpty()) {
-            KojiBuild b = completedBuilds.get(foundBuilds.size() - 1);
+            KojiBuild b = completedBuilds.get(completedBuilds.size() - 1);
 
             LOGGER.debug("Found suitable completed build {} for checksum {}", b.getBuildInfo().getId(), archives.get(0).getChecksum());
 
@@ -380,20 +380,23 @@ public class BuildFinder {
         }
 
         if (archiveExtensions == null) {
+            LOGGER.info("Asking Koji for valid archive extensions");
             archiveExtensions = getArchiveExtensions();
         }
 
-        final String EMPTY_MD5 = Hex.encodeHexString(DigestUtils.getDigest(config.getChecksumType().getAlgorithm()).digest());
+        LOGGER.info("Using archive extensions: {}", green(archiveExtensions));
+
+        final String EMPTY_DIGEST = Hex.encodeHexString(DigestUtils.getDigest(config.getChecksumType().getAlgorithm()).digest());
 
         for (Entry<String, Collection<String>> entry : checksumTable.entrySet()) {
               String checksum = entry.getKey();
 
-            if (checksum.equals(EMPTY_MD5)) {
+            if (checksum.equals(EMPTY_DIGEST)) {
                 LOGGER.debug("Found empty file for checksum {}", checksum);
                 continue;
             }
 
-            Collection<String> filenames = checksumTable.get(checksum);
+            Collection<String> filenames = entry.getValue();
 
             boolean checkFile = filenames.stream().anyMatch(filename -> archiveExtensions.stream().anyMatch(filename::endsWith));
 
