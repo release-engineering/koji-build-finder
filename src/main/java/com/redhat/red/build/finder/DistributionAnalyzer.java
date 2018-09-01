@@ -23,8 +23,13 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -44,7 +49,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-public class DistributionAnalyzer {
+public class DistributionAnalyzer implements Callable<Map<String, Collection<String>>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionAnalyzer.class);
 
     /**
@@ -55,6 +60,9 @@ public class DistributionAnalyzer {
      */
     private static final List<String> NON_ARCHIVE_SCHEMES = Collections.unmodifiableList(Arrays.asList("tmp", "res", "ram", "file"));
 
+
+    private static final String CHECKSUMS_FILENAME_BASENAME = "checksums-";
+
     private final List<File> files;
 
     private MultiValuedMap<String, String> map;
@@ -64,6 +72,8 @@ public class DistributionAnalyzer {
     private String rootString;
 
     private BuildConfig config;
+
+    private BlockingQueue<Checksum> queue;
 
     private Cache<String, MultiValuedMap<String, String>> fileCache;
 
@@ -189,12 +199,22 @@ public class DistributionAnalyzer {
             }
 
             if (includeFile(fo)) {
-                String checksum = checksum(fo);
+                String checksumValue = checksum(fo);
                 String found = normalizePath(fo);
 
-                LOGGER.debug("Checksum: {} {}", checksum, found);
+                LOGGER.debug("Checksum: {} {}", checksumValue, found);
 
-                map.put(checksum, found);
+                map.put(checksumValue, found);
+
+                if (queue != null) {
+                    try {
+                        Checksum checksum = new Checksum(checksumValue, found);
+
+                        queue.put(checksum);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
             }
         } else {
             for (FileObject file : fo.getChildren()) {
@@ -207,7 +227,34 @@ public class DistributionAnalyzer {
         }
     }
 
-    public void outputToFile(File file) throws JsonGenerationException, JsonMappingException, IOException {
-        JSONUtils.dumpObjectToFile(map.asMap(), file);
+    public File getChecksumFile(File outputDirectory) {
+        return new File(outputDirectory, CHECKSUMS_FILENAME_BASENAME + config.getChecksumType() + ".json");
+    }
+
+    public void outputToFile(File outputDirectory) throws JsonGenerationException, JsonMappingException, IOException {
+        JSONUtils.dumpObjectToFile(getChecksums(), getChecksumFile(outputDirectory));
+    }
+
+    public Map<String, Collection<String>> getChecksums() {
+        return Collections.unmodifiableMap(map.asMap());
+    }
+
+    @Override
+    public Map<String, Collection<String>> call() throws IOException {
+        queue = new LinkedBlockingQueue<>();
+
+        checksumFiles();
+
+        try {
+            queue.put(new Checksum());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        return Collections.unmodifiableMap(map.asMap());
+    }
+
+    public BlockingQueue<Checksum> getQueue() {
+        return queue;
     }
 }

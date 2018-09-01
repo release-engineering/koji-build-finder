@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.io.FileUtils;
@@ -141,5 +142,16 @@ public class DistributionAnalyzerTest {
 
         assertEquals(4, checksums.size());
         assertTrue(systemOutRule.getLog().contains("Unable to process archive/compressed file"));
+    }
+
+    @Test
+    public void loadNestedZipMultiThreaded() throws IOException {
+        List<File> target = Collections.singletonList(TestUtils.loadFile("nested.zip"));
+        BuildConfig config = new BuildConfig();
+        config.setArchiveExtensions(Collections.emptyList());
+        DistributionAnalyzer da = new DistributionAnalyzer(target, config);
+        Map<String, Collection<String>> checksums = da.call();
+
+        assertEquals(9, checksums.size());
     }
 }

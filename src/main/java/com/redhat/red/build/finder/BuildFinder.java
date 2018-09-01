@@ -21,6 +21,8 @@ import static com.redhat.red.build.finder.AnsiUtils.red;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
@@ -56,12 +59,14 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiTagInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskRequest;
 
-public class BuildFinder {
-    private static final String CHECKSUMS_FILENAME_BASENAME = "checksums-";
+public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BuildFinder.class);
 
     private static final String BUILDS_FILENAME = "builds.json";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BuildFinder.class);
+    private static final String CHECKSUMS_FILENAME_BASENAME = "checksums-";
+
+    private static String EMPTY_DIGEST;
 
     private ClientSession session;
 
@@ -75,6 +80,8 @@ public class BuildFinder {
 
     private List<String> archiveExtensions;
 
+    private DistributionAnalyzer analyzer;
+
     private Cache<String, Integer> checksumCache;
 
     private Cache<Integer, KojiBuild> buildCache;
@@ -82,20 +89,27 @@ public class BuildFinder {
     private EmbeddedCacheManager cacheManager;
 
     public BuildFinder(ClientSession session, BuildConfig config) {
-        this(session, config, null);
+        this(session, config, null, null);
     }
 
-    public BuildFinder(ClientSession session, BuildConfig config, EmbeddedCacheManager cacheManager) {
+    public BuildFinder(ClientSession session, BuildConfig config, DistributionAnalyzer analyzer) {
+        this(session, config, analyzer, null);
+    }
+
+    public BuildFinder(ClientSession session, BuildConfig config, DistributionAnalyzer analyzer, EmbeddedCacheManager cacheManager) {
         this.session = session;
         this.config = config;
         this.outputDirectory = new File("");
         this.checksumMap = new ArrayListValuedHashMap<>();
+        this.analyzer = analyzer;
         this.cacheManager = cacheManager;
 
         if (cacheManager != null) {
             this.buildCache = cacheManager.getCache("builds");
             this.checksumCache = cacheManager.getCache("checksums");
         }
+
+        EMPTY_DIGEST = Hex.encodeHexString(DigestUtils.getDigest(config.getChecksumType().getAlgorithm()).digest());
 
         initBuilds();
     }
@@ -382,11 +396,8 @@ public class BuildFinder {
         if (archiveExtensions == null) {
             LOGGER.info("Asking Koji for valid archive extensions");
             archiveExtensions = getArchiveExtensions();
+            LOGGER.info("Using archive extensions: {}", green(archiveExtensions));
         }
-
-        LOGGER.info("Using archive extensions: {}", green(archiveExtensions));
-
-        final String EMPTY_DIGEST = Hex.encodeHexString(DigestUtils.getDigest(config.getChecksumType().getAlgorithm()).digest());
 
         for (Entry<String, Collection<String>> entry : checksumTable.entrySet()) {
               String checksum = entry.getKey();
@@ -583,5 +594,59 @@ public class BuildFinder {
 
     public void outputToFile() throws JsonGenerationException, JsonMappingException, IOException {
         JSONUtils.dumpObjectToFile(builds, new File(outputDirectory, getBuildsFilename()));
+    }
+
+    @Override
+    public Map<Integer, KojiBuild> call() throws KojiClientException {
+        Instant startTime = Instant.now();
+        MultiValuedMap<String, String> checksumMap = new ArrayListValuedHashMap<>();
+        List<Checksum> checksums = new ArrayList<>();
+        Checksum checksum = null;
+        boolean finished = false;
+
+        while (!finished) {
+            try {
+                checksum = analyzer.getQueue().take();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            if (checksum.getChecksum() == null) {
+                finished = true;
+                break;
+            }
+
+            checksums.add(checksum);
+
+            int numElements = analyzer.getQueue().drainTo(checksums);
+
+            LOGGER.debug("Got {} checksums from queue", numElements + 1);
+
+            for (Checksum c : checksums) {
+                String checksumValue = c.getChecksum();
+                String filename = c.getFilename();
+
+                if (checksumValue != null) {
+                    checksumMap.put(checksumValue, filename);
+                } else {
+                    finished = true;
+                }
+            }
+
+            findBuilds(checksumMap.asMap());
+
+            checksumMap.clear();
+            checksums.clear();
+        }
+
+        Instant endTime = Instant.now();
+        Duration duration = Duration.between(startTime, endTime).abs();
+        int numChecksums = analyzer.getChecksums().size();
+        int numBuilds = builds.size() - 1;
+
+        LOGGER.info("Total number of files: {}, checked: {}, skipped: {}, time: {}, average: {}", green(numChecksums), green(numChecksums - numBuilds), green(numBuilds), green(duration), green(numBuilds > 0 ? duration.dividedBy(numBuilds) : 0));
+        LOGGER.info("Found {} builds", green(numBuilds));
+
+        return Collections.unmodifiableMap(builds);
     }
 }

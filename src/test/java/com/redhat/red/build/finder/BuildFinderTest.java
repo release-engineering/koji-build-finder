@@ -53,12 +53,12 @@ public class BuildFinderTest {
 
         DistributionAnalyzer da = new DistributionAnalyzer(Collections.singletonList(new File(target.getAbsolutePath())), config);
         da.checksumFiles();
-        da.outputToFile(new File(folder, BuildFinder.getChecksumFilename(checksumType)));
+        da.outputToFile(folder);
 
         File[] file = folder.listFiles();
 
         assertTrue(file != null && file.length == 1);
-        assertTrue(file[0].getName().equals(BuildFinder.getChecksumFilename(checksumType)));
+        assertTrue(file[0].getCanonicalPath().equals(da.getChecksumFile(folder).getCanonicalPath()));
     }
 
     @Test
@@ -73,9 +73,9 @@ public class BuildFinderTest {
 
         DistributionAnalyzer da = new DistributionAnalyzer(Collections.singletonList(new File(target.getAbsolutePath())), config);
         da.checksumFiles();
-        da.outputToFile(new File(folder, BuildFinder.getChecksumFilename(checksumType)));
+        da.outputToFile(folder);
 
-        Map<String, Collection<String>> checksums = JSONUtils.loadChecksumsFile(new File(folder, BuildFinder.getChecksumFilename(checksumType)));
+        Map<String, Collection<String>> checksums = JSONUtils.loadChecksumsFile(da.getChecksumFile(folder));
 
         assertEquals(1, checksums.size());
     }
