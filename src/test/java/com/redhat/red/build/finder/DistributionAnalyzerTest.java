@@ -154,4 +154,40 @@ public class DistributionAnalyzerTest {
 
         assertEquals(9, checksums.size());
     }
+
+    @Test
+    public void loadNestedZipNoRecursion() throws IOException {
+        List<File> target = Collections.singletonList(TestUtils.loadFile("nested.zip"));
+        BuildConfig config = new BuildConfig();
+        config.setArchiveExtensions(Collections.emptyList());
+        config.setDisableRecursion(true);
+        DistributionAnalyzer da = new DistributionAnalyzer(target, config);
+        MultiValuedMap<String, String> checksums = da.checksumFiles();
+
+        assertEquals(3, checksums.size());
+    }
+
+    @Test
+    public void loadNestedWarNoRecusion() throws IOException {
+        List<File> target = Collections.singletonList(TestUtils.loadFile("nested.war"));
+        BuildConfig config = new BuildConfig();
+        config.setArchiveExtensions(Collections.emptyList());
+        config.setDisableRecursion(true);
+        DistributionAnalyzer da = new DistributionAnalyzer(target, config);
+        MultiValuedMap<String, String> checksums = da.checksumFiles();
+
+        assertEquals(4, checksums.size());
+    }
+
+    @Test
+    public void loadNestedTarGzNoRecusion() throws IOException {
+        List<File> target = Collections.singletonList(TestUtils.loadFile("nested.tar.gz"));
+        BuildConfig config = new BuildConfig();
+        config.setArchiveExtensions(Collections.emptyList());
+        config.setDisableRecursion(true);
+        DistributionAnalyzer da = new DistributionAnalyzer(target, config);
+        MultiValuedMap<String, String> checksums = da.checksumFiles();
+
+        assertEquals(4, checksums.size());
+    }
 }

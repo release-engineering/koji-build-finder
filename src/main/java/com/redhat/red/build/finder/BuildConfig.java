@@ -49,6 +49,9 @@ public class BuildConfig {
     @JsonProperty("disable-cache")
     private Boolean disableCache;
 
+    @JsonProperty("disable-recursion")
+    private Boolean disableRecursion;
+
     @JsonProperty("excludes")
     private List<Pattern> excludes;
 
@@ -171,6 +174,18 @@ public class BuildConfig {
 
     public void setDisableCache(boolean disableCache) {
         this.disableCache = disableCache;
+    }
+
+    public boolean getDisableRecursion() {
+        if (disableRecursion == null) {
+            disableRecursion = ConfigDefaults.DISABLE_RECURSION;
+        }
+
+        return disableRecursion;
+    }
+
+    public void setDisableRecursion(boolean disableRecursion) {
+        this.disableRecursion = disableRecursion;
     }
 
     public List<Pattern> getExcludes() {

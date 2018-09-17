@@ -100,6 +100,9 @@ public final class Main implements Callable<Void> {
     @Option(names = {"--disable-cache"}, description = "Disable local cache.")
     private boolean disableCache = ConfigDefaults.DISABLE_CACHE;
 
+    @Option(names = {"--disable-recursion"}, description = "Disable recursion.")
+    private boolean disableRecursion = ConfigDefaults.DISABLE_RECURSION;
+
     @Option(names = {"-e", "--archive-extension"}, paramLabel = "STRING", description = "Add a Koji archive type extension to check.", converter = FilenameConverter.class)
     private List<String> archiveExtensions = ConfigDefaults.ARCHIVE_EXTENSIONS;
 
@@ -192,6 +195,10 @@ public final class Main implements Callable<Void> {
             LOGGER.info("Local cache is disabled");
         } else {
             LOGGER.info("Using local cache: lifespan: {}, maxIdle: {}", green(config.getCacheLifespan()), green(config.getCacheMaxIdle()));
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--disable-recursion")) {
+            config.setDisableRecursion(disableRecursion);
         }
 
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("-k")) {

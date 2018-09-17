@@ -60,7 +60,6 @@ public class DistributionAnalyzer implements Callable<Map<String, Collection<Str
      */
     private static final List<String> NON_ARCHIVE_SCHEMES = Collections.unmodifiableList(Arrays.asList("tmp", "res", "ram", "file"));
 
-
     private static final String CHECKSUMS_FILENAME_BASENAME = "checksums-";
 
     private final List<File> files;
@@ -78,6 +77,8 @@ public class DistributionAnalyzer implements Callable<Map<String, Collection<Str
     private Cache<String, MultiValuedMap<String, String>> fileCache;
 
     private EmbeddedCacheManager cacheManager;
+
+    private int level;
 
     public DistributionAnalyzer(List<File> files, BuildConfig config) {
         this(files, config, null);
@@ -123,6 +124,7 @@ public class DistributionAnalyzer implements Callable<Map<String, Collection<Str
                         LOGGER.info("Finding checksums for file: {}", green(file.getName()));
                         rootString = fo.getName().getFriendlyURI().substring(0, fo.getName().getFriendlyURI().indexOf(fo.getName().getBaseName()));
                         map = new ArrayListValuedHashMap<>();
+
                         listChildren(fo, map);
 
                         if (cacheManager != null) {
@@ -165,16 +167,35 @@ public class DistributionAnalyzer implements Callable<Map<String, Collection<Str
         return normalizedPath;
     }
 
+    private boolean shouldListArchive(FileObject fo) throws FileSystemException {
+        if (!config.getDisableRecursion()) {
+            return true;
+        }
+
+        if (level == 1 || level == 2 && fo.getParent().isFolder() && fo.getParent().getChildren().length == 1) {
+            return true;
+        }
+
+        return false;
+    }
+
     private void listArchive(FileObject fo, MultiValuedMap<String, String> map) throws IOException {
         LOGGER.debug("Creating file system for: {}", normalizePath(fo));
 
-        try (FileObject layered = sfs.createFileSystem(fo.getName().getExtension(), fo)) {
+        FileObject layered = null;
+
+        try {
+            layered = sfs.createFileSystem(fo.getName().getExtension(), fo);
             listChildren(layered, map);
-            sfs.closeFileSystem(layered.getFileSystem());
         } catch (FileSystemException e) {
             // TODO: store checksum/filename/error so that we can flag the file
             LOGGER.warn("Unable to process archive/compressed file: {}: {}", red(normalizePath(fo)), red(e.getMessage()));
             LOGGER.debug("Caught file system exception", e);
+        } finally {
+            if (layered != null) {
+                sfs.closeFileSystem(layered.getFileSystem());
+                layered.close();
+            }
         }
     }
 
@@ -195,7 +216,13 @@ public class DistributionAnalyzer implements Callable<Map<String, Collection<Str
     private void listChildren(FileObject fo, MultiValuedMap<String, String> map) throws IOException {
         if (fo.isFile()) {
             if (isArchive(fo)) {
-                listArchive(fo, map);
+                level++;
+
+                if (shouldListArchive(fo)) {
+                    listArchive(fo, map);
+                }
+
+                level--;
             }
 
             if (includeFile(fo)) {
