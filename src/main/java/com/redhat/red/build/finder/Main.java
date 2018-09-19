@@ -350,7 +350,7 @@ public final class Main implements Callable<Void> {
         LOGGER.info("{}", green(" |  |   |  |  |  |  |_/ /_/ |   |     \\  |  |   |  / /_/ \\  ___/|  | \\/)"));
         LOGGER.info("{}", green(" |____  |____/|__|____\\____ |   \\___  /  |__|___|  \\____ |\\___  |__|   "));
         LOGGER.info("{}", green("      \\/                   \\/       \\/           \\/     \\/    \\/       "));
-        LOGGER.info("{} (SHA: {})", boldYellow(BuildFinder.getVersion()), cyan(BuildFinder.getScmRevision()));
+        LOGGER.info("{}{} (SHA: {})", String.format("%" +  Math.max(0, 79 - String.format("%s (SHA: %s)", BuildFinder.getVersion(), BuildFinder.getScmRevision()).length() - 7) + "s", ""), boldYellow(BuildFinder.getVersion()), cyan(BuildFinder.getScmRevision()));
         LOGGER.info("{}", green(""));
 
         LOGGER.info("Using configuration: {}", green(configFile));
@@ -401,16 +401,14 @@ public final class Main implements Callable<Void> {
 
         if (config.getChecksumOnly()) {
             DistributionAnalyzer analyzer = new DistributionAnalyzer(inputs, config, cacheManager);
-            checksums = analyzer.getChecksums();
+            checksums = analyzer.checksumFiles().asMap();
 
-            if (config.getUseChecksumsFile()) {
-                try {
-                    analyzer.outputToFile(checksumFile);
-                } catch (IOException e) {
-                    LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
-                    LOGGER.debug("Error", e);
-                    System.exit(1);
-                }
+            try {
+                analyzer.outputToFile(outputDirectory);
+            } catch (IOException e) {
+                LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
+                LOGGER.debug("Error", e);
+                System.exit(1);
             }
 
             if (checksums == null || checksums.isEmpty()) {
@@ -473,7 +471,7 @@ public final class Main implements Callable<Void> {
 
                 if (config.getUseChecksumsFile()) {
                     try {
-                        analyzer.outputToFile(checksumFile);
+                        analyzer.outputToFile(outputDirectory);
                     } catch (IOException e) {
                         LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
                         LOGGER.debug("Error", e);
@@ -487,9 +485,7 @@ public final class Main implements Callable<Void> {
 
                 builds = futureBuilds.get();
 
-                if (config.getUseBuildsFile()) {
-                    JSONUtils.dumpObjectToFile(builds, buildsFile);
-                }
+                JSONUtils.dumpObjectToFile(builds, buildsFile);
             } catch (KojiClientException e) {
                 LOGGER.error("Failed to find builds: {}", boldRed(e.getMessage()));
                 LOGGER.debug("Koji Client Error", e);

@@ -168,6 +168,18 @@ public class DistributionAnalyzerTest {
     }
 
     @Test
+    public void loadNested2ZipNoRecursion() throws IOException {
+        List<File> target = Collections.singletonList(TestUtils.loadFile("nested2.zip"));
+        BuildConfig config = new BuildConfig();
+        config.setArchiveExtensions(Collections.emptyList());
+        config.setDisableRecursion(true);
+        DistributionAnalyzer da = new DistributionAnalyzer(target, config);
+        MultiValuedMap<String, String> checksums = da.checksumFiles();
+
+        assertEquals(2, checksums.size());
+    }
+
+    @Test
     public void loadNestedWarNoRecusion() throws IOException {
         List<File> target = Collections.singletonList(TestUtils.loadFile("nested.war"));
         BuildConfig config = new BuildConfig();

@@ -172,7 +172,7 @@ public class DistributionAnalyzer implements Callable<Map<String, Collection<Str
             return true;
         }
 
-        if (level == 1 || level == 2 && fo.getParent().isFolder() && fo.getParent().getChildren().length == 1) {
+        if (level == 1 || level == 2 && fo.getParent().isFolder() && fo.getParent().getName().toString().endsWith("!/") && fo.getParent().getChildren().length == 1) {
             return true;
         }
 
@@ -259,6 +259,8 @@ public class DistributionAnalyzer implements Callable<Map<String, Collection<Str
     }
 
     public void outputToFile(File outputDirectory) throws JsonGenerationException, JsonMappingException, IOException {
+        outputDirectory.mkdirs();
+
         JSONUtils.dumpObjectToFile(getChecksums(), getChecksumFile(outputDirectory));
     }
 
