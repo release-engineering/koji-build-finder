@@ -15,8 +15,18 @@
  */
 package com.redhat.red.build.finder;
 
+import java.io.IOException;
+
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.vfs2.FileObject;
+
 public class Checksum {
-    private String checksum;
+    private FileObject fileObject;
+
+    private String algorithm;
+
+    private String value;
 
     private String filename;
 
@@ -25,16 +35,42 @@ public class Checksum {
     }
 
     public Checksum(String checksum, String filename) {
-        this.checksum = checksum;
-        this.filename = filename;
+
     }
 
-    public String getChecksum() {
-        return checksum;
+    public Checksum(FileObject fo, String algorithm, String root) throws IOException {
+        this.fileObject = fo;
+        this.algorithm = algorithm;
+        this.value = checksum(fo, algorithm);
+        this.filename = Utils.normalizePath(fileObject, root);
     }
 
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
+    private String checksum(FileObject fo, String algorithm) throws IOException {
+        return Hex.encodeHexString(DigestUtils.digest(DigestUtils.getDigest(algorithm), fo.getContent().getInputStream()));
+    }
+
+    public String getAlgorithm() {
+        return algorithm;
+    }
+
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
+    }
+
+    public FileObject getFileObject() {
+        return fileObject;
+    }
+
+    public void setFileObject(FileObject fileObject) {
+        this.fileObject = fileObject;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 
     public String getFilename() {

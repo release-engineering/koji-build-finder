@@ -611,7 +611,7 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
                 Thread.currentThread().interrupt();
             }
 
-            if (checksum.getChecksum() == null) {
+            if (checksum.getValue() == null) {
                 finished = true;
                 break;
             }
@@ -623,7 +623,7 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
             LOGGER.debug("Got {} checksums from queue", numElements + 1);
 
             for (Checksum c : checksums) {
-                String checksumValue = c.getChecksum();
+                String checksumValue = c.getValue();
                 String filename = c.getFilename();
 
                 if (checksumValue != null) {
