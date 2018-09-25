@@ -42,7 +42,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.function.Function;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
@@ -717,8 +716,7 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
                 throw new KojiClientException("Error getting futures", e);
             }
 
-            Map<Integer, KojiBuildInfo> archiveBuildsMap = archiveBuilds.stream().collect(Collectors.toMap(KojiBuildInfo::getId, Function.identity()));
-            List<Integer> taskIds = archiveBuildsMap.values().stream().map(KojiBuildInfo::getTaskId).filter(Objects::nonNull).collect(Collectors.toList());
+            List<Integer> taskIds = archiveBuilds.stream().map(KojiBuildInfo::getTaskId).filter(Objects::nonNull).collect(Collectors.toList());
             int taskIdsSize = taskIds.size();
             Future<List<KojiTaskInfo>> futureTaskInfos = null;
 
