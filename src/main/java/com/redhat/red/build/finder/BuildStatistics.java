@@ -68,7 +68,7 @@ public class BuildStatistics {
             return 0;
         }
 
-        return (((double) numberOfImportedBuilds / (double) numberOfBuilds) * 100.00);
+        return ((double) numberOfImportedBuilds / (double) numberOfBuilds) * 100.00;
     }
 
     public double getPercentOfArchivesImported() {
@@ -76,6 +76,6 @@ public class BuildStatistics {
             return 0;
         }
 
-        return (((double) numberOfImportedArchives / (double) numberOfArchives) * 100.00);
+        return ((double) numberOfImportedArchives / (double) numberOfArchives) * 100.00;
     }
 }

@@ -15,9 +15,16 @@
  */
 package com.redhat.red.build.finder;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.vfs2.FileObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class Utils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
+
     private Utils() {
 
     }
@@ -27,5 +34,23 @@ public final class Utils {
         String normalizedPath = friendlyURI.substring(friendlyURI.indexOf(root) + root.length());
 
         return normalizedPath;
+    }
+
+    public static void shutdownAndAwaitTermination(ExecutorService pool) {
+        pool.shutdown();
+
+        try {
+            if (!pool.awaitTermination(10000, TimeUnit.MILLISECONDS)) {
+                pool.shutdownNow();
+
+                if (!pool.awaitTermination(10000, TimeUnit.MILLISECONDS)) {
+                    LOGGER.error("Pool did not terminate");
+                }
+            }
+        } catch (InterruptedException e) {
+            pool.shutdownNow();
+
+            Thread.currentThread().interrupt();
+        }
     }
 }

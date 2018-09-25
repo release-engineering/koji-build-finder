@@ -16,6 +16,7 @@
 package com.redhat.red.build.finder;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -106,6 +107,9 @@ public class FileObjectTrackingTest {
         assertEquals(25, checksums.size());
 
         Object sCounter = getFileSystemCounter();
+
+        assertNotNull(sCounter);
+
         int sCount = (Integer) sCounter;
 
         assertEquals(0, sCount);

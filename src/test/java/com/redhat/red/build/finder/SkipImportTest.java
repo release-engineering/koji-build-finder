@@ -38,7 +38,7 @@ public class SkipImportTest  {
         BuildConfig config = new BuildConfig();
         BuildFinder finder = new BuildFinder(session, config);
         Map<String, Collection<String>> checksumTable = Collections.singletonMap(checksum, filenames);
-        Map<Integer, KojiBuild> builds = finder.findBuilds(checksumTable);
+        Map<Integer, KojiBuild> builds = finder.findBuildsSlow(checksumTable);
 
         assertEquals(2, builds.size());
         assertTrue(builds.containsKey(0));

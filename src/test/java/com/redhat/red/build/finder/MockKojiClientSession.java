@@ -139,11 +139,31 @@ public class MockKojiClientSession implements ClientSession {
 
     @Override
     public void enrichArchiveTypeInfo(List<KojiArchiveInfo> archiveInfos) throws KojiClientException {
-        // XXX: not implemented
+
     }
 
     @Override
     public void close() {
 
+    }
+
+    @Override
+    public List<List<KojiArchiveInfo>> listArchives(List<KojiArchiveQuery> queries) throws KojiClientException {
+        return null;
+    }
+
+    @Override
+    public List<KojiBuildInfo> getBuild(List<Integer> buildIds) throws KojiClientException {
+        return null;
+    }
+
+    @Override
+    public List<KojiTaskInfo> getTaskInfo(List<Integer> taskIds, List<Boolean> requests) throws KojiClientException {
+        return null;
+    }
+
+    @Override
+    public List<List<KojiTagInfo>> listTags(List<Integer> buildIds) throws KojiClientException {
+        return null;
     }
 }

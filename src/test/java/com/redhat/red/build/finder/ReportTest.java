@@ -79,21 +79,21 @@ public class ReportTest {
     @Test
     public void verifyBuilds() {
         assertTrue(builds.get(0).isImport());
-        assertNull(builds.get(0).getSourcesZip());
+        assertNull(builds.get(0).getScmSourcesZip());
         assertNull(builds.get(0).getPatchesZip());
         assertNull(builds.get(0).getProjectSourcesTgz());
         assertTrue(builds.get(0).getDuplicateArchives().isEmpty());
         assertNotNull(builds.get(0).toString());
 
         assertTrue(builds.get(1).isImport());
-        assertNull(builds.get(1).getSourcesZip());
+        assertNull(builds.get(1).getScmSourcesZip());
         assertNull(builds.get(1).getPatchesZip());
         assertNull(builds.get(1).getProjectSourcesTgz());
         assertEquals(1, builds.get(1).getDuplicateArchives().size());
         assertNotNull(builds.get(1).toString());
 
         assertTrue(builds.get(2).isImport());
-        assertNull(builds.get(2).getSourcesZip());
+        assertNull(builds.get(2).getScmSourcesZip());
         assertNull(builds.get(2).getPatchesZip());
         assertNull(builds.get(2).getProjectSourcesTgz());
         assertEquals(1, builds.get(2).getDuplicateArchives().size());
@@ -103,7 +103,7 @@ public class ReportTest {
         assertTrue(builds.get(3).isMaven());
         assertTrue(builds.get(3).getTypes().contains("maven"));
         assertNotNull(builds.get(3).getSource());
-        assertNotNull(builds.get(3).getSourcesZip());
+        assertNotNull(builds.get(3).getScmSourcesZip());
         assertNotNull(builds.get(3).getPatchesZip());
         assertNotNull(builds.get(3).getProjectSourcesTgz());
         assertNotNull(builds.get(3).getTaskRequest().asMavenBuildRequest().getProperties());
@@ -112,7 +112,7 @@ public class ReportTest {
 
         assertTrue(builds.get(4).isMaven());
         assertNotNull(builds.get(4).getSource());
-        assertNull(builds.get(4).getSourcesZip());
+        assertNull(builds.get(4).getScmSourcesZip());
         assertNull(builds.get(4).getPatchesZip());
         assertNotNull(builds.get(4).getProjectSourcesTgz());
         assertNotNull(builds.get(4).getBuildInfo().getExtra());
@@ -122,7 +122,7 @@ public class ReportTest {
 
         assertFalse(builds.get(5).isMaven());
         assertNotNull(builds.get(5).getSource());
-        assertNull(builds.get(5).getSourcesZip());
+        assertNull(builds.get(5).getScmSourcesZip());
         assertNull(builds.get(5).getPatchesZip());
         assertNull(builds.get(5).getProjectSourcesTgz());
         assertTrue(builds.get(5).getDuplicateArchives().isEmpty());

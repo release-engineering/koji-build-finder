@@ -75,9 +75,9 @@ import picocli.CommandLine.Spec;
 public final class Main implements Callable<Void> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
-    private static ExecutorService executorService;
+    private ExecutorService pool;
 
-    private static EmbeddedCacheManager cacheManager;
+    private EmbeddedCacheManager cacheManager;
 
     @Spec
     private CommandSpec commandSpec;
@@ -161,15 +161,14 @@ public final class Main implements Callable<Void> {
         try {
             Ansi ansi = System.getProperty("picocli.ansi") == null ? Ansi.ON : Ansi.AUTO;
             CommandLine.call(main, System.out, ansi, args);
-        } catch (Exception e) {
-            LOGGER.error("{}", boldRed(e.getMessage()), e);
-            LOGGER.debug("Error", e);
+            System.exit(0);
+        } catch (picocli.CommandLine.ExecutionException e) {
+            LOGGER.error("Error: {}", boldRed(e.getMessage()), e);
             System.exit(1);
         } finally {
-            closeCaches();
+            main.closeCaches();
+            main.shutdownPool();
         }
-
-        System.exit(0);
     }
 
     public BuildConfig setupBuildConfig(ParseResult parseResult) throws IOException {
@@ -192,9 +191,9 @@ public final class Main implements Callable<Void> {
 
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("--disable-cache")) {
             config.setDisableCache(disableCache);
-            LOGGER.info("Local cache is disabled");
+            LOGGER.info("Local cache: {}", green("disabled"));
         } else {
-            LOGGER.info("Using local cache: lifespan: {}, maxIdle: {}", green(config.getCacheLifespan()), green(config.getCacheMaxIdle()));
+            LOGGER.info("Local cache: {}, lifespan: {}, maxIdle: {}", green("enabled"), green(config.getCacheLifespan()), green(config.getCacheMaxIdle()));
         }
 
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("--disable-recursion")) {
@@ -264,7 +263,7 @@ public final class Main implements Callable<Void> {
         return config;
     }
 
-    private static void initCaches(BuildConfig config) {
+    private void initCaches(BuildConfig config) {
         KojiBuild.KojiBuildExternalizer externalizer = new KojiBuild.KojiBuildExternalizer();
         GlobalConfiguration globalConfig = new GlobalConfigurationBuilder().serialization().addAdvancedExternalizer(externalizer.getId(), externalizer).build();
 
@@ -273,31 +272,41 @@ public final class Main implements Callable<Void> {
         String location = new File(ConfigDefaults.CONFIG).getParent();
         Configuration configuration = new ConfigurationBuilder().expiration().lifespan(config.getCacheLifespan()).maxIdle(config.getCacheMaxIdle()).wakeUpInterval(-1L).persistence().passivation(false).addSingleFileStore().shared(false).preload(true).fetchPersistentState(true).purgeOnStartup(false).location(location).build();
 
-        cacheManager.defineConfiguration("files", configuration);
-        cacheManager.defineConfiguration("checksums", configuration);
+        cacheManager.defineConfiguration("files-" + config.getChecksumType(), configuration);
+        cacheManager.defineConfiguration("checksums-" + config.getChecksumType(), configuration);
         cacheManager.defineConfiguration("builds", configuration);
     }
 
-    private static void closeCaches() {
+    private void closeCaches() {
+        if (cacheManager == null) {
+            return;
+        }
+
         try {
-            if (cacheManager != null) {
-                cacheManager.close();
-                cacheManager = null;
-            }
+            cacheManager.close();
         } catch (IOException e) {
+            LOGGER.warn("Error closing cache manager: {}", red(e.getMessage()));
             LOGGER.debug("Error", e);
         }
+    }
+
+    private void shutdownPool() {
+        if (pool == null) {
+            return;
+        }
+
+        Utils.shutdownAndAwaitTermination(pool);
     }
 
     public void writeConfiguration(File configFile, BuildConfig config) {
         if (!configFile.exists()) {
             File configDir = configFile.getParentFile();
 
-            if (configDir != null && !configDir.exists()) {
+            if (configDir != null) {
                 boolean created = configDir.mkdirs();
 
                 if (!created) {
-                    LOGGER.warn("Failed to create directory: {}", red(configDir));
+                    LOGGER.debug("mkdirs returned {} for {}", created, configDir);
                 }
             }
 
@@ -353,7 +362,7 @@ public final class Main implements Callable<Void> {
         LOGGER.info("{}{} (SHA: {})", String.format("%" +  Math.max(0, 79 - String.format("%s (SHA: %s)", BuildFinder.getVersion(), BuildFinder.getScmRevision()).length() - 7) + "s", ""), boldYellow(BuildFinder.getVersion()), cyan(BuildFinder.getScmRevision()));
         LOGGER.info("{}", green(""));
 
-        LOGGER.info("Using configuration: {}", green(configFile));
+        LOGGER.info("Using configuration file: {}", green(configFile));
 
         BuildConfig config = null;
 
@@ -383,6 +392,12 @@ public final class Main implements Callable<Void> {
 
         List<File> inputs = createFileList(files);
 
+        boolean created = outputDirectory.mkdirs();
+
+        if (!created) {
+            LOGGER.debug("mkdirs returned {} for {}", created, outputDirectory);
+        }
+
         File checksumFile = new File(outputDirectory, BuildFinder.getChecksumFilename(config.getChecksumType()));
         Map<String, Collection<String>> checksums = null;
 
@@ -399,7 +414,11 @@ public final class Main implements Callable<Void> {
             }
         }
 
-        if (config.getChecksumOnly()) {
+        if (checksumOnly) {
+            if (cacheManager == null && !config.getDisableCache()) {
+                initCaches(config);
+            }
+
             DistributionAnalyzer analyzer = new DistributionAnalyzer(inputs, config, cacheManager);
             checksums = analyzer.checksumFiles().asMap();
 
@@ -437,18 +456,18 @@ public final class Main implements Callable<Void> {
                 initCaches(config);
             }
 
-            executorService = Executors.newFixedThreadPool(2);
+            pool = Executors.newFixedThreadPool(2);
 
             DistributionAnalyzer analyzer = new DistributionAnalyzer(inputs, config, cacheManager);
-            Future<Map<String, Collection<String>>> futureChecksums = executorService.submit(analyzer);
+            Future<Map<String, Collection<String>>> futureChecksums = pool.submit(analyzer);
 
             boolean isKerberos = krbService != null && krbPrincipal != null && krbPassword != null || krbCCache != null || krbKeytab != null;
 
             try (KojiClientSession session = isKerberos ? new KojiClientSession(config.getKojiHubURL(), krbService, krbPrincipal, krbPassword, krbCCache, krbKeytab) : new KojiClientSession(config.getKojiHubURL())) {
                 if (isKerberos) {
-                    LOGGER.info("Creating Koji session with Kerberos service: {}", green(krbService));
+                    LOGGER.info("Using Koji session with Kerberos service: {}", green(krbService));
                 } else {
-                    LOGGER.info("Created anonymous Koji session");
+                    LOGGER.info("Using anonymous Koji session");
                 }
 
                 if (cacheManager == null && !config.getDisableCache()) {
@@ -459,47 +478,49 @@ public final class Main implements Callable<Void> {
 
                 finder.setOutputDirectory(outputDirectory);
 
-                Future<Map<Integer, KojiBuild>> futureBuilds = executorService.submit(finder);
+                Future<Map<Integer, KojiBuild>> futureBuilds = pool.submit(finder);
 
                 try {
                     checksums = futureChecksums.get();
                 } catch (ExecutionException e) {
-                    LOGGER.error("Error getting checksums map: {}", boldRed(e.getMessage()));
-                    LOGGER.debug("Error", e.getCause());
+                    LOGGER.error("Error getting checksums: {}", boldRed(e.getMessage()), e);
+                    LOGGER.debug("Error", e);
                     System.exit(1);
                 }
 
-                if (config.getUseChecksumsFile()) {
-                    try {
-                        analyzer.outputToFile(outputDirectory);
-                    } catch (IOException e) {
-                        LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
-                        LOGGER.debug("Error", e);
-                        System.exit(1);
-                    }
+                try {
+                    analyzer.outputToFile(outputDirectory);
+                } catch (IOException e) {
+                    LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
+                    LOGGER.debug("Error", e);
+                    System.exit(1);
                 }
 
                 if (checksums == null || checksums.isEmpty()) {
                     LOGGER.warn("The list of checksums is empty. If this is unexpected, try removing the checksum cache ({}) and try again.", checksumFile.getAbsolutePath());
                 }
 
-                builds = futureBuilds.get();
+                try {
+                    builds = futureBuilds.get();
+                } catch (ExecutionException e) {
+                    LOGGER.error("Error getting builds {}", boldRed(e.getMessage()), e);
+                    LOGGER.debug("Error", e);
+                    System.exit(1);
+                }
 
                 JSONUtils.dumpObjectToFile(builds, buildsFile);
             } catch (KojiClientException e) {
-                LOGGER.error("Failed to find builds: {}", boldRed(e.getMessage()));
+                LOGGER.error("Error finding builds: {}", boldRed(e.getMessage()), e);
                 LOGGER.debug("Koji Client Error", e);
                 System.exit(1);
             } catch (IOException e) {
-                LOGGER.error("Error finding builds: {}", boldRed(e.getMessage()));
+                LOGGER.error("Error finding builds: {}", boldRed(e.getMessage()), e);
                 LOGGER.debug("Error", e);
                 System.exit(1);
             }
         }
 
-        if (builds != null && !builds.isEmpty()) {
-            LOGGER.info("Generating reports");
-
+        if (builds != null && builds.containsKey(0) && (!builds.get(0).getArchives().isEmpty() || builds.keySet().size() > 1)) {
             List<KojiBuild> buildList = new ArrayList<>(builds.values());
             List<Report> reports = new ArrayList<>();
 
@@ -507,6 +528,8 @@ public final class Main implements Callable<Void> {
             reports.add(new ProductReport(outputDirectory, buildList));
             reports.add(new NVRReport(outputDirectory, buildList));
             reports.add(new GAVReport(outputDirectory, buildList));
+
+            LOGGER.info("Generating {} reports", green(reports.size()));
 
             reports.forEach(report -> {
                 try {
@@ -528,10 +551,18 @@ public final class Main implements Callable<Void> {
 
             LOGGER.info("{}", boldYellow("DONE"));
         } else {
-            LOGGER.warn("Could not generate any reports since list of builds is empty. If this is unexpected, try removing the builds cache ({}) and try again.", buildsFile.getAbsolutePath());
+            LOGGER.warn("Did not generate any reports since the list of builds is empty");
         }
 
         return null;
+    }
+
+    public ExecutorService getPool() {
+        return pool;
+    }
+
+    public EmbeddedCacheManager getCacheManager() {
+        return cacheManager;
     }
 
     static class ManifestVersionProvider implements IVersionProvider {

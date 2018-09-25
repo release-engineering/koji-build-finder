@@ -57,6 +57,27 @@ public class KojiLocalArchive implements Externalizable {
         this.files = files;
     }
 
+    public static boolean isMissingBuildTypeInfo(KojiArchiveInfo archive) {
+        String archiveBuildType = archive.getBuildType();
+
+        if (archiveBuildType == null) {
+            return false;
+        }
+
+        switch (archiveBuildType) {
+        case "image":
+            return archive.getArch() == null;
+        case "maven":
+            return archive.getGroupId() == null;
+        case "rpm":
+            return false;
+        case "win":
+            return archive.getPlatforms() == null;
+        default:
+            return false;
+        }
+    }
+
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeInt(VERSION);

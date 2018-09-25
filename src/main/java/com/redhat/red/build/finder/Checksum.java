@@ -34,8 +34,9 @@ public class Checksum {
 
     }
 
-    public Checksum(String checksum, String filename) {
-
+    public Checksum(String value, String filename) {
+        this.value = value;
+        this.filename = filename;
     }
 
     public Checksum(FileObject fo, String algorithm, String root) throws IOException {

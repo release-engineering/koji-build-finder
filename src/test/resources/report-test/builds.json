@@ -908,7 +908,7 @@
     },
     "taskRequest" : {
       "request" : [ "svn+http://svn.apache.org/repos/asf/commons/proper/beanutils/tags/BEANUTILS_1_9_2#1598386", "jb-eap-7.0-rhel-7-maven-candidate", {
-        "patches" : "git://pkgs.devel.redhat.com/rpms/apache-commons-beanutils?#1a485a0a3a06cf4578b26816ad5c224a7802cd5e",
+        "patches" : "git://localhost/rpms/apache-commons-beanutils?#1a485a0a3a06cf4578b26816ad5c224a7802cd5e",
         "properties" : {
           "additionalparam" : "-Xdoclint:none",
           "version.incremental.suffix" : "redhat"
@@ -1206,7 +1206,7 @@
       "extra" : {
         "build_system" : "PNC",
         "external_build_id" : "985",
-        "external_build_system" : "http://orch.cloud.pnc.engineering.redhat.com/pnc-web/#/build-records/985",
+        "external_build_system" : "http://localhost/pnc-web/#/build-records/985",
         "maven" : {
           "artifact_id" : "config-api-parent",
           "group_id" : "org.wildfly.swarm",
@@ -1225,7 +1225,7 @@
       "maven_group_id" : "org.wildfly.swarm",
       "maven_artifact_id" : "config-api-parent",
       "maven_version" : "1.1.0.Final-redhat-14",
-      "source" : "git+ssh://user-pnc-gerrit@code.engineering.redhat.com:22/wildfly-swarm-prod/wildfly-config-api.git#1.x"
+      "source" : "git+ssh://user@localhost:22/wildfly-swarm-prod/wildfly-config-api.git#1.x"
     },
     "archives" : [ {
       "archive" : {
@@ -1441,7 +1441,7 @@
       "arch" : "noarch"
     },
     "taskRequest" : {
-      "request" : [ "git://pkgs.devel.redhat.com/rpms/artemis-native-linux#eee002a284922bf7c4c6b006dcb62f2c036ef293", "jb-amq-7-rhel-6-candidate", { } ]
+      "request" : [ "git://localhost/rpms/artemis-native-linux#eee002a284922bf7c4c6b006dcb62f2c036ef293", "jb-amq-7-rhel-6-candidate", { } ]
     },
     "archives" : [ {
       "archive" : {

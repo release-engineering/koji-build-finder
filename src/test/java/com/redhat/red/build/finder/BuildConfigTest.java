@@ -48,8 +48,8 @@ public class BuildConfigTest {
         assertNotNull(s);
 
         assertEquals(ConfigDefaults.ARCHIVE_TYPES, bc.getArchiveTypes());
-        assertEquals(ConfigDefaults.CHECKSUM_TYPE, bc.getChecksumType());
         assertEquals(ConfigDefaults.CHECKSUM_ONLY, bc.getChecksumOnly());
+        assertEquals(ConfigDefaults.CHECKSUM_TYPE, bc.getChecksumType());
         assertEquals(ConfigDefaults.EXCLUDES, bc.getExcludes());
         assertEquals(ConfigDefaults.KOJI_HUB_URL, bc.getKojiHubURL());
         assertEquals(ConfigDefaults.KOJI_WEB_URL, bc.getKojiWebURL());
@@ -70,9 +70,9 @@ public class BuildConfigTest {
 
         BuildConfig bc = BuildConfig.load(json);
 
+        assertFalse(bc.getChecksumOnly());
         assertTrue(bc.getKojiHubURL().toExternalForm().equals("https://my.url.com/hub"));
         assertTrue(bc.getKojiWebURL().toExternalForm().equals("https://my.url.com/web"));
-        assertFalse(bc.getChecksumOnly());
     }
 
     @Test

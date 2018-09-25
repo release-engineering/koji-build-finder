@@ -48,7 +48,6 @@ public class BuildFinderTest {
         KojiChecksumType checksumType = KojiChecksumType.sha1;
         BuildConfig config = new BuildConfig();
 
-        config.setChecksumOnly(true);
         config.setChecksumType(checksumType);
 
         DistributionAnalyzer da = new DistributionAnalyzer(Collections.singletonList(new File(target.getAbsolutePath())), config);
@@ -68,7 +67,6 @@ public class BuildFinderTest {
 
         BuildConfig config = new BuildConfig();
 
-        config.setChecksumOnly(true);
         config.setChecksumType(checksumType);
 
         DistributionAnalyzer da = new DistributionAnalyzer(Collections.singletonList(new File(target.getAbsolutePath())), config);

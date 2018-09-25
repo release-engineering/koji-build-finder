@@ -17,6 +17,8 @@ package com.redhat.red.build.finder;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -28,37 +30,50 @@ import org.commonjava.util.jhttpc.auth.PasswordManager;
 import com.codahale.metrics.MetricRegistry;
 import com.redhat.red.build.koji.KojiClient;
 import com.redhat.red.build.koji.KojiClientException;
+import com.redhat.red.build.koji.KojiClientHelper;
 import com.redhat.red.build.koji.config.KojiConfig;
 import com.redhat.red.build.koji.config.SimpleKojiConfigBuilder;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveQuery;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveType;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
+import com.redhat.red.build.koji.model.xmlrpc.KojiBuildTypeInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiSessionInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTagInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskRequest;
+import com.redhat.red.build.koji.model.xmlrpc.messages.Constants;
 
 public class KojiClientSession extends KojiClient implements ClientSession {
+    private static final int DEFAULT_MAX_CONNECTIONS = 10;
+
     private static final int DEFAULT_THREAD_COUNT = 1;
+
+    private static final int DEFAULT_TIMEOUT = 300;
 
     private KojiSessionInfo session;
 
+    private KojiClientHelper helper;
+
     public KojiClientSession(KojiConfig config, PasswordManager passwordManager, ExecutorService executorService) throws KojiClientException {
         super(config, passwordManager, executorService);
-    }
-
-    public KojiClientSession(URL url) throws KojiClientException {
-        super(new SimpleKojiConfigBuilder().withKojiURL(url.toExternalForm()).build(), new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT));
-    }
-
-    public KojiClientSession(URL url, String krbService, String krbPrincipal, String krbPassword, File krbCCache, File krbKeytab) throws KojiClientException {
-        super(new SimpleKojiConfigBuilder().withKojiURL(url != null ? url.toExternalForm() : null).withKrbService(krbService).withKrbCCache(krbCCache != null ? krbCCache.getPath() : null).withKrbKeytab(krbKeytab != null ? krbKeytab.getPath() : null).withKrbPrincipal(krbPrincipal).withKrbPassword(krbPassword).build(), new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT));
-        session = super.login();
+        helper = new KojiClientHelper(this);
     }
 
     public KojiClientSession(KojiConfig config, PasswordManager passwordManager, ExecutorService executorService, MetricRegistry registry) throws KojiClientException {
         super(config, passwordManager, executorService, registry);
+        helper = new KojiClientHelper(this);
+    }
+
+    public KojiClientSession(URL url) throws KojiClientException {
+        super(new SimpleKojiConfigBuilder().withMaxConnections(DEFAULT_MAX_CONNECTIONS).withTimeout(DEFAULT_TIMEOUT).withConnectionPoolTimeout(DEFAULT_TIMEOUT).withKojiURL(url.toExternalForm()).build(), new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT));
+        helper = new KojiClientHelper(this);
+    }
+
+    public KojiClientSession(URL url, String krbService, String krbPrincipal, String krbPassword, File krbCCache, File krbKeytab) throws KojiClientException {
+        super(new SimpleKojiConfigBuilder().withMaxConnections(DEFAULT_MAX_CONNECTIONS).withTimeout(DEFAULT_TIMEOUT).withConnectionPoolTimeout(DEFAULT_TIMEOUT).withKojiURL(url != null ? url.toExternalForm() : null).withKrbService(krbService).withKrbCCache(krbCCache != null ? krbCCache.getPath() : null).withKrbKeytab(krbKeytab != null ? krbKeytab.getPath() : null).withKrbPrincipal(krbPrincipal).withKrbPassword(krbPassword).build(), new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT));
+        session = super.login();
+        helper = new KojiClientHelper(this);
     }
 
     @Override
@@ -94,6 +109,57 @@ public class KojiClientSession extends KojiClient implements ClientSession {
     @Override
     public void enrichArchiveTypeInfo(List<KojiArchiveInfo> archiveInfos) throws KojiClientException {
         super.enrichArchiveTypeInfo(archiveInfos, session);
+    }
+
+    @Override
+    public List<List<KojiArchiveInfo>> listArchives(List<KojiArchiveQuery> queries) throws KojiClientException {
+        return helper.listArchives(queries, session);
+    }
+
+    @Override
+    public List<KojiBuildInfo> getBuild(List<Integer> buildIds) throws KojiClientException {
+        List<KojiBuildInfo> buildInfos = super.multiCall(Constants.GET_BUILD, buildIds, KojiBuildInfo.class, session);
+
+        if (buildInfos.isEmpty()) {
+            return buildInfos;
+        }
+
+        List<KojiBuildTypeInfo> buildTypeInfos = super.multiCall(Constants.GET_BUILD_TYPE, buildIds, KojiBuildTypeInfo.class, session);
+
+        if (buildInfos.size() != buildTypeInfos.size()) {
+            throw new KojiClientException("Sizes must be equal");
+        }
+
+        Iterator<KojiBuildInfo> it = buildInfos.iterator();
+        Iterator<KojiBuildTypeInfo> it2 = buildTypeInfos.iterator();
+
+        while (it.hasNext()) {
+            KojiBuildTypeInfo.addBuildTypeInfo(it2.next(), it.next());
+        }
+
+        return buildInfos;
+    }
+
+    @Override
+    public List<KojiTaskInfo> getTaskInfo(List<Integer> taskIds, List<Boolean> requests) throws KojiClientException {
+        int taskIdsSize = taskIds.size();
+        List<Object> args = new ArrayList<>(taskIdsSize);
+
+        for (int i = 0; i < taskIdsSize; i++) {
+            List<Object> req = new ArrayList<>(2);
+
+            req.add(taskIds.get(i));
+            req.add(requests.get(i));
+
+            args.add(req);
+        }
+
+        return super.multiCall(Constants.GET_TASK_INFO, args, KojiTaskInfo.class, session);
+    }
+
+    @Override
+    public List<List<KojiTagInfo>> listTags(List<Integer> buildIds) throws KojiClientException {
+        return helper.listTagsByIds(buildIds, session);
     }
 
     @Override

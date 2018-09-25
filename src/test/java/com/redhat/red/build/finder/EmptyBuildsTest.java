@@ -33,16 +33,13 @@ public class EmptyBuildsTest  {
     @Test
     public void verifyEmptyChecksums() throws IOException, KojiClientException {
         BuildConfig config = new BuildConfig();
-
-        config.setChecksumOnly(true);
-
         DistributionAnalyzer da = new DistributionAnalyzer(Collections.emptyList(), config);
 
         da.checksumFiles();
 
         MockKojiClientSession session = new MockKojiClientSession("empty-builds-test");
         BuildFinder finder = new BuildFinder(session, config);
-        finder.findBuilds(Collections.emptyMap());
+        finder.findBuildsSlow(Collections.emptyMap());
     }
 
     @Test
@@ -53,7 +50,7 @@ public class EmptyBuildsTest  {
         BuildConfig config = new BuildConfig();
         BuildFinder finder = new BuildFinder(session, config);
         Map<String, Collection<String>> checksumTable = Collections.singletonMap(checksum, filenames);
-        Map<Integer, KojiBuild> builds = finder.findBuilds(checksumTable);
+        Map<Integer, KojiBuild> builds = finder.findBuildsSlow(checksumTable);
 
         assertEquals(1, builds.size());
         assertTrue(builds.containsKey(0));

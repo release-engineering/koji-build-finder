@@ -138,7 +138,7 @@ public class HTMLReport extends Report {
                                       td(build.getArchives() != null ? ol(each(build.getArchives(), archive -> li(linkArchive(build, archive.getArchive()), text(": "), text(String.join(", ", archive.getFiles()))))) : text("")),
                                       td(build.getTags() != null ? ul(each(build.getTags(), tag -> li(linkTag(tag.getId(), tag.getName())))) : text("")),
                                       td(build.getMethod() != null ? text(build.getMethod()) : (build.getBuildInfo().getId() > 0 ? errorText("imported build") : text(""))),
-                                      td(build.getSourcesZip() != null ? linkArchive(build, build.getSourcesZip()) : text("")),
+                                      td(build.getScmSourcesZip() != null ? linkArchive(build, build.getScmSourcesZip()) : text("")),
                                       td(build.getPatchesZip() != null ? linkArchive(build, build.getPatchesZip()) : text("")),
                                       td(build.getSource() != null ? linkSource(build.getSource()) : (build.getBuildInfo().getId() == 0 ? text("") : errorText("missing URL"))),
                                       td(build.getTaskInfo() != null && build.getTaskInfo().getMethod() != null && build.getTaskInfo().getMethod().equals("maven") && build.getTaskRequest() != null && build.getTaskRequest().asMavenBuildRequest().getProperties() != null && build.getTaskRequest().asMavenBuildRequest() != null ? each(build.getTaskRequest().asMavenBuildRequest().getProperties().entrySet(), entry -> text(entry.getKey() + (entry.getValue() != null ? ("=" + entry.getValue() + "; ") : "; "))) : text("")),
@@ -155,6 +155,6 @@ public class HTMLReport extends Report {
 
     @Override
     public String renderText() {
-        return document().render() + toHTML().renderFormatted();
+        return document().render() + toHTML().render();
     }
 }

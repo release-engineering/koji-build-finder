@@ -42,7 +42,9 @@ import java.util.stream.Stream;
 import org.apache.commons.collections4.MultiMapUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
+import org.apache.commons.vfs2.AllFileSelector;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystem;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import org.infinispan.Cache;
@@ -98,7 +100,7 @@ public class DistributionAnalyzer implements Callable<Map<String, Collection<Str
         this.cacheManager = cacheManager;
 
         if (cacheManager != null) {
-            this.fileCache = cacheManager.getCache("files");
+            this.fileCache = cacheManager.getCache("files-" + config.getChecksumType());
         }
 
         this.level = new AtomicInteger();
@@ -106,33 +108,46 @@ public class DistributionAnalyzer implements Callable<Map<String, Collection<Str
     }
 
     public MultiValuedMap<String, String> checksumFiles() throws IOException {
-        final Instant startTime = Instant.now();
+        Instant startTime = Instant.now();
+        FileObject fo = null;
         sfs = new StandardFileSystemManager();
 
-        sfs.init();
-
         try {
+            sfs.init();
+
             for (File file : files) {
-                try (FileObject fo = sfs.resolveFile(file.getAbsolutePath())) {
+                    fo = sfs.resolveFile(file.getAbsolutePath());
+                    root = fo.getName().getFriendlyURI().substring(0, fo.getName().getFriendlyURI().indexOf(fo.getName().getBaseName()));
                     MultiValuedMap<String, String> map = null;
                     String value = null;
 
                     if (cacheManager != null) {
-                        Checksum checksum = new Checksum(fo, config.getChecksumType().getAlgorithm(), root);
-                        value = checksum.getValue();
+                        Checksum fileChecksum = new Checksum(fo, config.getChecksumType().getAlgorithm(), root);
+                        value = fileChecksum.getValue();
                         map = fileCache.get(value);
 
                         if (map != null) {
                             this.map.putAll(map);
-                            LOGGER.info("Loaded checksums for file {} (checksum {}) from cache", green(file.getName()), green(value));
+
+                            if (queue != null) {
+                                map.entries().forEach(entry -> {
+                                    try {
+                                        Checksum checksum = new Checksum(entry.getKey(), entry.getValue());
+                                        queue.put(checksum);
+                                    } catch (InterruptedException e) {
+                                        Thread.currentThread().interrupt();
+                                    }
+                                });
+                            }
+
+                            LOGGER.info("Loaded {} checksums for file: {} (checksum: {}) from cache", green(map.keySet().size()), green(file.getName()), green(value));
                         } else {
-                            LOGGER.info("File {} (checksum {}) not found in cache", green(file.getName()), green(value));
+                            LOGGER.info("File: {} (checksum: {}) not found in cache", green(file.getName()), green(value));
                         }
                     }
 
                     if (map == null) {
                         LOGGER.info("Finding checksums for file: {}", green(file.getName()));
-                        root = fo.getName().getFriendlyURI().substring(0, fo.getName().getFriendlyURI().indexOf(fo.getName().getBaseName()));
                         map = new ArrayListValuedHashMap<>();
 
                         listChildren(fo, map);
@@ -147,15 +162,20 @@ public class DistributionAnalyzer implements Callable<Map<String, Collection<Str
                             this.map.putAll(map);
                         }
                     }
-                }
             }
         } finally {
+            if (fo != null) {
+                fo.close();
+            }
+
             sfs.close();
+
+            Utils.shutdownAndAwaitTermination(pool);
         }
 
-        final Instant endTime = Instant.now();
-        final Duration duration = Duration.between(startTime, endTime).abs();
-        final int numChecksums = map.size();
+        Instant endTime = Instant.now();
+        Duration duration = Duration.between(startTime, endTime).abs();
+        int numChecksums = map.size();
 
         LOGGER.info("Total number of checksums: {}, time: {}, average: {}", green(numChecksums), green(duration), green(numChecksums > 0D ? duration.dividedBy(numChecksums) : 0D));
 
@@ -182,18 +202,19 @@ public class DistributionAnalyzer implements Callable<Map<String, Collection<Str
         LOGGER.debug("Creating file system for: {}", Utils.normalizePath(fo, root));
 
         FileObject layered = null;
+        FileSystem fs = null;
 
         try {
             layered = sfs.createFileSystem(fo.getName().getExtension(), fo);
+            fs = layered.getFileSystem();
             listChildren(layered, map);
-        } catch (FileSystemException e) {
+        } catch (IOException e) {
             // TODO: store checksum/filename/error so that we can flag the file
             LOGGER.warn("Unable to process archive/compressed file: {}: {}", red(Utils.normalizePath(fo, root)), red(e.getMessage()));
             LOGGER.debug("Error", e);
         } finally {
-            if (layered != null) {
-                sfs.closeFileSystem(layered.getFileSystem());
-                layered.close();
+            if (fs != null) {
+                sfs.closeFileSystem(fs);
             }
         }
     }
@@ -216,89 +237,86 @@ public class DistributionAnalyzer implements Callable<Map<String, Collection<Str
         return new Callable<Checksum>() {
             public Checksum call() throws IOException {
                 Checksum checksum = new Checksum(fo, config.getChecksumType().getAlgorithm(), root);
+                LOGGER.debug("{}:{} {}", checksum.getAlgorithm(), checksum.getValue(), checksum.getFilename());
                 return checksum;
             }
         };
     }
 
+    private void handleFutureChecksum(Future<Checksum> future, MultiValuedMap<String, String> map) throws IOException {
+        try {
+            Checksum checksum = future.get();
+            String value = checksum.getValue();
+            String filename = checksum.getFilename();
+
+            map.put(value, filename);
+
+            if (queue != null) {
+                try {
+                    queue.put(checksum);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException e) {
+            throw new IOException(e);
+        }
+    }
+
     private void listChildren(FileObject fo, MultiValuedMap<String, String> map) throws IOException {
-        if (fo.isFile()) {
-            if (isArchive(fo)) {
-                level.incrementAndGet();
+        FileObject[] files = null;
 
-                if (shouldListArchive(fo)) {
-                    listArchive(fo, map);
-                }
+        try {
+            files = fo.findFiles(new AllFileSelector());
 
-                level.decrementAndGet();
-            }
+            int numChildren = files.length;
+            Collection<Future<Checksum>> futures = new ArrayList<>(numChildren);
+            List<Callable<Checksum>> tasks = new ArrayList<>(numChildren);
 
-            if (includeFile(fo)) {
-                Checksum checksum = new Checksum(fo, config.getChecksumType().getAlgorithm(), root);
-                String value = checksum.getValue();
-                String filename = checksum.getFilename();
+            for (FileObject file : files) {
+                if (file.isFile()) {
+                    if (isArchive(file)) {
+                        level.incrementAndGet();
 
-                LOGGER.debug("Checksum: {} {}", value, filename);
+                        if (shouldListArchive(file)) {
+                            listArchive(file, map);
+                        }
 
-                map.put(value, filename);
+                        level.decrementAndGet();
+                    }
 
-                if (queue != null) {
-                    try {
-                        queue.put(checksum);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
+                    if (includeFile(file)) {
+                        if (!file.getName().getScheme().equals("tar")) {
+                            tasks.add(checksumTask(file));
+                        } else {
+                            Future<Checksum> future = pool.submit(checksumTask(file));
+                            handleFutureChecksum(future, map);
+                        }
                     }
                 }
             }
-        } else {
-            List<FileObject> children = Arrays.asList(fo.getChildren());
-            List<FileObject> folders = new ArrayList<>();
-            Collection<Future<Checksum>> futures = new ArrayList<>();
-            List<Callable<Checksum>> tasks = new ArrayList<>();
 
-            for (FileObject child : children) {
-                if (child.isFile() && !isArchive(child)) {
-                    if (includeFile(child)) {
-                        tasks.add(checksumTask(child));
-                    }
-                } else {
-                    folders.add(child);
+            int tasksSize = tasks.size();
+
+            if (tasksSize > 0) {
+                LOGGER.debug("Number of checksum tasks: {}", tasksSize);
+
+                try {
+                    futures = pool.invokeAll(tasks);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
-            }
-
-            try {
-                futures = pool.invokeAll(tasks);
 
                 for (Future<Checksum> future : futures) {
-                    Checksum checksum2 = future.get();
-                    String value = checksum2.getValue();
-                    String filename = checksum2.getFilename();
-
-                    LOGGER.debug("Checksum: {} {}", value, filename);
-
-                    map.put(value, filename);
-
-                    checksum2.getFileObject().close();
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            } catch (ExecutionException e) {
-                Throwable t = e.getCause();
-
-                if (t instanceof FileSystemException) {
-                    throw new FileSystemException(t);
-                } else if (t instanceof IOException) {
-                    throw new IOException(t);
-                } else {
-                    LOGGER.warn("Got unhandled exception", e);
+                    handleFutureChecksum(future, map);
                 }
             }
-
-            for (FileObject archive : folders) {
-                try {
-                    listChildren(archive, map);
-                } finally {
-                    archive.close();
+        } finally {
+            if (files != null) {
+                for (FileObject file : files) {
+                    file.close();
                 }
             }
         }
@@ -309,8 +327,6 @@ public class DistributionAnalyzer implements Callable<Map<String, Collection<Str
     }
 
     public void outputToFile(File outputDirectory) throws JsonGenerationException, JsonMappingException, IOException {
-        outputDirectory.mkdirs();
-
         JSONUtils.dumpObjectToFile(getChecksums(), getChecksumFile(outputDirectory));
     }
 

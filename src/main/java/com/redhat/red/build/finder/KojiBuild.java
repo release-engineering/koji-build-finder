@@ -158,11 +158,12 @@ public class KojiBuild {
 
     @JsonIgnore
     public KojiArchiveInfo getProjectSourcesTgz() {
+        String mavenArtifactId = buildInfo.getMavenArtifactId();
         String mavenVersion = buildInfo.getMavenVersion();
         KojiArchiveInfo sourcesZip = null;
 
-        if (remoteArchives != null && mavenVersion != null) {
-            String sourcesZipFilename = buildInfo.getMavenArtifactId() + "-" + buildInfo.getMavenVersion() + "-project-sources.tar.gz";
+        if (remoteArchives != null && mavenArtifactId != null && mavenVersion != null) {
+            String sourcesZipFilename = mavenArtifactId + "-" + mavenVersion + "-project-sources.tar.gz";
             sourcesZip = remoteArchives.stream().filter(sArchive -> sArchive.getFilename().equals(sourcesZipFilename)).findFirst().orElse(null);
             return sourcesZip;
         }
@@ -171,12 +172,13 @@ public class KojiBuild {
     }
 
     @JsonIgnore
-    public KojiArchiveInfo getSourcesZip() {
+    public KojiArchiveInfo getScmSourcesZip() {
+        String mavenArtifactId = buildInfo.getMavenArtifactId();
         String mavenVersion = buildInfo.getMavenVersion();
         KojiArchiveInfo sourcesZip = null;
 
-        if (remoteArchives != null && mavenVersion != null) {
-            String sourcesZipFilename = buildInfo.getMavenArtifactId() + "-" + buildInfo.getMavenVersion() + "-scm-sources.zip";
+        if (remoteArchives != null && mavenArtifactId != null && mavenVersion != null) {
+            String sourcesZipFilename = mavenArtifactId + "-" + mavenVersion + "-scm-sources.zip";
             sourcesZip = remoteArchives.stream().filter(sArchive -> sArchive.getFilename().equals(sourcesZipFilename)).findFirst().orElse(null);
             return sourcesZip;
         }
@@ -186,11 +188,12 @@ public class KojiBuild {
 
     @JsonIgnore
     public KojiArchiveInfo getPatchesZip() {
+        String mavenArtifactId = buildInfo.getMavenArtifactId();
         String mavenVersion = buildInfo.getMavenVersion();
         KojiArchiveInfo patchesZip = null;
 
-        if (remoteArchives != null && mavenVersion != null) {
-            String patchesZipFilename = buildInfo.getMavenArtifactId() + "-" + buildInfo.getMavenVersion() + "-patches.zip";
+        if (remoteArchives != null && mavenArtifactId != null && mavenVersion != null) {
+            String patchesZipFilename = mavenArtifactId + "-" + mavenVersion + "-patches.zip";
             patchesZip = remoteArchives.stream().filter(pArchive -> pArchive.getFilename().equals(patchesZipFilename)).findFirst().orElse(null);
             return patchesZip;
         }
@@ -200,12 +203,12 @@ public class KojiBuild {
 
     @JsonIgnore
     public boolean isImport() {
-        return !((buildInfo != null && buildInfo.getExtra() != null && buildInfo.getExtra().containsKey(KEY_BUILD_SYSTEM)) || (taskInfo != null));
+        return !((buildInfo != null && buildInfo.getExtra() != null && buildInfo.getExtra().containsKey(KEY_BUILD_SYSTEM)) || taskInfo != null);
     }
 
     @JsonIgnore
     public boolean isMaven() {
-        return ((buildInfo != null && buildInfo.getExtra() != null && buildInfo.getExtra().containsKey(KEY_MAVEN)) || (taskInfo != null && taskInfo.getMethod() != null && taskInfo.getMethod().equals(KEY_MAVEN)));
+        return (buildInfo != null && buildInfo.getExtra() != null && buildInfo.getExtra().containsKey(KEY_MAVEN)) || (taskInfo != null && taskInfo.getMethod() != null && taskInfo.getMethod().equals(KEY_MAVEN));
     }
 
     @JsonIgnore
@@ -253,7 +256,7 @@ public class KojiBuild {
                     String version = (String) extra.get(KEY_VERSION);
 
                     if (version != null) {
-                        buildSystem += (" " + version);
+                        buildSystem += " " + version;
                     }
                 }
 

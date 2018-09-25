@@ -39,10 +39,11 @@ To see the available options, execute the command `java -jar target/koji-build-f
     Finds builds in Koji.
           FILE...                One or more files.
           --cache-lifespan=LONG  Specify cache lifespan.
-                                   Default: -1
+                                   Default: 3600000
           --cache-max-idle=LONG  Specify cache maximum idle time.
-                                   Default: -1
+                                   Default: 3600000
           --disable-cache        Disable local cache.
+          --disable-recursion    Disable recursion.
           --koji-hub-url=URL     Set Koji hub URL.
           --koji-web-url=URL     Set Koji web URL.
           --krb-ccache=FILE      Set location of Kerberos credential cache.
@@ -104,11 +105,12 @@ The configuration file is in JSON format. The default configuration file, `confi
     {
       "archive-extensions" : [ "dll", "dylib", "ear", "jar", "jdocbook", "jdocbook-style", "kar", "plugin", "pom", "rar", "sar", "so", "war", "xml" ],
       "archive-types" : [ "jar", "xml", "pom", "so", "dll", "dylib" ],
-      "cache-lifespan" : -1,
-      "cache-max-idle" : -1,
+      "cache-lifespan" : 3600000,
+      "cache-max-idle" : 3600000,
       "checksum-only" : false,
       "checksum-type" : "md5",
       "disable-cache" : false,
+      "disable-recursion" : false,
       "excludes" : [ "^(?!.*/pom\\.xml$).*/.*\\.xml$" ],
       "use-builds-file" : false,
       "use-checksums-file" : false
@@ -118,13 +120,23 @@ The `archive-extensions` option specifies the Koji archive type extensions to in
 
 The `archive-types` option specifies the Koji archive types to include in the archive search.
 
+The `cache-lifespan` option specifies the cache entry lifespan in milliseconds.
+
+The `cache-max-idle` option specifies the cache entry maximum idle time in milliseconds.
+
 The `checksum-only` option specifies whether or not to skip the Koji build lookup stage and only checksum the files in the input. This stage is performed offline, whereas the build lookup stage is online.
 
 The `checksum-type` option specifies the checksum type to use for lookups. Note that at this time Koji can only support a single checksum type in its database, `md5`, even though the Koji API currently provides additional support for `sha256` and `sha512` checksum types.
 
+The `disable-cache` option disables the local infinispan cache for checksums and builds.
+
+The `disable-recursion` option disables recursion when examining archives.
+
 The `excludes` option is list of regular expression patterns. Any paths that match any of these patterns will be excluded during the build-lookup stage search.
 
 The `koji-hub-url` and `koji-web-url` configuration options must be set to valid URLs for your particular network.
+
+The `use-checksums-file` and `use-builds-file` options specify whether to load any existing `checksums.json` or `builds.json` file, respectively. These files are always written, but not loaded by default.
 
 All of the options found in the configuration file can also be specified and overridden via command-line options.
 

@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
@@ -35,9 +36,9 @@ public abstract class ConfigDefaults {
 
     public static final List<String> ARCHIVE_EXTENSIONS = Collections.unmodifiableList(Arrays.asList("dll", "dylib", "ear", "jar", "jdocbook", "jdocbook-style", "kar", "plugin", "pom", "rar", "sar", "so", "war", "xml"));
 
-    public static final Long CACHE_LIFESPAN = -1L;
+    public static final Long CACHE_LIFESPAN = TimeUnit.HOURS.toMillis(1L);
 
-    public static final Long CACHE_MAX_IDLE = -1L;
+    public static final Long CACHE_MAX_IDLE = TimeUnit.HOURS.toMillis(1L);
 
     public static final Boolean CHECKSUM_ONLY = Boolean.FALSE;
 
