@@ -670,8 +670,9 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
         }
 
         List<Integer> archiveBuildIds = archives.stream().flatMap(a -> a.stream()).map(KojiArchiveInfo::getBuildId).distinct().collect(Collectors.toList());
+        List<Integer> cachedBuildIds = cachedArchiveInfos.stream().flatMap(a -> a.stream()).map(KojiArchiveInfo::getBuildId).filter(id -> !archiveBuildIds.contains(id)).distinct().collect(Collectors.toList());
 
-        archiveBuildIds.addAll(cachedArchiveInfos.stream().flatMap(a -> a.stream()).map(KojiArchiveInfo::getBuildId).distinct().collect(Collectors.toList()));
+        archiveBuildIds.addAll(cachedBuildIds);
 
         int buildIdsSize = archiveBuildIds.size();
 
