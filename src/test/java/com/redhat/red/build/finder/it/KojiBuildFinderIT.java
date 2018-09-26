@@ -78,7 +78,7 @@ public class KojiBuildFinderIT extends AbstractKojiIT {
             final ClientSession session = getKojiClientSession();
             final BuildFinder finder = new BuildFinder(session, getConfig());
 
-            finder.findBuildsSlow(map);
+            finder.findBuilds(map);
         } finally {
             context2.stop();
         }
