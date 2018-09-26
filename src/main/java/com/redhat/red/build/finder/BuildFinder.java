@@ -598,7 +598,7 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
             for (int i = 0; i < numChunks; i++) {
                 int chunkNumber = i + 1;
                 List<Entry<String, Collection<String>>> chunk = chunks.get(i);
-                List<KojiArchiveQuery> queries = new ArrayList<>(chunk.size());
+                List<KojiArchiveQuery> queries = new ArrayList<>(numChunks);
 
                 chunk.forEach(entry -> {
                     String checksum = entry.getKey();
@@ -610,29 +610,33 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
                 if (!queries.isEmpty()) {
                     int querySize = queries.size();
 
-                    LOGGER.debug("Got {} queries", green(querySize));
+                    LOGGER.debug("Added {} queries", green(querySize));
 
                     allQueries.addAll(queries);
 
                     tasks.add(() -> {
-                        LOGGER.debug("Looking up checksums for chunk {} / {}", green(chunkNumber), green(numChunks));
                         List<List<KojiArchiveInfo>> archiveInfos = null;
+
+                        LOGGER.debug("Looking up checksums for chunk {} / {}", green(chunkNumber), green(numChunks));
 
                         try {
                             archiveInfos = session.listArchives(queries);
 
                             return archiveInfos;
-                        } catch (KojiClientException e) {
-                            int newChunkSize = 1;
+                        } catch (NullPointerException e) { // FIXME: caused by kojiji
+                            final int newChunkSize = 4;
 
-                            LOGGER.warn("Looking up checksums for chunk {} / {} failed, retrying with chunk size: {}", red(chunkNumber), red(numChunks), red(newChunkSize));
+                            LOGGER.debug("Looking up checksums for chunk {} / {} failed with {}. Retrying with chunk size: {}", red(chunkNumber), red(numChunks), red(e.getMessage()), red(newChunkSize));
 
-                            archiveInfos = new ArrayList<>(querySize);
                             List<List<KojiArchiveQuery>> subQueries = ListUtils.partition(queries, newChunkSize);
+                            int numSubQueries = subQueries.size();
+                            archiveInfos = new ArrayList<>(querySize);
 
-                            for (List<KojiArchiveQuery> subQuery : subQueries) {
+                            for (int j = 0; j < numSubQueries; j++) {
+                                int subChunkNumber = j + 1;
+                                List<KojiArchiveQuery> subQuery = subQueries.get(j);
                                 List<List<KojiArchiveInfo>> subArchiveInfos = session.listArchives(subQuery);
-
+                                LOGGER.debug("Looking up checksums for chunk {} / {}", green(subChunkNumber), green(numSubQueries));
                                 archiveInfos.addAll(subArchiveInfos);
                             }
 
