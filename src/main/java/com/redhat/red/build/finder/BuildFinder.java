@@ -608,13 +608,36 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
                 });
 
                 if (!queries.isEmpty()) {
-                    LOGGER.debug("Got {} queries", green(queries.size()));
+                    int querySize = queries.size();
+
+                    LOGGER.debug("Got {} queries", green(querySize));
 
                     allQueries.addAll(queries);
 
                     tasks.add(() -> {
                         LOGGER.debug("Looking up checksums for chunk {} / {}", green(chunkNumber), green(numChunks));
-                        return session.listArchives(queries);
+                        List<List<KojiArchiveInfo>> archiveInfos = null;
+
+                        try {
+                            archiveInfos = session.listArchives(queries);
+
+                            return archiveInfos;
+                        } catch (KojiClientException e) {
+                            int newChunkSize = 1;
+
+                            LOGGER.warn("Looking up checksums for chunk {} / {} failed, retrying with chunk size: {}", red(chunkNumber), red(numChunks), red(newChunkSize));
+
+                            archiveInfos = new ArrayList<>(querySize);
+                            List<List<KojiArchiveQuery>> subQueries = ListUtils.partition(queries, newChunkSize);
+
+                            for (List<KojiArchiveQuery> subQuery : subQueries) {
+                                List<List<KojiArchiveInfo>> subArchiveInfos = session.listArchives(subQuery);
+
+                                archiveInfos.addAll(subArchiveInfos);
+                            }
+
+                            return archiveInfos;
+                        }
                     });
                 }
             }
@@ -631,13 +654,11 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
                         List<List<KojiArchiveInfo>> archiveFutures = future.get();
                         List<KojiArchiveInfo> archivesToEnrich = archiveFutures.stream().filter(a -> !a.isEmpty()).flatMap(a -> a.stream()).collect(Collectors.toList());
 
-                        LOGGER.debug("Begin enrich {} archives", archivesToEnrich.size());
+                        LOGGER.debug("Enriching {} archives", archivesToEnrich.size());
 
                         if (!archivesToEnrich.isEmpty()) {
                             session.enrichArchiveTypeInfo(archivesToEnrich);
                         }
-
-                        LOGGER.debug("End enrich {} archives", archivesToEnrich.size());
 
                         for (List<KojiArchiveInfo> archiveList : archiveFutures) {
                             String queryChecksum = itqueries.next().getChecksum();
@@ -661,7 +682,7 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
 
                         archives.addAll(archiveFutures);
                     } catch (ExecutionException e) {
-                        throw new KojiClientException("Error getting futures", e.getCause());
+                        throw new KojiClientException("Error getting archive futures", e);
                     }
                 }
             } catch (InterruptedException e) {
@@ -714,7 +735,7 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
                 Thread.currentThread().interrupt();
             } catch (ExecutionException e) {
                 Utils.shutdownAndAwaitTermination(pool);
-                throw new KojiClientException("Error getting futures", e);
+                throw new KojiClientException("Error getting archive build futures", e);
             }
 
             List<Integer> taskIds = archiveBuilds.stream().map(KojiBuildInfo::getTaskId).filter(Objects::nonNull).collect(Collectors.toList());
@@ -743,7 +764,7 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
                 Thread.currentThread().interrupt();
             } catch (ExecutionException e) {
                 Utils.shutdownAndAwaitTermination(pool);
-                throw new KojiClientException("Error getting futures", e);
+                throw new KojiClientException("Error getting tag, archive, or taskinfo futures", e);
             }
 
             Iterator<KojiBuildInfo> itbuilds = archiveBuilds.iterator();
