@@ -15,30 +15,23 @@
  */
 package com.redhat.red.build.finder;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.List;
+import java.util.Collection;
+import java.util.TreeSet;
 
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 
-public class KojiLocalArchive implements Externalizable {
-    private static final long serialVersionUID = -6388497659567932834L;
-
-    private static int VERSION = 1;
-
+public class KojiLocalArchive {
     private KojiArchiveInfo archive;
 
-    private List<String> files;
+    private Collection<String> files;
 
     public KojiLocalArchive() {
 
     }
 
-    public KojiLocalArchive(KojiArchiveInfo archive, List<String> files) {
+    public KojiLocalArchive(KojiArchiveInfo archive, Collection<String> files) {
         this.archive = archive;
-        this.files = files;
+        this.files = new TreeSet<>();
     }
 
     public KojiArchiveInfo getArchive() {
@@ -49,11 +42,11 @@ public class KojiLocalArchive implements Externalizable {
         this.archive = archive;
     }
 
-    public List<String> getFiles() {
+    public Collection<String> getFiles() {
         return files;
     }
 
-    public void setFiles(List<String> files) {
+    public void setFiles(Collection<String> files) {
         this.files = files;
     }
 
@@ -76,25 +69,5 @@ public class KojiLocalArchive implements Externalizable {
         default:
             return false;
         }
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeInt(VERSION);
-        out.writeObject(archive);
-        out.writeObject(files);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        int version = in.readInt();
-
-        if (version != 1) {
-            throw new IOException("Invalid version: " + version);
-        }
-
-        archive = (KojiArchiveInfo) in.readObject();
-        files = (List<String>) in.readObject();
     }
 }
