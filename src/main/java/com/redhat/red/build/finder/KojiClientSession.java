@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.commonjava.util.jhttpc.auth.MemoryPasswordManager;
 import org.commonjava.util.jhttpc.auth.PasswordManager;
@@ -45,11 +46,11 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiTaskRequest;
 import com.redhat.red.build.koji.model.xmlrpc.messages.Constants;
 
 public class KojiClientSession extends KojiClient implements ClientSession {
-    private static final int DEFAULT_MAX_CONNECTIONS = 10;
+    private static final int DEFAULT_MAX_CONNECTIONS = 13;
 
     private static final int DEFAULT_THREAD_COUNT = 1;
 
-    private static final int DEFAULT_TIMEOUT = 300;
+    private static final int DEFAULT_TIMEOUT = (int) TimeUnit.MINUTES.toSeconds(15L);
 
     private KojiSessionInfo session;
 
