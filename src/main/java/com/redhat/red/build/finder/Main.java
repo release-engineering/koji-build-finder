@@ -159,7 +159,7 @@ public final class Main implements Callable<Void> {
         Main main = new Main();
 
         try {
-            Ansi ansi = System.getProperty("picocli.ansi") == null ? Ansi.ON : Ansi.AUTO;
+            Ansi ansi = System.getProperty("picocli.ansi") == null ? Ansi.ON : (Boolean.getBoolean("picocli.ansi") ? Ansi.ON : Ansi.OFF);
             CommandLine.call(main, System.out, ansi, args);
             System.exit(0);
         } catch (picocli.CommandLine.ExecutionException e) {
