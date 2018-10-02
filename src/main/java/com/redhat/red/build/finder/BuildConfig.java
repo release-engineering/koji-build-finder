@@ -61,6 +61,9 @@ public class BuildConfig {
     @JsonProperty("koji-web-url")
     private URL kojiWebURL;
 
+    @JsonProperty("output-directory")
+    private String outputDirectory;
+
     @JsonProperty("use-builds-file")
     private Boolean useBuildsFile;
 
@@ -224,6 +227,17 @@ public class BuildConfig {
         this.kojiWebURL = kojiWebURL;
     }
 
+    public String getOutputDirectory() {
+        if (outputDirectory == null) {
+            outputDirectory = ConfigDefaults.OUTPUT_DIR;
+        }
+        return outputDirectory;
+    }
+
+    public void setOutputDirectory(String outputDirectory) {
+        this.outputDirectory = outputDirectory;
+    }
+
     public boolean getUseBuildsFile() {
         if (useBuildsFile == null) {
             useBuildsFile = ConfigDefaults.USE_BUILDS_FILE;
@@ -262,6 +276,7 @@ public class BuildConfig {
             + ", \n\texcludes=" + getExcludes()
             + ", \n\tkojiHubURL=" + getKojiHubURL()
             + ", \n\tkojiWebURL=" + getKojiWebURL()
+            + ", \n\toutputDirectory=" + getOutputDirectory()
             + ", \n\tuseBuildsFile=" + getUseBuildsFile()
             + ", \n\tuseChecksumsFile='" + getUseChecksumsFile()
             + "}";

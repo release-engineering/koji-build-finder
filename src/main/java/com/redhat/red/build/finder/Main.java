@@ -131,7 +131,7 @@ public final class Main implements Callable<Void> {
     private String krbService;
 
     @Option(names = {"-o", "--output-directory"}, paramLabel = "FILE", description = "Set output directory.")
-    private File outputDirectory;
+    private File outputDirectory = new File(ConfigDefaults.OUTPUT_DIR);
 
     @Option(names = {"-q", "--quiet"}, description = "Disable all logging.")
     private boolean quiet = false;
@@ -257,6 +257,7 @@ public final class Main implements Callable<Void> {
         }
 
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("-o")) {
+            config.setOutputDirectory(outputDirectory.toString());
             LOGGER.info("Output will be stored in directory: {}", green(outputDirectory));
         }
 

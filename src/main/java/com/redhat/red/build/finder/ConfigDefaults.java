@@ -56,6 +56,8 @@ public abstract class ConfigDefaults {
 
     public static final URL KOJI_WEB_URL = null;
 
+    public static final String OUTPUT_DIR = ".";
+
     public static final Boolean USE_BUILDS_FILE = Boolean.FALSE;
 
     public static final Boolean USE_CHECKSUMS_FILE = Boolean.FALSE;
