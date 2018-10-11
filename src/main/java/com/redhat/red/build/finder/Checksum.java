@@ -79,11 +79,8 @@ public class Checksum {
             checksumTypes.forEach(checksumType -> {
                 CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
                     MessageDigest md =  mds.get(checksumType);
-
                     md.update(buffer, 0, len);
-
                     return null;
-
                 });
 
                 futures.add(future);
@@ -101,7 +98,6 @@ public class Checksum {
         checksumTypes.forEach(checksumType -> {
             CompletableFuture<Checksum> future = CompletableFuture.supplyAsync(() -> {
                 MessageDigest md = mds.get(checksumType);
-
                 return new Checksum(checksumType, Hex.encodeHexString(md.digest()), Utils.normalizePath(fo, root));
             });
 
