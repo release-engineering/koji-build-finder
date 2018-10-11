@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -116,7 +117,7 @@ public class MainTest {
 
         assertTrue(parseResult.matchedOption("--checksum-only").getValue());
 
-        assertEquals(KojiChecksumType.sha256, parseResult.matchedOption("--checksum-type").getValue());
+        assertEquals(EnumSet.of(KojiChecksumType.sha256), parseResult.matchedOption("--checksum-type").getValue());
 
         List<Pattern> excludes = parseResult.matchedOption("--exclude").getValue();
 
@@ -159,7 +160,7 @@ public class MainTest {
 
         assertTrue(parseResult.matchedOption("--checksum-only").getValue());
 
-        assertEquals(KojiChecksumType.sha256, parseResult.matchedOption("--checksum-type").getValue());
+        assertEquals(EnumSet.of(KojiChecksumType.sha256), parseResult.matchedOption("--checksum-type").getValue());
 
         Main.main(args);
 
@@ -196,7 +197,7 @@ public class MainTest {
 
             assertTrue(parseResult.matchedOption("--checksum-only").getValue());
 
-            assertEquals(KojiChecksumType.md5, parseResult.matchedOption("--checksum-type").getValue());
+            assertEquals(EnumSet.of(KojiChecksumType.md5), parseResult.matchedOption("--checksum-type").getValue());
 
             assertTrue(parseResult.matchedOption("--debug").getValue());
 
@@ -240,7 +241,7 @@ public class MainTest {
 
             assertTrue(parseResult.matchedOption("--checksum-only").getValue());
 
-            assertEquals(KojiChecksumType.md5, parseResult.matchedOption("--checksum-type").getValue());
+            assertEquals(EnumSet.of(KojiChecksumType.md5), parseResult.matchedOption("--checksum-type").getValue());
 
             assertTrue(parseResult.matchedOption("--quiet").getValue());
 

@@ -25,18 +25,25 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
+import org.apache.commons.collections4.MultiMapUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+
+import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
 public class DistributionAnalyzerTest {
     @Rule
@@ -58,6 +65,8 @@ public class DistributionAnalyzerTest {
     }
 
     @Test
+    // XXX: Disabled for performance
+    @Ignore
     public void verifySize() throws IOException {
         List<File> af = new ArrayList<>();
         File test = temp.newFile();
@@ -116,9 +125,9 @@ public class DistributionAnalyzerTest {
         BuildConfig config = new BuildConfig();
         config.setArchiveExtensions(Collections.emptyList());
         DistributionAnalyzer da = new DistributionAnalyzer(target, config);
-        MultiValuedMap<String, String> checksums = da.checksumFiles();
+        Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = da.checksumFiles();
 
-        assertEquals(25, checksums.size());
+        assertEquals(25, checksums.get(KojiChecksumType.md5).size());
     }
 
     @Test
@@ -127,9 +136,9 @@ public class DistributionAnalyzerTest {
         BuildConfig config = new BuildConfig();
         config.setArchiveExtensions(Collections.emptyList());
         DistributionAnalyzer da = new DistributionAnalyzer(target, config);
-        MultiValuedMap<String, String> checksums = da.checksumFiles();
+        Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = da.checksumFiles();
 
-        assertEquals(7, checksums.size());
+        assertEquals(7, checksums.get(KojiChecksumType.md5).size());
     }
 
     @Test
@@ -138,9 +147,9 @@ public class DistributionAnalyzerTest {
         BuildConfig config = new BuildConfig();
         config.setArchiveExtensions(Collections.emptyList());
         DistributionAnalyzer da = new DistributionAnalyzer(target, config);
-        MultiValuedMap<String, String> checksums = da.checksumFiles();
+        Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = da.checksumFiles();
 
-        assertEquals(4, checksums.size());
+        assertEquals(4, checksums.get(KojiChecksumType.md5).size());
         assertTrue(systemOutRule.getLog().contains("Unable to process archive/compressed file"));
     }
 
@@ -150,9 +159,45 @@ public class DistributionAnalyzerTest {
         BuildConfig config = new BuildConfig();
         config.setArchiveExtensions(Collections.emptyList());
         DistributionAnalyzer da = new DistributionAnalyzer(target, config);
-        Map<String, Collection<String>> checksums = da.call();
+        Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = da.call();
 
-        assertEquals(9, checksums.size());
+        assertEquals(25, checksums.get(KojiChecksumType.md5).size());
+    }
+
+    @Test
+    public void loadNestedZipMultiThreadedMultipleChecksumTypes() throws IOException {
+        List<File> target = Collections.singletonList(TestUtils.loadFile("nested.zip"));
+        BuildConfig config = new BuildConfig();
+        config.setArchiveExtensions(Collections.emptyList());
+        config.setChecksumTypes(EnumSet.allOf(KojiChecksumType.class));
+
+        assertEquals(config.getChecksumTypes().size(), 3);
+
+        DistributionAnalyzer da = new DistributionAnalyzer(target, config);
+        Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = da.call();
+
+        assertEquals(config.getChecksumTypes().size(), checksums.keySet().size());
+
+        assertTrue(config.getChecksumTypes().contains(KojiChecksumType.md5));
+        assertTrue(config.getChecksumTypes().contains(KojiChecksumType.sha1));
+        assertTrue(config.getChecksumTypes().contains(KojiChecksumType.sha256));
+
+        config.getChecksumTypes().forEach(checksumType -> assertEquals(25, checksums.get(checksumType).size()));
+
+        config.getChecksumTypes().forEach(checksumType -> {
+            for (Entry<String, String> entry : checksums.get(checksumType).entries()) {
+                String checksum = entry.getKey();
+                String filename = entry.getValue();
+                Set<Checksum> set = MultiMapUtils.getValuesAsSet(da.getFiles(), filename);
+                Checksum cksum =  Checksum.findByType(set, checksumType);
+
+                assertEquals(checksum, cksum.getValue());
+                assertEquals(checksumType, cksum.getType());
+            }
+        });
+
+        assertEquals(3, checksums.values().size());
+        assertEquals(25 * checksums.values().size(), checksums.values().stream().mapToInt(MultiValuedMap::size).sum());
     }
 
     @Test
@@ -162,9 +207,9 @@ public class DistributionAnalyzerTest {
         config.setArchiveExtensions(Collections.emptyList());
         config.setDisableRecursion(true);
         DistributionAnalyzer da = new DistributionAnalyzer(target, config);
-        MultiValuedMap<String, String> checksums = da.checksumFiles();
+        Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = da.checksumFiles();
 
-        assertEquals(3, checksums.size());
+        assertEquals(3, checksums.get(KojiChecksumType.md5).size());
     }
 
     @Test
@@ -174,9 +219,9 @@ public class DistributionAnalyzerTest {
         config.setArchiveExtensions(Collections.emptyList());
         config.setDisableRecursion(true);
         DistributionAnalyzer da = new DistributionAnalyzer(target, config);
-        MultiValuedMap<String, String> checksums = da.checksumFiles();
+        Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = da.checksumFiles();
 
-        assertEquals(2, checksums.size());
+        assertEquals(2, checksums.get(KojiChecksumType.md5).size());
     }
 
     @Test
@@ -186,9 +231,9 @@ public class DistributionAnalyzerTest {
         config.setArchiveExtensions(Collections.emptyList());
         config.setDisableRecursion(true);
         DistributionAnalyzer da = new DistributionAnalyzer(target, config);
-        MultiValuedMap<String, String> checksums = da.checksumFiles();
+        Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = da.checksumFiles();
 
-        assertEquals(4, checksums.size());
+        assertEquals(4, checksums.get(KojiChecksumType.md5).size());
     }
 
     @Test
@@ -198,8 +243,8 @@ public class DistributionAnalyzerTest {
         config.setArchiveExtensions(Collections.emptyList());
         config.setDisableRecursion(true);
         DistributionAnalyzer da = new DistributionAnalyzer(target, config);
-        MultiValuedMap<String, String> checksums = da.checksumFiles();
+        Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = da.checksumFiles();
 
-        assertEquals(4, checksums.size());
+        assertEquals(4, checksums.get(KojiChecksumType.md5).size());
     }
 }

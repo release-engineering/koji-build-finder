@@ -18,20 +18,25 @@ package com.redhat.red.build.finder;
 import java.util.Collection;
 import java.util.TreeSet;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 
 public class KojiLocalArchive {
     private KojiArchiveInfo archive;
 
-    private Collection<String> files;
+    @JsonProperty("files")
+    private Collection<String> filenames;
+
+    private Collection<Checksum> checksums;
 
     public KojiLocalArchive() {
-
+        this.filenames = new TreeSet<>();
     }
 
-    public KojiLocalArchive(KojiArchiveInfo archive, Collection<String> files) {
+    public KojiLocalArchive(KojiArchiveInfo archive, Collection<String> filenames, Collection<Checksum> checksums) {
         this.archive = archive;
-        this.files = new TreeSet<>();
+        this.filenames = new TreeSet<>(filenames);
+        this.checksums = checksums;
     }
 
     public KojiArchiveInfo getArchive() {
@@ -42,12 +47,20 @@ public class KojiLocalArchive {
         this.archive = archive;
     }
 
-    public Collection<String> getFiles() {
-        return files;
+    public Collection<String> getFilenames() {
+        return filenames;
     }
 
-    public void setFiles(Collection<String> files) {
-        this.files = files;
+    public void setFilenames(Collection<String> filenames) {
+        this.filenames = new TreeSet<>(filenames);
+    }
+
+    public Collection<Checksum> getChecksums() {
+        return checksums;
+    }
+
+    public void setChecksums(Collection<Checksum> checksums) {
+        this.checksums = checksums;
     }
 
     public static boolean isMissingBuildTypeInfo(KojiArchiveInfo archive) {

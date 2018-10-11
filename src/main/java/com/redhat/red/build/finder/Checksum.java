@@ -16,54 +16,130 @@
 package com.redhat.red.build.finder;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.vfs2.FileObject;
 
-public class Checksum {
-    private FileObject fileObject;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
-    private String algorithm;
+public class Checksum {
+    private static int BUFFER_SIZE = 1024;
+
+    private KojiChecksumType type;
 
     private String value;
 
+    @JsonIgnore
     private String filename;
 
     public Checksum() {
 
     }
 
-    public Checksum(String value, String filename) {
+    public Checksum(KojiChecksumType type, String value, String filename) {
+        this.type = type;
         this.value = value;
         this.filename = filename;
     }
 
-    public Checksum(FileObject fo, String algorithm, String root) throws IOException {
-        this.fileObject = fo;
-        this.algorithm = algorithm;
-        this.value = checksum(fo, algorithm);
-        this.filename = Utils.normalizePath(fileObject, root);
+    public static Set<Checksum> checksum(FileObject fo, Set<KojiChecksumType> checksumTypes, String root) throws IOException {
+        int checksumTypesSize = checksumTypes.size();
+        Map<KojiChecksumType, MessageDigest> mds = new HashMap<>(checksumTypesSize);
+
+        for (KojiChecksumType checksumType : checksumTypes) {
+            try {
+                mds.put(checksumType, MessageDigest.getInstance(checksumType.getAlgorithm()));
+            } catch (NoSuchAlgorithmException e) {
+                throw new IOException(e);
+            }
+        }
+
+        List<CompletableFuture<Void>> futures = new ArrayList<>(checksumTypesSize);
+
+        int len1;
+        InputStream input = fo.getContent().getInputStream();
+        byte[] buffer = new byte[BUFFER_SIZE];
+
+        while ((len1 = input.read(buffer)) > 0) {
+            final int len = len1;
+
+            checksumTypes.forEach(checksumType -> {
+                CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
+                    MessageDigest md =  mds.get(checksumType);
+
+                    md.update(buffer, 0, len);
+
+                    return null;
+
+                });
+
+                futures.add(future);
+            });
+
+            for (CompletableFuture<Void> future : futures) {
+                future.join();
+            }
+
+            futures.clear();
+        }
+
+        Map<KojiChecksumType, CompletableFuture<Checksum>> futures2 = new HashMap<>(checksumTypesSize);
+
+        checksumTypes.forEach(checksumType -> {
+            CompletableFuture<Checksum> future = CompletableFuture.supplyAsync(() -> {
+                MessageDigest md = mds.get(checksumType);
+
+                return new Checksum(checksumType, Hex.encodeHexString(md.digest()), Utils.normalizePath(fo, root));
+            });
+
+            futures2.put(checksumType, future);
+        });
+
+        Set<Checksum> results = new HashSet<>(checksumTypesSize);
+
+        for (KojiChecksumType checksumType : checksumTypes) {
+            try {
+                results.add(futures2.get(checksumType).get());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (ExecutionException e) {
+                throw new IOException(e);
+            }
+        }
+
+        return results;
     }
 
-    private String checksum(FileObject fo, String algorithm) throws IOException {
-        return Hex.encodeHexString(DigestUtils.digest(DigestUtils.getDigest(algorithm), fo.getContent().getInputStream()));
+    public static Checksum findByType(Set<Checksum> checksums, KojiChecksumType type) {
+        List<Checksum> list = checksums.stream().filter(checksum -> checksum.getType().equals(type)).collect(Collectors.toList());
+        int size = list.size();
+
+        if (size == 0) {
+            return null;
+        }
+
+        return list.get(0);
     }
 
-    public String getAlgorithm() {
-        return algorithm;
+    public KojiChecksumType getType() {
+        return type;
     }
 
-    public void setAlgorithm(String algorithm) {
-        this.algorithm = algorithm;
-    }
-
-    public FileObject getFileObject() {
-        return fileObject;
-    }
-
-    public void setFileObject(FileObject fileObject) {
-        this.fileObject = fileObject;
+    public void setType(KojiChecksumType type) {
+        this.type = type;
     }
 
     public String getValue() {

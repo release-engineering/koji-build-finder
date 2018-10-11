@@ -19,7 +19,9 @@ import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -42,7 +44,7 @@ public abstract class ConfigDefaults {
 
     public static final Boolean CHECKSUM_ONLY = Boolean.FALSE;
 
-    public static final KojiChecksumType CHECKSUM_TYPE = KojiChecksumType.md5;
+    public static final Set<KojiChecksumType> CHECKSUM_TYPES = EnumSet.of(KojiChecksumType.md5);
 
     public static final String CONFIG = FileUtils.getUserDirectoryPath() + File.separator + ".koji-build-finder" + File.separator + "config.json";
 

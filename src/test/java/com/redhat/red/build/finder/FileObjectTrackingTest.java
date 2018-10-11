@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.MultiValuedMap;
 import org.jboss.byteman.contrib.bmunit.BMRule;
@@ -33,6 +34,8 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
+
+import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
 @RunWith(BMUnitRunner.class)
 // Uncomment this to get byteman logging!
@@ -102,9 +105,9 @@ public class FileObjectTrackingTest {
         config.setArchiveExtensions(Collections.emptyList());
 
         DistributionAnalyzer da = new DistributionAnalyzer(target, config);
-        MultiValuedMap<String, String> checksums = da.checksumFiles();
+        Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = da.checksumFiles();
 
-        assertEquals(25, checksums.size());
+        assertEquals(25, checksums.get(KojiChecksumType.md5).size());
 
         Object sCounter = getFileSystemCounter();
 

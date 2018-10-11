@@ -35,6 +35,7 @@ import com.redhat.red.build.finder.BuildFinder;
 import com.redhat.red.build.finder.ClientSession;
 import com.redhat.red.build.finder.DistributionAnalyzer;
 import com.redhat.red.build.koji.KojiClientException;
+import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
 public class KojiBuildFinderIT extends AbstractKojiIT {
     private static final String PROPERTY = "com.redhat.red.build.finder.it.distribution.url";
@@ -65,7 +66,7 @@ public class KojiBuildFinderIT extends AbstractKojiIT {
 
         try {
             final DistributionAnalyzer da = new DistributionAnalyzer(Collections.singletonList(file), getConfig());
-            map = da.checksumFiles().asMap();
+            map = da.checksumFiles().get(KojiChecksumType.md5).asMap();
         } finally {
             context.stop();
         }

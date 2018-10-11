@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -44,7 +45,7 @@ public class BuildConfig {
     private Boolean checksumOnly;
 
     @JsonProperty("checksum-type")
-    private KojiChecksumType checksumType;
+    private Set<KojiChecksumType> checksumTypes;
 
     @JsonProperty("disable-cache")
     private Boolean disableCache;
@@ -155,16 +156,16 @@ public class BuildConfig {
         this.checksumOnly = checksumOnly;
     }
 
-    public KojiChecksumType getChecksumType() {
-        if (checksumType == null) {
-            checksumType = ConfigDefaults.CHECKSUM_TYPE;
+    public Set<KojiChecksumType> getChecksumTypes() {
+        if (checksumTypes == null) {
+            checksumTypes = ConfigDefaults.CHECKSUM_TYPES;
         }
 
-        return checksumType;
+        return checksumTypes;
     }
 
-    public void setChecksumType(KojiChecksumType checksumType) {
-        this.checksumType = checksumType;
+    public void setChecksumTypes(Set<KojiChecksumType> checksumTypes) {
+        this.checksumTypes = checksumTypes;
     }
 
     public boolean getDisableCache() {
@@ -271,7 +272,7 @@ public class BuildConfig {
             + ", \n\tcacheLifespan=" + getCacheLifespan()
             + ", \n\tcacheMaxIdle=" + getCacheMaxIdle()
             + ", \n\tchecksumOnly=" + getChecksumOnly()
-            + ", \n\tchecksumType=" + getChecksumType()
+            + ", \n\tchecksumTypes=" + getChecksumTypes()
             + ", \n\tdisableCache=" + getDisableCache()
             + ", \n\texcludes=" + getExcludes()
             + ", \n\tkojiHubURL=" + getKojiHubURL()

@@ -28,19 +28,31 @@ public final class TestUtils {
         final URL resource = Thread.currentThread().getContextClassLoader().getResource(resourceBase + resourceName);
 
         if (resource == null) {
-            throw new IOException("Unable to locate resource for " + resourceBase + resourceName);
+            throw new IOException("Unable to locate resource for: " + resourceBase + resourceName);
         }
 
         return new File(resource.getPath());
     }
 
     public static File loadFile(String file) throws IOException {
-        URL urlFile = Thread.currentThread().getContextClassLoader().getResource(file);
+        URL url = Thread.currentThread().getContextClassLoader().getResource(file);
 
-        if (urlFile == null) {
-            throw new IOException("Unable to resolve " + file);
+        if (url == null) {
+            throw new IOException("Unable to resolve: " + file);
         }
 
-        return new File(urlFile.getFile());
+        String urlFile = url.getFile();
+
+        if (urlFile.isEmpty()) {
+            throw new IOException("Unable to get file from URL: " + url);
+        }
+
+        File newFile = new File(urlFile);
+
+        if (!newFile.exists()) {
+            throw new IOException("File does not exist: " + newFile);
+        }
+
+        return newFile;
     }
 }

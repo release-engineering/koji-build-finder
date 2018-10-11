@@ -27,15 +27,20 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.io.FileUtils;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
@@ -136,8 +141,8 @@ public final class Main implements Callable<Void> {
     @Option(names = {"-q", "--quiet"}, description = "Disable all logging.")
     private boolean quiet = false;
 
-    @Option(names = {"-t", "--checksum-type"}, paramLabel = "CHECKSUM", description = "Set checksum type (${COMPLETION-CANDIDATES}).")
-    private KojiChecksumType checksumType = ConfigDefaults.CHECKSUM_TYPE;
+    @Option(names = {"-t", "--checksum-type"}, paramLabel = "CHECKSUM", description = "Add a checksum type (${COMPLETION-CANDIDATES}).")
+    private Set<KojiChecksumType> checksumTypes = ConfigDefaults.CHECKSUM_TYPES;
 
     @Option(names = {"--use-builds-file"}, description = "Use builds file.")
     private boolean useBuildsFile = ConfigDefaults.USE_BUILDS_FILE;
@@ -205,7 +210,7 @@ public final class Main implements Callable<Void> {
         }
 
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("-t")) {
-            config.setChecksumType(checksumType);
+            config.setChecksumTypes(checksumTypes);
         }
 
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("-a")) {
@@ -273,8 +278,11 @@ public final class Main implements Callable<Void> {
         String location = new File(ConfigDefaults.CONFIG).getParent();
         Configuration configuration = new ConfigurationBuilder().expiration().lifespan(config.getCacheLifespan()).maxIdle(config.getCacheMaxIdle()).wakeUpInterval(-1L).persistence().passivation(false).addSingleFileStore().shared(false).preload(true).fetchPersistentState(true).purgeOnStartup(false).location(location).build();
 
-        cacheManager.defineConfiguration("files-" + config.getChecksumType(), configuration);
-        cacheManager.defineConfiguration("checksums-" + config.getChecksumType(), configuration);
+        config.getChecksumTypes().forEach(checksumType -> {
+            cacheManager.defineConfiguration("files-" + checksumType, configuration);
+            cacheManager.defineConfiguration("checksums-" + checksumType, configuration);
+        });
+
         cacheManager.defineConfiguration("builds", configuration);
     }
 
@@ -399,40 +407,72 @@ public final class Main implements Callable<Void> {
             LOGGER.debug("mkdirs returned {} for {}", created, outputDirectory);
         }
 
-        File checksumFile = new File(outputDirectory, BuildFinder.getChecksumFilename(config.getChecksumType()));
-        Map<String, Collection<String>> checksums = null;
+        LOGGER.info("Checksum type: {}", green(String.join(", ", config.getChecksumTypes().stream().map(String::valueOf).collect(Collectors.toSet()))));
 
-        LOGGER.info("Checksum type: {}", green(config.getChecksumType()));
+        final Map<KojiChecksumType, MultiValuedMap<String, String>> checksumsFromFile = new HashMap<>(config.getChecksumTypes().size());
 
-        if (config.getUseChecksumsFile() && checksumFile.exists()) {
-            try {
-                LOGGER.info("Loading checksums from file: {}", green(checksumFile));
-                checksums = JSONUtils.loadChecksumsFile(checksumFile);
-            } catch (IOException e) {
-                LOGGER.error("Error loading checksums file: {}", boldRed(e.getMessage()));
-                LOGGER.debug("Error", e);
-                System.exit(1);
-            }
+        if (config.getUseChecksumsFile()) {
+            config.getChecksumTypes().forEach(checksumType -> {
+                File checksumFile = new File(outputDirectory, BuildFinder.getChecksumFilename(checksumType));
+
+                if (checksumFile.exists()) {
+                    checksumsFromFile.put(checksumType, new ArrayListValuedHashMap<>());
+
+                    LOGGER.info("Loading checksums from file: {}", green(checksumFile));
+
+                    try {
+                        Map<String, Collection<String>> subChecksums = JSONUtils.loadChecksumsFile(checksumFile);
+                        subChecksums.entrySet().forEach(e -> e.getValue().forEach(v -> checksumsFromFile.get(checksumType).put(e.getKey(), v)));
+                    } catch (IOException e) {
+                        LOGGER.error("Error loading checksums file: {}", boldRed(e.getMessage()));
+                        LOGGER.debug("Error", e);
+                        System.exit(1);
+                    }
+                } else {
+                    LOGGER.error("File {} does not exist", boldRed(checksumFile));
+                    System.exit(1);
+                }
+            });
         }
 
+        Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = checksumsFromFile;
+
         if (checksumOnly) {
-            if (cacheManager == null && !config.getDisableCache()) {
-                initCaches(config);
-            }
+            if (!config.getUseChecksumsFile()) {
+                if (cacheManager == null && !config.getDisableCache()) {
+                    initCaches(config);
+                }
 
-            DistributionAnalyzer analyzer = new DistributionAnalyzer(inputs, config, cacheManager);
-            checksums = analyzer.checksumFiles().asMap();
+                pool = Executors.newFixedThreadPool(config.getChecksumTypes().size());
 
-            try {
-                analyzer.outputToFile(outputDirectory);
-            } catch (IOException e) {
-                LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
-                LOGGER.debug("Error", e);
-                System.exit(1);
+                DistributionAnalyzer analyzer = new DistributionAnalyzer(inputs, config, cacheManager);
+                Future<Map<KojiChecksumType, MultiValuedMap<String, String>>> futureChecksum = pool.submit(analyzer);
+
+                try {
+                    checksums  = futureChecksum.get();
+                } catch (ExecutionException e) {
+                    LOGGER.error("Error getting checksums: {}", boldRed(e.getMessage()), e);
+                    LOGGER.debug("Error", e);
+                    System.exit(1);
+                }
+
+                checksums.keySet().forEach(checksumType -> {
+                    try {
+                        analyzer.outputToFile(checksumType, outputDirectory);
+                    } catch (IOException e) {
+                        LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
+                        LOGGER.debug("Error", e);
+                        System.exit(1);
+                    }
+                });
+            } else {
+                int numChecksums = checksums.values().iterator().next().size();
+
+                LOGGER.info("Total number of checksums: {}", green(numChecksums));
             }
 
             if (checksums == null || checksums.isEmpty()) {
-                LOGGER.warn("The list of checksums is empty. If this is unexpected, try removing the checksum cache ({}) and try again.", checksumFile.getAbsolutePath());
+                LOGGER.warn("The list of checksums is empty");
             }
 
             System.exit(0);
@@ -442,82 +482,112 @@ public final class Main implements Callable<Void> {
         Map<Integer, KojiBuild> builds = null;
         File buildsFile = new File(outputDirectory, BuildFinder.getBuildsFilename());
 
-        if (config.getUseBuildsFile() && buildsFile.exists()) {
-            LOGGER.info("Loading builds from file: {}", green(buildsFile.getPath()));
+        if (config.getUseBuildsFile()) {
+            if (buildsFile.exists()) {
+                LOGGER.info("Loading builds from file: {}", green(buildsFile.getPath()));
 
-            try {
-                builds = JSONUtils.loadBuildsFile(buildsFile);
-            } catch (IOException e) {
-                LOGGER.error("Error loading builds file: {}", boldRed(e.getMessage()));
-                LOGGER.debug("Error", e);
+                try {
+                    builds = JSONUtils.loadBuildsFile(buildsFile);
+                } catch (IOException e) {
+                    LOGGER.error("Error loading builds file: {}", boldRed(e.getMessage()));
+                    LOGGER.debug("Error", e);
+                    System.exit(1);
+                }
+            } else {
+                LOGGER.error("File {} does not exist", boldRed(buildsFile));
                 System.exit(1);
             }
         } else {
-            if (cacheManager == null && !config.getDisableCache()) {
-                initCaches(config);
+            if (!checksumTypes.contains(KojiChecksumType.md5)) {
+                LOGGER.error("To find builds, you must enable checksum type: {}", boldRed(KojiChecksumType.md5));
+                System.exit(1);
             }
 
-            pool = Executors.newFixedThreadPool(2);
+            if (config.getUseChecksumsFile()) {
+                boolean isKerberos = krbService != null && krbPrincipal != null && krbPassword != null || krbCCache != null || krbKeytab != null;
 
-            DistributionAnalyzer analyzer = new DistributionAnalyzer(inputs, config, cacheManager);
-            Future<Map<String, Collection<String>>> futureChecksums = pool.submit(analyzer);
+                try (KojiClientSession session = isKerberos ? new KojiClientSession(config.getKojiHubURL(), krbService, krbPrincipal, krbPassword, krbCCache, krbKeytab) : new KojiClientSession(config.getKojiHubURL())) {
+                    if (isKerberos) {
+                        LOGGER.info("Using Koji session with Kerberos service: {}", green(krbService));
+                    } else {
+                        LOGGER.info("Using anonymous Koji session");
+                    }
 
-            boolean isKerberos = krbService != null && krbPrincipal != null && krbPassword != null || krbCCache != null || krbKeytab != null;
+                    DistributionAnalyzer analyzer = new DistributionAnalyzer(inputs, config, cacheManager);
 
-            try (KojiClientSession session = isKerberos ? new KojiClientSession(config.getKojiHubURL(), krbService, krbPrincipal, krbPassword, krbCCache, krbKeytab) : new KojiClientSession(config.getKojiHubURL())) {
-                if (isKerberos) {
-                    LOGGER.info("Using Koji session with Kerberos service: {}", green(krbService));
-                } else {
-                    LOGGER.info("Using anonymous Koji session");
+                    analyzer.setChecksums(checksums);
+
+                    finder = new BuildFinder(session, config, analyzer, cacheManager);
+
+                    finder.findBuilds(checksums.get(KojiChecksumType.md5).asMap());
+
+                    finder.setOutputDirectory(outputDirectory);
                 }
-
+            } else {
                 if (cacheManager == null && !config.getDisableCache()) {
                     initCaches(config);
                 }
 
-                finder = new BuildFinder(session, config, analyzer, cacheManager);
+                pool = Executors.newFixedThreadPool(1 + config.getChecksumTypes().size());
 
-                finder.setOutputDirectory(outputDirectory);
+                DistributionAnalyzer analyzer = new DistributionAnalyzer(inputs, config, cacheManager);
+                Future<Map<KojiChecksumType, MultiValuedMap<String, String>>> futureChecksum = pool.submit(analyzer);
 
-                Future<Map<Integer, KojiBuild>> futureBuilds = pool.submit(finder);
+                boolean isKerberos = krbService != null && krbPrincipal != null && krbPassword != null || krbCCache != null || krbKeytab != null;
 
-                try {
-                    checksums = futureChecksums.get();
-                } catch (ExecutionException e) {
-                    LOGGER.error("Error getting checksums: {}", boldRed(e.getMessage()), e);
-                    LOGGER.debug("Error", e);
+                try (KojiClientSession session = isKerberos ? new KojiClientSession(config.getKojiHubURL(), krbService, krbPrincipal, krbPassword, krbCCache, krbKeytab) : new KojiClientSession(config.getKojiHubURL())) {
+                    if (isKerberos) {
+                        LOGGER.info("Using Koji session with Kerberos service: {}", green(krbService));
+                    } else {
+                        LOGGER.info("Using anonymous Koji session");
+                    }
+
+                    finder = new BuildFinder(session, config, analyzer, cacheManager);
+
+                    finder.setOutputDirectory(outputDirectory);
+
+                    Future<Map<Integer, KojiBuild>> futureBuilds = pool.submit(finder);
+
+                    try {
+                        checksums = futureChecksum.get();
+                    } catch (ExecutionException e) {
+                        LOGGER.error("Error getting checksums: {}", boldRed(e.getMessage()), e);
+                        LOGGER.debug("Error", e);
+                        System.exit(1);
+                    }
+
+                    checksums.keySet().forEach(checksumType -> {
+                        try {
+                            analyzer.outputToFile(checksumType, outputDirectory);
+                        } catch (IOException e) {
+                            LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
+                            LOGGER.debug("Error", e);
+                            System.exit(1);
+                        }
+                    });
+
+                    if (checksums == null || checksums.isEmpty()) {
+                        LOGGER.warn("The list of checksums is empty");
+                    }
+
+                    try {
+                        builds = futureBuilds.get();
+                    } catch (ExecutionException e) {
+                        LOGGER.error("Error getting builds {}", boldRed(e.getMessage()), e);
+                        LOGGER.debug("Error", e);
+                        System.exit(1);
+                    }
+
+                    JSONUtils.dumpObjectToFile(builds, buildsFile);
+                } catch (KojiClientException e) {
+                    LOGGER.error("Error finding builds: {}", boldRed(e.getMessage()), e);
+                    LOGGER.debug("Koji Client Error", e);
                     System.exit(1);
-                }
-
-                try {
-                    analyzer.outputToFile(outputDirectory);
                 } catch (IOException e) {
-                    LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
+                    LOGGER.error("Error finding builds: {}", boldRed(e.getMessage()), e);
                     LOGGER.debug("Error", e);
                     System.exit(1);
                 }
-
-                if (checksums == null || checksums.isEmpty()) {
-                    LOGGER.warn("The list of checksums is empty. If this is unexpected, try removing the checksum cache ({}) and try again.", checksumFile.getAbsolutePath());
-                }
-
-                try {
-                    builds = futureBuilds.get();
-                } catch (ExecutionException e) {
-                    LOGGER.error("Error getting builds {}", boldRed(e.getMessage()), e);
-                    LOGGER.debug("Error", e);
-                    System.exit(1);
-                }
-
-                JSONUtils.dumpObjectToFile(builds, buildsFile);
-            } catch (KojiClientException e) {
-                LOGGER.error("Error finding builds: {}", boldRed(e.getMessage()), e);
-                LOGGER.debug("Koji Client Error", e);
-                System.exit(1);
-            } catch (IOException e) {
-                LOGGER.error("Error finding builds: {}", boldRed(e.getMessage()), e);
-                LOGGER.debug("Error", e);
-                System.exit(1);
             }
         }
 

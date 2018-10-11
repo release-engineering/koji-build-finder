@@ -135,7 +135,7 @@ public class HTMLReport extends Report {
                                       td(build.getBuildInfo().getId() > 0 ? linkBuild(build.getBuildInfo().getId()) : errorText(String.valueOf(build.getBuildInfo().getId()))),
                                       td(build.getBuildInfo().getId() > 0 ? linkPackage(build.getBuildInfo().getPackageId(), build.getBuildInfo().getName()) : text("")),
                                       td(build.getBuildInfo().getId() > 0 ? text(build.getBuildInfo().getVersion().replace('_', '-')) : text("")),
-                                      td(build.getArchives() != null ? ol(each(build.getArchives(), archive -> li(linkArchive(build, archive.getArchive()), text(": "), text(String.join(", ", archive.getFiles()))))) : text("")),
+                                      td(build.getArchives() != null ? ol(each(build.getArchives(), archive -> li(linkArchive(build, archive.getArchive()), text(": "), text(String.join(", ", archive.getFilenames()))))) : text("")),
                                       td(build.getTags() != null ? ul(each(build.getTags(), tag -> li(linkTag(tag.getId(), tag.getName())))) : text("")),
                                       td(build.getMethod() != null ? text(build.getMethod()) : (build.getBuildInfo().getId() > 0 ? errorText("imported build") : text(""))),
                                       td(build.getScmSourcesZip() != null ? linkArchive(build, build.getScmSourcesZip()) : text("")),

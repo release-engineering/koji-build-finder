@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Map;
 
 import org.junit.Before;
@@ -48,16 +49,16 @@ public class BuildFinderTest {
         KojiChecksumType checksumType = KojiChecksumType.sha1;
         BuildConfig config = new BuildConfig();
 
-        config.setChecksumType(checksumType);
+        config.setChecksumTypes(EnumSet.of(checksumType));
 
         DistributionAnalyzer da = new DistributionAnalyzer(Collections.singletonList(new File(target.getAbsolutePath())), config);
         da.checksumFiles();
-        da.outputToFile(folder);
+        da.outputToFile(checksumType, folder);
 
         File[] file = folder.listFiles();
 
         assertTrue(file != null && file.length == 1);
-        assertTrue(file[0].getCanonicalPath().equals(da.getChecksumFile(folder).getCanonicalPath()));
+        assertTrue(file[0].getCanonicalPath().equals(da.getChecksumFile(checksumType, folder).getCanonicalPath()));
     }
 
     @Test
@@ -67,13 +68,13 @@ public class BuildFinderTest {
 
         BuildConfig config = new BuildConfig();
 
-        config.setChecksumType(checksumType);
+        config.setChecksumTypes(EnumSet.of(checksumType));
 
         DistributionAnalyzer da = new DistributionAnalyzer(Collections.singletonList(new File(target.getAbsolutePath())), config);
         da.checksumFiles();
-        da.outputToFile(folder);
+        da.outputToFile(checksumType, folder);
 
-        Map<String, Collection<String>> checksums = JSONUtils.loadChecksumsFile(da.getChecksumFile(folder));
+        Map<String, Collection<String>> checksums = JSONUtils.loadChecksumsFile(da.getChecksumFile(checksumType, folder));
 
         assertEquals(1, checksums.size());
     }
