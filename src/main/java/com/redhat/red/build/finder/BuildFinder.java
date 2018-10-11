@@ -462,7 +462,7 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
 
             for (KojiArchiveInfo archive : archives) {
                 if (!archive.getChecksumType().equals(KojiChecksumType.md5)) {
-                    LOGGER.warn("Skipping archive id {} as checksum is not {}, but is {}", red(KojiChecksumType.md5), red(archive.getArchiveId()), red(archive.getChecksumType()));
+                    LOGGER.warn("Skipping archive id {} as checksum is not {}, but is {}", red(archive.getArchiveId()), red(KojiChecksumType.md5), red(archive.getChecksumType()));
                     continue;
                 }
 
