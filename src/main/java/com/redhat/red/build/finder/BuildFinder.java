@@ -292,7 +292,7 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
         } else {
             LOGGER.debug("Adding new archive id {} to build id {} with {} archives and filenames {}", archive.getArchiveId(), archive.getBuildId(), build.getArchives().size(), filenames);
 
-            build.getArchives().add(new KojiLocalArchive(archive, filenames, analyzer != null ? analyzer.getFiles().asMap().get(filenames.iterator().next()) : Collections.emptySet()));
+            build.getArchives().add(new KojiLocalArchive(archive, filenames, analyzer != null ? analyzer.getFiles().get(filenames.iterator().next()) : Collections.emptySet()));
 
             build.getArchives().sort((KojiLocalArchive a1, KojiLocalArchive a2) -> a1.getArchive().getFilename().compareTo(a2.getArchive().getFilename()));
         }
