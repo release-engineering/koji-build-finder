@@ -82,7 +82,7 @@ public class KojiPerformanceIT extends AbstractKojiPerformanceIT {
     }
 
     @Test
-    public void testMultiCall() {
+    public void testMultiCall() throws KojiClientException {
         final Timer timer = REGISTRY.timer(MetricRegistry.name(KojiPerformanceIT.class, "multiCall"));
 
         for (int i = 0; i < NUM_LOOPS; i++) {

@@ -22,12 +22,13 @@ import org.junit.Test;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import com.redhat.red.build.koji.model.xmlrpc.messages.Constants;
 
 public class KojiMultiCallPerformanceIT extends AbstractKojiPerformanceIT {
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void testMultiCall(final int chunkSize) {
+    public void testMultiCall(final int chunkSize) throws KojiClientException {
         final Timer timer = REGISTRY.timer(MetricRegistry.name(KojiMultiCallPerformanceIT.class, String.format("multiCall-%03d", chunkSize)));
 
         for (int i = 0; i < NUM_LOOPS; i++) {
@@ -47,7 +48,7 @@ public class KojiMultiCallPerformanceIT extends AbstractKojiPerformanceIT {
     }
 
     @Test
-    public void testMultiCall() {
+    public void testMultiCall() throws KojiClientException {
         final int min = 5;
         final int size = BUILD_IDS.size();
         final int doubleSize = size * 2;
