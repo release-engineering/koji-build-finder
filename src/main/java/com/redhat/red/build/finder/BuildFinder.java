@@ -604,12 +604,9 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
 
                         LOGGER.debug("Looking up checksums for chunk {} / {}", green(chunkNumber), green(numChunks));
 
-                        try {
-                            archiveInfos = session.listArchives(queries);
-                            return archiveInfos;
-                        } catch (NullPointerException e) {
-                            throw new KojiClientException("NullPointerException for query checksums: {}", queries.stream().map(KojiArchiveQuery::getChecksum).collect(Collectors.joining(" ")));
-                        }
+                        archiveInfos = session.listArchives(queries);
+
+                        return archiveInfos;
                     });
                 }
             }
