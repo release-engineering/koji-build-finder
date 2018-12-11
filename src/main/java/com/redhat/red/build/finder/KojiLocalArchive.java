@@ -18,6 +18,7 @@ package com.redhat.red.build.finder;
 import java.util.Collection;
 import java.util.TreeSet;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 
@@ -29,14 +30,19 @@ public class KojiLocalArchive {
 
     private Collection<Checksum> checksums;
 
+    @JsonProperty("unmatchedFiles")
+    private Collection<String> unmatchedFilenames;
+
     public KojiLocalArchive() {
         this.filenames = new TreeSet<>();
+        this.unmatchedFilenames = new TreeSet<>();
     }
 
     public KojiLocalArchive(KojiArchiveInfo archive, Collection<String> filenames, Collection<Checksum> checksums) {
         this.archive = archive;
         this.filenames = new TreeSet<>(filenames);
         this.checksums = checksums;
+        this.unmatchedFilenames = new TreeSet<>();
     }
 
     public KojiArchiveInfo getArchive() {
@@ -82,5 +88,24 @@ public class KojiLocalArchive {
         default:
             return false;
         }
+    }
+
+    @JsonIgnore
+    public boolean isBuiltFromSource() {
+        return unmatchedFilenames.isEmpty();
+    }
+
+    public Collection<String> getUnmatchedFilenames() {
+        return unmatchedFilenames;
+    }
+
+    public void setUnmatchedFilenames(Collection<String> unmatchFilenames) {
+        this.unmatchedFilenames = new TreeSet<>(unmatchedFilenames);
+    }
+
+    @Override
+    public String toString() {
+        return "KojiLocalArchive [archive=" + archive + ", filenames=" + filenames + ", checksums=" + checksums
+                + ", unmatchedFilenames=" + unmatchedFilenames + "]";
     }
 }

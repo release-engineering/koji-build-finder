@@ -233,7 +233,7 @@ public class DistributionAnalyzerTest {
         DistributionAnalyzer da = new DistributionAnalyzer(target, config);
         Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = da.checksumFiles();
 
-        assertEquals(4, checksums.get(KojiChecksumType.md5).size());
+        assertEquals(1, checksums.get(KojiChecksumType.md5).size());
     }
 
     @Test

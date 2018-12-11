@@ -97,6 +97,8 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
 
     private Set<KojiChecksumType> checksumTypesToCheck;
 
+    private Set<String> filesInError;
+
     public DistributionAnalyzer(List<File> files, BuildConfig config) {
         this(files, config, null);
     }
@@ -126,6 +128,7 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
 
         this.level = new AtomicInteger();
         this.pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        this.filesInError = new HashSet<>();
     }
 
     public Map<KojiChecksumType, MultiValuedMap<String, String>> checksumFiles() throws IOException {
@@ -218,12 +221,19 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
         return (!NON_ARCHIVE_SCHEMES.contains(fo.getName().getExtension()) && Stream.of(sfs.getSchemes()).anyMatch(s -> s.equals(fo.getName().getExtension())));
     }
 
+    private static boolean isJar(FileObject fo) {
+        String ext = fo.getName().getExtension();
+        boolean isJar = ext.equals("jar") || ext.equals("war") || ext.equals("rar") || ext.equals("ear") || ext.equals("sar") || ext.equals("kar") || ext.equals("jdocbook") || ext.equals("jdocbook-style") || ext.equals("plugin");
+
+        return isJar;
+    }
+
     private boolean shouldListArchive(FileObject fo) throws FileSystemException {
         if (!config.getDisableRecursion()) {
             return true;
         }
 
-        if (level.intValue() == 1 || level.intValue() == 2 && fo.getParent().isFolder() && fo.getParent().getName().toString().endsWith("!/") && fo.getParent().getChildren().length == 1) {
+        if (!isJar(fo) && level.intValue() == 1 || level.intValue() == 2 && fo.getParent().isFolder() && fo.getParent().getName().toString().endsWith("!/") && fo.getParent().getChildren().length == 1) {
             return true;
         }
 
@@ -241,8 +251,11 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
             fs = layered.getFileSystem();
             listChildren(layered);
         } catch (IOException e) {
-            // TODO: store checksum/filename/error so that we can flag the file
-            LOGGER.warn("Unable to process archive/compressed file: {}: {}", red(Utils.normalizePath(fo, root)), red(e.getMessage()));
+            String filename = Utils.normalizePath(fo, root);
+
+            filesInError.add(filename);
+
+            LOGGER.warn("Unable to process archive/compressed file: {}: {}", red(filename), red(e.getMessage()));
             LOGGER.debug("Error", e);
         } finally {
             if (fs != null) {
@@ -314,6 +327,15 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
 
             for (FileObject file : files) {
                 if (file.isFile()) {
+                    if (includeFile(file)) {
+                        if (!file.getName().getScheme().equals("tar")) {
+                            tasks.add(checksumTask(file));
+                        } else {
+                            Future<Set<Checksum>> future = pool.submit(checksumTask(file));
+                            handleFutureChecksum(future);
+                        }
+                    }
+
                     if (isArchive(file)) {
                         level.incrementAndGet();
 
@@ -322,15 +344,6 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
                         }
 
                         level.decrementAndGet();
-                    }
-
-                    if (includeFile(file)) {
-                        if (!file.getName().getScheme().equals("tar")) {
-                            tasks.add(checksumTask(file));
-                        } else {
-                            Future<Set<Checksum>> future = pool.submit(checksumTask(file));
-                            handleFutureChecksum(future);
-                        }
                     }
                 }
             }
@@ -379,6 +392,10 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
 
     public Map<String, Collection<String>> getChecksums(KojiChecksumType checksumType) {
         return Collections.unmodifiableMap(map.get(checksumType).asMap());
+    }
+
+    public Collection<String> getFilesInError() {
+        return filesInError;
     }
 
     @Override

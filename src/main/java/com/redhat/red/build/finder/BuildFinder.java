@@ -49,6 +49,7 @@ import java.util.stream.Stream;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.MultiMapUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.infinispan.Cache;
@@ -502,6 +503,43 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
         return Collections.unmodifiableMap(builds);
     }
 
+    private String handleFileNotFound(String filename) {
+        LOGGER.debug("Handle file not found: {}", filename);
+
+        int index = filename.lastIndexOf("!/");
+
+        if (index == -1) {
+            index = filename.length();
+        }
+
+        String parentFilename = filename.substring(0, index);
+
+        LOGGER.debug("Parent of file not found: {}", parentFilename);
+
+        for (KojiBuild build : builds.values()) {
+            List<KojiLocalArchive> as = build.getArchives();
+            final String needle = parentFilename;
+            Optional<KojiLocalArchive> a = as.stream().filter(ar -> ar.getFilenames().contains(needle)).findFirst();
+
+            if (a.isPresent()) {
+                KojiLocalArchive matchedArchive = a.get();
+                KojiArchiveInfo archive = matchedArchive.getArchive();
+
+                matchedArchive.getUnmatchedFilenames().add(filename);
+
+                LOGGER.debug("Archive {} ({}) is not build from source since it contains unfound file {} (built from source: {})", archive.getArchiveId(), archive.getFilename(), filename, matchedArchive.isBuiltFromSource());
+
+                return parentFilename;
+            }
+        }
+
+        if (index == -1 || index == filename.length()) {
+            return null;
+        }
+
+        return handleFileNotFound(parentFilename);
+    }
+
     private boolean shouldSkipChecksum(String checksum, Collection<String> filenames) {
         if (checksum.equals(emptyDigest)) {
             LOGGER.warn("Skipped empty digest for files: {}", red(filenames));
@@ -550,6 +588,7 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
 
             if (shouldSkipChecksum(checksum, filenames)) {
                 LOGGER.debug("Skipped checksum {} for filenames {}", checksum, filenames);
+                // XXX: must check for cached version and remove if present
                 continue;
             }
 
@@ -842,6 +881,44 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
                 }
 
                 addArchiveToBuild(build, archive, filenames);
+            }
+        }
+
+        KojiBuild buildZero = builds.get(0);
+        List<KojiLocalArchive> localArchives = buildZero.getArchives();
+
+        if (analyzer != null) {
+            analyzer.getFilesInError().forEach(fileInError -> addArchiveWithoutBuild(Checksum.findByType(MultiMapUtils.getValuesAsSet(analyzer.getFiles(), fileInError), KojiChecksumType.md5).getValue(), Collections.singletonList(fileInError)));
+        }
+
+        LOGGER.debug("Find parents for {} archives: {}", localArchives.size(), localArchives);
+
+        Iterator<KojiLocalArchive> it = localArchives.iterator();
+
+        while (it.hasNext()) {
+            KojiLocalArchive localArchive = it.next();
+            Collection<String> filenames = localArchive.getFilenames();
+
+            LOGGER.debug("Handle archive id {} with filenames {}", localArchive.getArchive().getArchiveId(), filenames);
+
+            Iterator<String> it2 = filenames.iterator();
+
+            while (it2.hasNext()) {
+                String filename = it2.next();
+                String parentFilename = handleFileNotFound(filename);
+
+                if (parentFilename != null && parentFilename.contains("!/")) {
+                    LOGGER.debug("Removing {} since we found a parent elsewhere", filename);
+
+                    it2.remove();
+                } else {
+                    LOGGER.debug("Keeping {} since the parent is the distribution itself", filename);
+                }
+            }
+
+            if (filenames.isEmpty()) {
+                LOGGER.debug("Remove archive since filenames is empty");
+                it.remove();
             }
         }
 

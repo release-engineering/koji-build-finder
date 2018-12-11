@@ -35,7 +35,18 @@ public class BuildStatistics {
             }
 
             if (build.getArchives() != null) {
-                long archiveCount = build.getArchives().stream().count();
+                long archiveCount = 0;
+
+                List<KojiLocalArchive> archives = build.getArchives();
+
+                for (KojiLocalArchive archive : archives) {
+                    archiveCount++;
+
+                    if (!build.isImport() && !archive.isBuiltFromSource()) {
+                        numberOfImportedArchives += archive.getUnmatchedFilenames().size();
+                    }
+                }
+
                 numberOfArchives += archiveCount;
 
                 if (build.isImport()) {
