@@ -177,13 +177,23 @@ public final class Main implements Callable<Void> {
     }
 
     public BuildConfig setupBuildConfig(ParseResult parseResult) throws IOException {
+        BuildConfig defaults = BuildConfig.load(Main.class.getClassLoader());
         BuildConfig config;
 
         if (configFile.exists()) {
-            config = BuildConfig.load(configFile);
+            if (defaults == null) {
+                config = BuildConfig.load(configFile);
+            } else {
+                config = BuildConfig.merge(defaults, configFile);
+            }
         } else {
-            LOGGER.info("Configuration file {} does not exist. Implicitly creating with defaults.", green(configFile));
-            config = new BuildConfig();
+            if (defaults == null) {
+                LOGGER.info("Configuration file {} does not exist. Implicitly creating with defaults.", green(configFile));
+                config = new BuildConfig();
+            } else {
+                LOGGER.info("Configuration file {} does not exist. Implicitly creating using defaults from file {} on classpath.", green(configFile), green(ConfigDefaults.CONFIG_FILE));
+                config = defaults;
+            }
         }
 
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("--cache-lifespan")) {

@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.redhat.red.build.koji.model.json.util.KojiObjectMapper;
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
@@ -83,8 +84,43 @@ public class BuildConfig {
         return getMapper().readValue(json, BuildConfig.class);
     }
 
+    public static BuildConfig load(URL url) throws IOException {
+        return getMapper().readValue(url, BuildConfig.class);
+    }
+
+    public static BuildConfig load(ClassLoader cl) throws IOException {
+        URL url = cl.getResource(ConfigDefaults.CONFIG_FILE);
+
+        if (url != null) {
+            return load(url);
+        }
+
+        return null;
+    }
+
     public void save(File file) throws IOException {
         JSONUtils.dumpObjectToFile(this, file);
+    }
+
+    public static BuildConfig merge(BuildConfig config, File file) throws IOException {
+        ObjectReader reader = getMapper().readerForUpdating(config);
+        BuildConfig merged = reader.readValue(file);
+
+        return merged;
+    }
+
+    public static BuildConfig merge(BuildConfig config, String json) throws IOException {
+        ObjectReader reader = getMapper().readerForUpdating(config);
+        BuildConfig merged = reader.readValue(json);
+
+        return merged;
+    }
+
+    public static BuildConfig merge(BuildConfig config, URL url) throws IOException {
+        ObjectReader reader = getMapper().readerForUpdating(config);
+        BuildConfig merged = reader.readValue(url);
+
+        return merged;
     }
 
     private static ObjectMapper getMapper() {

@@ -46,7 +46,11 @@ public abstract class ConfigDefaults {
 
     public static final Set<KojiChecksumType> CHECKSUM_TYPES = EnumSet.of(KojiChecksumType.md5);
 
-    public static final String CONFIG = FileUtils.getUserDirectoryPath() + File.separator + ".koji-build-finder" + File.separator + "config.json";
+    public static final String CONFIG_FILE = "config.json";
+
+    public static final String CONFIG_PATH = FileUtils.getUserDirectoryPath() + File.separator + ".koji-build-finder";
+
+    public static final String CONFIG = CONFIG_PATH + File.separator + CONFIG_FILE;
 
     public static final Boolean DISABLE_CACHE = Boolean.FALSE;
 

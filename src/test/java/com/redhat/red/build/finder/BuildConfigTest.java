@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
 public class BuildConfigTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(BuildConfigTest.class);
@@ -71,8 +72,8 @@ public class BuildConfigTest {
         BuildConfig bc = BuildConfig.load(json);
 
         assertFalse(bc.getChecksumOnly());
-        assertTrue(bc.getKojiHubURL().toExternalForm().equals("https://my.url.com/hub"));
-        assertTrue(bc.getKojiWebURL().toExternalForm().equals("https://my.url.com/web"));
+        assertEquals("https://my.url.com/hub", bc.getKojiHubURL().toExternalForm());
+        assertEquals("https://my.url.com/web", bc.getKojiWebURL().toExternalForm());
     }
 
     @Test
@@ -93,5 +94,24 @@ public class BuildConfigTest {
         BuildConfig bc2 = BuildConfig.load(file);
 
         assertEquals(bc.toString(), bc2.toString());
+    }
+
+    @Test
+    public void verifyLoadFromClassPath() throws IOException {
+        String json = "{\"archive-types\":[\"jar\"],\"excludes\":\"^(?!.*/pom\\\\.xml$).*/.*\\\\.xml$\",\"checksum-only\":true,\"checksum-type\":\"sha256\",\"koji-hub-url\":\"https://my.url.com/hub\",\"koji-web-url\":\"https://my.url.com/web\"}";
+        BuildConfig bc = BuildConfig.load(BuildConfigTest.class.getClassLoader());
+        BuildConfig bc2 = BuildConfig.load(json);
+
+        assertFalse(bc.getChecksumOnly());
+        assertTrue(bc2.getChecksumOnly());
+
+        BuildConfig merged = BuildConfig.merge(bc, json);
+
+        assertTrue(merged.getChecksumOnly());
+        assertTrue(merged.getArchiveTypes().size() == 1 && merged.getArchiveTypes().get(0).equals("jar"));
+        assertTrue(merged.getArchiveExtensions().size() == 14 && merged.getArchiveExtensions().get(0).equals("dll"));
+        assertEquals(KojiChecksumType.sha256, merged.getChecksumTypes().iterator().next());
+        assertEquals("https://my.url.com/hub", bc.getKojiHubURL().toExternalForm());
+        assertEquals("https://my.url.com/web", bc.getKojiWebURL().toExternalForm());
     }
 }
