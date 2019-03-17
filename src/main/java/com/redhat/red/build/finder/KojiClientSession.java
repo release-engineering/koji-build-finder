@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.commonjava.util.jhttpc.auth.MemoryPasswordManager;
 import org.commonjava.util.jhttpc.auth.PasswordManager;
@@ -39,6 +40,8 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveQuery;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveType;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildTypeInfo;
+import com.redhat.red.build.koji.model.xmlrpc.KojiIdOrName;
+import com.redhat.red.build.koji.model.xmlrpc.KojiRpmInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiSessionInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTagInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskInfo;
@@ -118,14 +121,30 @@ public class KojiClientSession extends KojiClient implements ClientSession {
     }
 
     @Override
-    public List<KojiBuildInfo> getBuild(List<Integer> buildIds) throws KojiClientException {
-        List<KojiBuildInfo> buildInfos = super.multiCall(Constants.GET_BUILD, buildIds, KojiBuildInfo.class, session);
+    public List<KojiBuildInfo> getBuild(List<KojiIdOrName> idsOrNames) throws KojiClientException {
+        int size = idsOrNames.size();
+        List<Object> args = new ArrayList<>(size);
+
+        for (KojiIdOrName idOrName : idsOrNames) {
+            Integer id = idOrName.getId();
+            String name = idOrName.getName();
+
+            if (id != null) {
+                args.add(id);
+            } else if (name != null) {
+                args.add(name);
+            } else {
+                throw new KojiClientException("Invalid KojiIdOrName: " + idOrName);
+            }
+        }
+
+        List<KojiBuildInfo> buildInfos = super.multiCall(Constants.GET_BUILD, args, KojiBuildInfo.class, session);
 
         if (buildInfos.isEmpty()) {
             return buildInfos;
         }
 
-        List<KojiBuildTypeInfo> buildTypeInfos = super.multiCall(Constants.GET_BUILD_TYPE, buildIds, KojiBuildTypeInfo.class, session);
+        List<KojiBuildTypeInfo> buildTypeInfos = super.multiCall(Constants.GET_BUILD_TYPE, args, KojiBuildTypeInfo.class, session);
 
         if (buildInfos.size() != buildTypeInfos.size()) {
             throw new KojiClientException("Sizes must be equal");
@@ -139,6 +158,33 @@ public class KojiClientSession extends KojiClient implements ClientSession {
         }
 
         return buildInfos;
+    }
+
+    @Override
+    public List<KojiRpmInfo> getRPM(List<KojiIdOrName> idsOrNames) throws KojiClientException {
+        int size = idsOrNames.size();
+        List<Object> args = new ArrayList<>(size);
+
+        for (KojiIdOrName idOrName : idsOrNames) {
+            Integer id = idOrName.getId();
+            String name = idOrName.getName();
+
+            if (id != null) {
+                args.add(id);
+            } else if (name != null) {
+                args.add(name);
+            } else {
+                throw new KojiClientException("Invalid KojiIdOrName: " + idOrName);
+            }
+        }
+
+        return super.multiCall(Constants.GET_RPM, args, KojiRpmInfo.class, session);
+    }
+
+
+    @Override
+    public List<List<KojiRpmInfo>> listBuildRPMs(List<KojiIdOrName> idsOrNames) throws KojiClientException {
+        return helper.listBuildRPMs(idsOrNames, session);
     }
 
     @Override
@@ -159,12 +205,17 @@ public class KojiClientSession extends KojiClient implements ClientSession {
     }
 
     @Override
-    public List<List<KojiTagInfo>> listTags(List<Integer> buildIds) throws KojiClientException {
+    public List<List<KojiTagInfo>> listTags(List<KojiIdOrName> idsOrNames) throws KojiClientException {
+        List<Integer> buildIds = idsOrNames.stream().map(KojiIdOrName::getId).collect(Collectors.toList());
         return helper.listTagsByIds(buildIds, session);
     }
 
     @Override
     public void close() {
         super.close();
+    }
+
+    public KojiSessionInfo getSession() {
+        return session;
     }
 }

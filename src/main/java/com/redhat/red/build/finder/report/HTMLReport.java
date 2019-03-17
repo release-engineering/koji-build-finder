@@ -52,7 +52,9 @@ import java.util.stream.Collectors;
 
 import com.redhat.red.build.finder.BuildFinder;
 import com.redhat.red.build.finder.KojiBuild;
+import com.redhat.red.build.finder.KojiLocalArchive;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
+import com.redhat.red.build.koji.model.xmlrpc.KojiRpmInfo;
 
 import j2html.attributes.Attr;
 import j2html.tags.ContainerTag;
@@ -101,10 +103,33 @@ public class HTMLReport extends Report {
     }
 
     private Tag<?> linkArchive(KojiBuild build, KojiArchiveInfo archive) {
-        int id = archive.getArchiveId();
+        Integer id = archive.getArchiveId();
         String name = archive.getFilename();
+        String href = "/archivenfo?archiveID=" + id;
         boolean error = (build.isImport() || id <= 0);
-        return error ? errorText(name) : a().withHref(kojiwebUrl + "/archiveinfo?archiveID=" + id).with(text(name));
+        return error ? errorText(name) : a().withHref(kojiwebUrl + href).with(text(name));
+    }
+
+    private Tag<?> linkRpm(KojiBuild build, KojiRpmInfo rpm) {
+        Integer id = rpm.getId();
+        String name = rpm.getName() + "-" + rpm.getVersion() + "-" + rpm.getRelease() + "." + rpm.getArch() + ".rpm";
+        String href = "/rpminfo?rpmID=" + id;
+        boolean error = (build.isImport() || id <= 0);
+        return error ? errorText(name) : a().withHref(kojiwebUrl + href).with(text(name));
+    }
+
+    private Tag<?> linkLocalArchive(KojiBuild build, KojiLocalArchive localArchive) {
+        KojiArchiveInfo archive = localArchive.getArchive();
+        KojiRpmInfo rpm = localArchive.getRpm();
+
+        if (rpm != null) {
+            return linkRpm(build, rpm);
+        } else if (archive != null) {
+            return linkArchive(build, archive);
+        } else {
+            return errorText("Error linking local archive with files: " + localArchive.getFilenames());
+        }
+
     }
 
     private Tag<?> linkTag(int id, String name) {
@@ -135,7 +160,7 @@ public class HTMLReport extends Report {
                                       td(build.getBuildInfo().getId() > 0 ? linkBuild(build.getBuildInfo().getId()) : errorText(String.valueOf(build.getBuildInfo().getId()))),
                                       td(build.getBuildInfo().getId() > 0 ? linkPackage(build.getBuildInfo().getPackageId(), build.getBuildInfo().getName()) : text("")),
                                       td(build.getBuildInfo().getId() > 0 ? text(build.getBuildInfo().getVersion().replace('_', '-')) : text("")),
-                                      td(build.getArchives() != null ? ol(each(build.getArchives(), archive -> li(linkArchive(build, archive.getArchive()), text(": "), text(String.join(", ", archive.getFilenames()))))) : text("")),
+                                      td(build.getArchives() != null ? ol(each(build.getArchives(), archive -> li(linkLocalArchive(build, archive), text(": "), text(String.join(", ", archive.getFilenames()))))) : text("")),
                                       td(build.getTags() != null ? ul(each(build.getTags(), tag -> li(linkTag(tag.getId(), tag.getName())))) : text("")),
                                       td(build.getMethod() != null ? text(build.getMethod()) : (build.getBuildInfo().getId() > 0 ? errorText("imported build") : text(""))),
                                       td(build.getScmSourcesZip() != null ? linkArchive(build, build.getScmSourcesZip()) : text("")),

@@ -66,6 +66,9 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveType;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildState;
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
+import com.redhat.red.build.koji.model.xmlrpc.KojiIdOrName;
+import com.redhat.red.build.koji.model.xmlrpc.KojiNVRA;
+import com.redhat.red.build.koji.model.xmlrpc.KojiRpmInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTagInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskRequest;
@@ -103,6 +106,8 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
 
     private Cache<Integer, KojiBuild> buildCache;
 
+    private Cache<String, KojiBuild> rpmCache;
+
     private EmbeddedCacheManager cacheManager;
 
     public BuildFinder(ClientSession session, BuildConfig config) {
@@ -124,6 +129,7 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
         if (cacheManager != null) {
             this.buildCache = cacheManager.getCache("builds");
             this.checksumCache = cacheManager.getCache("checksums-" + KojiChecksumType.md5);
+            this.rpmCache = cacheManager.getCache("rpms-" + KojiChecksumType.md5);
         }
 
         emptyDigest = Hex.encodeHexString(DigestUtils.getDigest(KojiChecksumType.md5.getAlgorithm()).digest());
@@ -285,7 +291,7 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
         Optional<KojiLocalArchive> matchingArchive = build.getArchives().stream().filter(a -> a.getArchive().getArchiveId().equals(archive.getArchiveId())).findFirst();
 
         if (matchingArchive.isPresent()) {
-            LOGGER.debug("Adding to existing archive id {} to build id {} with {} archives and filenames {}", archive.getArchiveId(), archive.getBuildId(), build.getArchives().size(), filenames);
+            LOGGER.debug("Adding existing archive id {} to build id {} with {} archives and filenames {}", archive.getArchiveId(), archive.getBuildId(), build.getArchives().size(), filenames);
 
             KojiLocalArchive existingArchive = matchingArchive.get();
 
@@ -294,6 +300,26 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
             LOGGER.debug("Adding new archive id {} to build id {} with {} archives and filenames {}", archive.getArchiveId(), archive.getBuildId(), build.getArchives().size(), filenames);
 
             build.getArchives().add(new KojiLocalArchive(archive, filenames, analyzer != null ? analyzer.getFiles().get(filenames.iterator().next()) : Collections.emptySet()));
+
+            build.getArchives().sort((KojiLocalArchive a1, KojiLocalArchive a2) -> a1.getArchive().getFilename().compareTo(a2.getArchive().getFilename()));
+        }
+    }
+
+    private void addRpmToBuild(KojiBuild build, KojiRpmInfo rpm, Collection<String> filenames) {
+        LOGGER.debug("Found build id {} for file {} (payloadhash {}) matching local files {}", build.getBuildInfo().getId(), rpm.getNvr(), rpm.getPayloadhash(), filenames);
+
+        Optional<KojiLocalArchive> matchingArchive = build.getArchives().stream().filter(a -> a.getRpm().getId().equals(rpm.getId())).findFirst();
+
+        if (matchingArchive.isPresent()) {
+            LOGGER.debug("Adding existing rpm id {} to build id {} with {} rpms and filenames {}", rpm.getId(), rpm.getBuildId(), build.getRpms().size(), filenames);
+
+            KojiLocalArchive existingArchive = matchingArchive.get();
+
+            existingArchive.getFilenames().addAll(filenames);
+        } else {
+            LOGGER.debug("Adding new rpm id {} to build id {} with {} rpms and filenames {}", rpm.getId(), rpm.getBuildId(), build.getRpms().size(), filenames);
+
+            build.getArchives().add(new KojiLocalArchive(rpm, filenames, analyzer != null ? analyzer.getFiles().get(filenames.iterator().next()) : Collections.emptySet()));
 
             build.getArchives().sort((KojiLocalArchive a1, KojiLocalArchive a2) -> a1.getArchive().getFilename().compareTo(a2.getArchive().getFilename()));
         }
@@ -546,7 +572,11 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
             return true;
         }
 
-        if (!filenames.stream().anyMatch(filename -> archiveExtensions.stream().anyMatch(filename::endsWith))) {
+        List<String> newArchiveExtensions = new ArrayList<>(archiveExtensions.size() + 1);
+        newArchiveExtensions.addAll(archiveExtensions);
+        newArchiveExtensions.add("rpm");
+
+        if (!filenames.stream().anyMatch(filename -> newArchiveExtensions.stream().anyMatch(filename::endsWith))) {
             LOGGER.warn("Skipped due to invalid archive extension for files: {}", red(filenames));
             return false;
         }
@@ -581,6 +611,7 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
         List<Entry<String, Collection<String>>> checksums = new ArrayList<>(numEntries);
         List<Entry<String, Collection<String>>> cachedChecksums = new ArrayList<>(numEntries);
         List<List<KojiArchiveInfo>> cachedArchiveInfos = new ArrayList<>(numEntries);
+        List<Entry<String, Collection<String>>> rpmEntries = new ArrayList<>(numEntries);
 
         for (Entry<String, Collection<String>> entry : entries) {
             String checksum = entry.getKey();
@@ -588,19 +619,32 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
 
             if (shouldSkipChecksum(checksum, filenames)) {
                 LOGGER.debug("Skipped checksum {} for filenames {}", checksum, filenames);
-                // XXX: must check for cached version and remove if present
+                // FIXME: must check for cached version and remove if present
                 continue;
             }
 
+            KojiBuild cacheRpmBuildInfo;
+
             List<KojiArchiveInfo> cacheArchiveInfos;
 
-            if (cacheManager == null || (cacheArchiveInfos = checksumCache.get(checksum)) == null) {
-                LOGGER.debug("Add checksum {} to list", checksum);
-                checksums.add(entry);
+            if (filenames.stream().anyMatch(filename -> filename.endsWith(".rpm"))) {
+                if (cacheManager == null || (cacheRpmBuildInfo = rpmCache.get(checksum)) == null) {
+                    LOGGER.debug("Add RPM entry {} to list", entry);
+                    rpmEntries.add(entry);
+                } else if (cacheManager != null) {
+                    LOGGER.debug("Checksum {} cached with build id {}", green(checksum), green(cacheRpmBuildInfo));
+                    rpmCache.put(checksum, cacheRpmBuildInfo);
+                    buildCache.put(cacheRpmBuildInfo.getBuildInfo().getId(), cacheRpmBuildInfo);
+                }
             } else {
-                LOGGER.debug("Checksum {} cached with build ids {}", green(checksum), green(cacheArchiveInfos.stream().map(KojiArchiveInfo::getBuildId).collect(Collectors.toList())));
-                cachedChecksums.add(entry);
-                cachedArchiveInfos.add(cacheArchiveInfos);
+                if (cacheManager == null || (cacheArchiveInfos = checksumCache.get(checksum)) == null) {
+                    LOGGER.debug("Add checksum {} to list", checksum);
+                    checksums.add(entry);
+                } else {
+                    LOGGER.debug("Checksum {} cached with build ids {}", green(checksum), green(cacheArchiveInfos.stream().map(KojiArchiveInfo::getBuildId).collect(Collectors.toList())));
+                    cachedChecksums.add(entry);
+                    cachedArchiveInfos.add(cacheArchiveInfos);
+                }
             }
         }
 
@@ -717,13 +761,93 @@ public class BuildFinder implements Callable<Map<Integer, KojiBuild>> {
             }
         }
 
+        List<KojiIdOrName> rpmBuildIdsOrNames = new ArrayList<>(rpmEntries.size());
+
+        if (!rpmEntries.isEmpty()) {
+            for (Entry<String, Collection<String>> rpmEntry : rpmEntries) {
+                Collection<String> filenames = rpmEntry.getValue();
+                Optional<String> rpmFilename = filenames.stream().filter(filename -> filename.endsWith(".rpm")).findFirst();
+
+                if (rpmFilename.isPresent()) {
+                    String name = rpmFilename.get();
+                    KojiNVRA nvra = KojiNVRA.parseNVRA(name);
+                    KojiIdOrName idOrName = KojiIdOrName.getFor(nvra.getName() + "-" + nvra.getVersion() + "-" + nvra.getRelease() + "." + nvra.getArch());
+
+                    rpmBuildIdsOrNames.add(idOrName);
+
+                    LOGGER.debug("Added RPM: {}", rpmBuildIdsOrNames.get(rpmBuildIdsOrNames.size() - 1));
+                }
+            }
+
+            List<KojiRpmInfo> rpmInfos = session.getRPM(rpmBuildIdsOrNames);
+            List<KojiIdOrName> rpmBuildIds = rpmInfos.stream().map(KojiRpmInfo::getBuildId).map(KojiIdOrName::getFor).collect(Collectors.toList());
+            List<KojiBuildInfo> rpmBuildInfos = session.getBuild(rpmBuildIds);
+            List<List<KojiTagInfo>> rpmTagInfos = session.listTags(rpmBuildIds);
+            List<List<KojiRpmInfo>> rpmRpmInfos = session.listBuildRPMs(rpmBuildIds);
+            List<KojiTaskInfo> rpmTaskInfos = Collections.emptyList();
+            List<Integer> taskIds = rpmBuildInfos.stream().map(KojiBuildInfo::getTaskId).filter(Objects::nonNull).collect(Collectors.toList());
+            int taskIdsSize = taskIds.size();
+
+            if (taskIdsSize > 0) {
+                Boolean[] a = new Boolean[taskIdsSize];
+                Arrays.fill(a, Boolean.TRUE);
+                List<Boolean> requests = Arrays.asList(a);
+                rpmTaskInfos = session.getTaskInfo(taskIds, requests);
+            }
+
+            Iterator<Entry<String, Collection<String>>> it = rpmEntries.iterator();
+            Iterator<KojiRpmInfo> itrpm = rpmInfos.iterator();
+            Iterator<KojiBuildInfo> itbuilds = rpmBuildInfos.iterator();
+            Iterator<List<KojiTagInfo>> ittags = rpmTagInfos.iterator();
+            Iterator<List<KojiRpmInfo>> itrpms = rpmRpmInfos.iterator();
+            Iterator<KojiTaskInfo> ittasks = rpmTaskInfos.iterator();
+
+            KojiBuild build = new KojiBuild();
+
+            while (it.hasNext()) {
+                Entry<String, Collection<String>> entry = it.next();
+                String checksum = entry.getKey();
+                Collection<String> filenames = entry.getValue();
+                KojiRpmInfo rpm = itrpm.next();
+                String actual = rpm.getPayloadhash();
+
+                if (!checksum.equals(actual)) {
+                    throw new KojiClientException("Mismatched payloadhash: " + checksum + " != " + actual);
+                }
+
+                build.setBuildInfo(itbuilds.next());
+                build.setTags(ittags.next());
+                build.setTaskInfo(ittasks.next());
+                build.setRemoteRpms(itrpms.next());
+
+                addRpmToBuild(build, rpm, filenames);
+
+                LOGGER.info("Found build: id: {} nvr: {} checksum: {} archive: {}", green(build.getBuildInfo().getId()), green(build.getBuildInfo().getNvr()), green(checksum), green(rpm.getName() + "-" + rpm.getVersion() + "-" + rpm.getRelease() + "." + rpm.getArch() + ".rpm"));
+            }
+
+            Integer id = build.getBuildInfo().getId();
+
+            allBuilds.put(id, build);
+
+            if (cacheManager != null) {
+                KojiBuild cachedBuild = buildCache.put(id, build);
+
+                if (cachedBuild != null && !cachedBuild.getBuildInfo().getTypeNames().contains("rpm")) {
+                    LOGGER.warn("Build id {} was already cached, but this should never happen", red(id));
+                }
+            }
+
+            builds.put(id, build);
+        }
+
         if (!buildIds.isEmpty()) {
-            Future<List<KojiBuildInfo>> futureArchiveBuilds = pool.submit(() -> session.getBuild(buildIds));
-            Future<List<List<KojiTagInfo>>> futureTagInfos = pool.submit(() -> session.listTags(buildIds));
+            List<KojiIdOrName> idsOrNames = buildIds.stream().map(KojiIdOrName::getFor).collect(Collectors.toList());
+            Future<List<KojiBuildInfo>> futureArchiveBuilds = pool.submit(() -> session.getBuild(idsOrNames));
+            Future<List<List<KojiTagInfo>>> futureTagInfos = pool.submit(() -> session.listTags(idsOrNames));
             List<KojiArchiveQuery> queries = new ArrayList<>(buildIdsSize);
 
-            buildIds.forEach(archiveBuildId -> {
-                KojiArchiveQuery query = new KojiArchiveQuery().withBuildId(archiveBuildId);
+            buildIds.forEach(buildId -> {
+                KojiArchiveQuery query = new KojiArchiveQuery().withBuildId(buildId);
                 queries.add(query);
             });
 

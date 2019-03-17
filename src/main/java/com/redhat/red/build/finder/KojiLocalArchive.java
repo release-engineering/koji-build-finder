@@ -21,9 +21,12 @@ import java.util.TreeSet;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
+import com.redhat.red.build.koji.model.xmlrpc.KojiRpmInfo;
 
 public class KojiLocalArchive {
     private KojiArchiveInfo archive;
+
+    private KojiRpmInfo rpm;
 
     @JsonProperty("files")
     private Collection<String> filenames;
@@ -45,12 +48,27 @@ public class KojiLocalArchive {
         this.unmatchedFilenames = new TreeSet<>();
     }
 
+    public KojiLocalArchive(KojiRpmInfo rpm, Collection<String> filenames, Collection<Checksum> checksums) {
+        this.rpm = rpm;
+        this.filenames = new TreeSet<>(filenames);
+        this.checksums = checksums;
+        this.unmatchedFilenames = new TreeSet<>();
+    }
+
     public KojiArchiveInfo getArchive() {
         return archive;
     }
 
     public void setArchive(KojiArchiveInfo archive) {
         this.archive = archive;
+    }
+
+    public KojiRpmInfo getRpm() {
+        return rpm;
+    }
+
+    public void setRpm(KojiRpmInfo rpm) {
+        this.rpm = rpm;
     }
 
     public Collection<String> getFilenames() {
@@ -70,6 +88,10 @@ public class KojiLocalArchive {
     }
 
     public static boolean isMissingBuildTypeInfo(KojiArchiveInfo archive) {
+        if (archive == null) {
+            return false;
+        }
+
         String archiveBuildType = archive.getBuildType();
 
         if (archiveBuildType == null) {
@@ -105,7 +127,7 @@ public class KojiLocalArchive {
 
     @Override
     public String toString() {
-        return "KojiLocalArchive [archive=" + archive + ", filenames=" + filenames + ", checksums=" + checksums
+        return "KojiLocalArchive [archive=" + archive + ", rpm=" + rpm + ", filenames=" + filenames + ", checksums=" + checksums
                 + ", unmatchedFilenames=" + unmatchedFilenames + "]";
     }
 }

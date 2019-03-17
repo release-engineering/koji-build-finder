@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildRequest;
+import com.redhat.red.build.koji.model.xmlrpc.KojiRpmInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTagInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskRequest;
@@ -57,20 +58,26 @@ public class KojiBuild {
 
     private transient List<String> types;
 
+    private transient List<KojiRpmInfo> rpms;
+
+    private List<KojiRpmInfo> remoteRpms;
+
     private transient List<KojiArchiveInfo> duplicateArchives;
 
     public KojiBuild() {
         this.archives = new ArrayList<>();
+        this.rpms = new ArrayList<>();
         this.duplicateArchives = new ArrayList<>();
     }
 
     public KojiBuild(KojiBuildInfo buildInfo) {
         this.buildInfo = buildInfo;
         this.archives = new ArrayList<>();
+        this.rpms = new ArrayList<>();
         this.duplicateArchives = new ArrayList<>();
     }
 
-    public KojiBuild(KojiBuildInfo buildInfo, KojiTaskInfo taskInfo, KojiTaskRequest taskRequest, List<KojiLocalArchive> archives, List<KojiArchiveInfo> remoteArchives, List<KojiTagInfo> tags, List<String> types) {
+    public KojiBuild(KojiBuildInfo buildInfo, KojiTaskInfo taskInfo, KojiTaskRequest taskRequest, List<KojiLocalArchive> archives, List<KojiArchiveInfo> remoteArchives, List<KojiTagInfo> tags, List<String> types, List<KojiRpmInfo> rpms, List<KojiRpmInfo> remoteRpms) {
         this.buildInfo = buildInfo;
         this.taskInfo = taskInfo;
         this.taskRequest = taskRequest;
@@ -78,6 +85,8 @@ public class KojiBuild {
         this.remoteArchives = remoteArchives;
         this.tags = tags;
         this.types = types;
+        this.rpms = rpms;
+        this.remoteRpms = remoteRpms;
     }
 
     public KojiBuildInfo getBuildInfo() {
@@ -146,6 +155,24 @@ public class KojiBuild {
 
     public void setTypes(List<String> types) {
         this.types = types;
+    }
+
+
+
+    public List<KojiRpmInfo> getRpms() {
+        return rpms;
+    }
+
+    public void setRpms(List<KojiRpmInfo> rpms) {
+        this.rpms = rpms;
+    }
+
+    public List<KojiRpmInfo> getRemoteRpms() {
+        return remoteRpms;
+    }
+
+    public void setRemoteRpms(List<KojiRpmInfo> remoteRpms) {
+        this.remoteRpms = remoteRpms;
     }
 
     public List<KojiArchiveInfo> getDuplicateArchives() {
@@ -271,13 +298,14 @@ public class KojiBuild {
     public String toString() {
         return "KojiBuild [buildInfo=" + buildInfo + ", taskInfo=" + taskInfo + ", taskRequest=" + taskRequest
                 + ", archives=" + archives + ", remoteArchives=" + remoteArchives + ", tags=" + tags
-                + ", duplicateArchives=" + duplicateArchives + "]";
+                + ", rpms=" + rpms + ", remoteRpms=" + remoteRpms + ", duplicateArchives=" + duplicateArchives
+                + "]";
     }
 
     public static class KojiBuildExternalizer implements AdvancedExternalizer<KojiBuild> {
         private static final long serialVersionUID = 8698588352614405297L;
 
-        private static final int VERSION = 1;
+        private static final int VERSION = 2;
 
         private static final Integer ID = (Character.getNumericValue('K') << 16) | (Character.getNumericValue('B') << 8) | Character.getNumericValue('F');
 
@@ -289,6 +317,7 @@ public class KojiBuild {
             output.writeObject(build.remoteArchives);
             output.writeObject(build.tags);
             output.writeObject(build.types);
+            output.writeObject(build.remoteRpms);
          }
 
         @SuppressWarnings("unchecked")
@@ -296,7 +325,7 @@ public class KojiBuild {
         public KojiBuild readObject(ObjectInput input) throws IOException, ClassNotFoundException {
             int version = input.readInt();
 
-            if (version != 1) {
+            if (version != 1 && version != 2) {
                 throw new IOException("Invalid version: " + version);
             }
 
@@ -307,6 +336,10 @@ public class KojiBuild {
             build.setRemoteArchives((List<KojiArchiveInfo>) input.readObject());
             build.setTags((List<KojiTagInfo>) input.readObject());
             build.setTypes((List<String>) input.readObject());
+
+            if (version > 1) {
+                build.setRemoteRpms((List<KojiRpmInfo>) input.readObject());
+            }
 
             return build;
         }

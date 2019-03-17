@@ -15,6 +15,7 @@
  */
 package com.redhat.red.build.finder;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
@@ -31,6 +32,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.vfs2.FileObject;
+import org.eclipse.packagedrone.utils.rpm.RpmSignatureTag;
+import org.eclipse.packagedrone.utils.rpm.parse.RpmInputStream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
@@ -68,41 +71,98 @@ public class Checksum {
         }
 
         List<CompletableFuture<Void>> futures = new ArrayList<>(checksumTypesSize);
-
-        int len1;
-        InputStream input = fo.getContent().getInputStream();
-        byte[] buffer = new byte[BUFFER_SIZE];
-
-        while ((len1 = input.read(buffer)) > 0) {
-            final int len = len1;
-
-            checksumTypes.forEach(checksumType -> {
-                CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
-                    MessageDigest md =  mds.get(checksumType);
-                    md.update(buffer, 0, len);
-                    return null;
-                });
-
-                futures.add(future);
-            });
-
-            for (CompletableFuture<Void> future : futures) {
-                future.join();
-            }
-
-            futures.clear();
-        }
-
         Map<KojiChecksumType, CompletableFuture<Checksum>> futures2 = new HashMap<>(checksumTypesSize);
 
-        checksumTypes.forEach(checksumType -> {
-            CompletableFuture<Checksum> future = CompletableFuture.supplyAsync(() -> {
-                MessageDigest md = mds.get(checksumType);
-                return new Checksum(checksumType, Hex.encodeHexString(md.digest()), Utils.normalizePath(fo, root));
-            });
+        if (!fo.getName().getExtension().equals("rpm")) {
+            int len1;
+            InputStream input = fo.getContent().getInputStream();
+            byte[] buffer = new byte[BUFFER_SIZE];
 
-            futures2.put(checksumType, future);
-        });
+            while ((len1 = input.read(buffer)) > 0) {
+                final int len = len1;
+
+                checksumTypes.forEach(checksumType -> {
+                    CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
+                        MessageDigest md =  mds.get(checksumType);
+                        md.update(buffer, 0, len);
+                        return null;
+                    });
+
+                    futures.add(future);
+                });
+
+                for (CompletableFuture<Void> future : futures) {
+                    future.join();
+                }
+
+                futures.clear();
+            }
+
+            checksumTypes.forEach(checksumType -> {
+                CompletableFuture<Checksum> future = CompletableFuture.supplyAsync(() -> {
+                    MessageDigest md = mds.get(checksumType);
+                    return new Checksum(checksumType, Hex.encodeHexString(md.digest()), Utils.normalizePath(fo, root));
+                });
+
+                futures2.put(checksumType, future);
+            });
+        } else {
+            try (RpmInputStream in = new RpmInputStream(new BufferedInputStream(fo.getContent().getInputStream()))) {
+                for (KojiChecksumType checksumType : checksumTypes) {
+                    CompletableFuture<Checksum> future;
+
+                    switch (checksumType) {
+                    case md5:
+                        Object md5 = in.getSignatureHeader().getTag(RpmSignatureTag.MD5);
+
+                        if (!(md5 instanceof byte[])) {
+                            throw new IOException("Missing MD5 for " + fo);
+                        }
+
+                        final String sigmd5 = Hex.encodeHexString((byte[]) md5);
+
+                        future = CompletableFuture.supplyAsync(() -> {
+                            return new Checksum(checksumType, sigmd5, Utils.normalizePath(fo, root));
+                        });
+
+                        futures2.put(checksumType, future);
+                        break;
+                    case sha1:
+                        Object sha1 = in.getSignatureHeader().getTag(RpmSignatureTag.SHA1HEADER);
+
+                        if (!(sha1 instanceof byte[])) {
+                            break;
+                        }
+
+                        final String sigsha1 = Hex.encodeHexString((byte[]) sha1);
+
+                        future = CompletableFuture.supplyAsync(() -> {
+                            return new Checksum(checksumType, sigsha1, Utils.normalizePath(fo, root));
+                        });
+
+                        futures2.put(checksumType, future);
+                        break;
+                    case sha256:
+                        // XXX: SHA256HEADER constant is only available in packagedrone 0.15.0 which is not released yet
+                        Object sha256 = in.getSignatureHeader().getTag(273);
+
+                        if (!(sha256 instanceof byte[])) {
+                            break;
+                        }
+
+                        final String sigsha256 = Hex.encodeHexString((byte[]) sha256);
+
+                        future = CompletableFuture.supplyAsync(() -> {
+                            return new Checksum(checksumType, sigsha256, Utils.normalizePath(fo, root));
+                        });
+
+                        futures2.put(checksumType, future);
+                        break;
+                    default:
+                    }
+                }
+            }
+        }
 
         Set<Checksum> results = new HashSet<>(checksumTypesSize);
 

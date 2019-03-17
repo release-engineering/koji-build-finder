@@ -265,7 +265,7 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
     }
 
     private boolean includeFile(FileObject fo) {
-        boolean excludeExtension = config.getArchiveExtensions() != null && !config.getArchiveExtensions().isEmpty() && !config.getArchiveExtensions().stream().anyMatch(x -> x.equals(fo.getName().getExtension()));
+        boolean excludeExtension = config.getArchiveExtensions() != null && !config.getArchiveExtensions().isEmpty() && !config.getArchiveExtensions().stream().anyMatch(x -> x.equals(fo.getName().getExtension())) && !fo.getName().getExtension().equals("rpm");
         boolean excludeFile = false;
 
         if (!excludeExtension) {
@@ -274,6 +274,8 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
         }
 
         boolean include = (!excludeFile && !excludeExtension);
+
+        LOGGER.debug("Include {}: {}", fo.getName(), include);
 
         return include;
     }

@@ -33,6 +33,8 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveQuery;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveType;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
+import com.redhat.red.build.koji.model.xmlrpc.KojiIdOrName;
+import com.redhat.red.build.koji.model.xmlrpc.KojiRpmInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTagInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiTaskRequest;
@@ -153,7 +155,12 @@ public class MockKojiClientSession implements ClientSession {
     }
 
     @Override
-    public List<KojiBuildInfo> getBuild(List<Integer> buildIds) throws KojiClientException {
+    public List<KojiBuildInfo> getBuild(List<KojiIdOrName> idsOrNames) throws KojiClientException {
+        return null;
+    }
+
+    @Override
+    public List<KojiRpmInfo> getRPM(List<KojiIdOrName> idsOrNames) throws KojiClientException {
         return null;
     }
 
@@ -163,7 +170,12 @@ public class MockKojiClientSession implements ClientSession {
     }
 
     @Override
-    public List<List<KojiTagInfo>> listTags(List<Integer> buildIds) throws KojiClientException {
+    public List<List<KojiRpmInfo>> listBuildRPMs(List<KojiIdOrName> idsOrNames) {
+        return null;
+    }
+
+    @Override
+    public List<List<KojiTagInfo>> listTags(List<KojiIdOrName> idsOrNames) throws KojiClientException {
         return null;
     }
 }

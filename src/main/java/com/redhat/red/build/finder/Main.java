@@ -291,6 +291,7 @@ public final class Main implements Callable<Void> {
         config.getChecksumTypes().forEach(checksumType -> {
             cacheManager.defineConfiguration("files-" + checksumType, configuration);
             cacheManager.defineConfiguration("checksums-" + checksumType, configuration);
+            cacheManager.defineConfiguration("rpms-" + checksumType, configuration);
         });
 
         cacheManager.defineConfiguration("builds", configuration);
