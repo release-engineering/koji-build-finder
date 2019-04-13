@@ -126,7 +126,7 @@ public final class Main implements Callable<Void> {
     @Option(names = {"--krb-keytab"}, paramLabel = "FILE", description = "Set location of Kerberos keytab.")
     private File krbKeytab;
 
-    @Option(names = {"--krb-password"}, paramLabel = "STRING", description = "Set Kerberos password.")
+    @Option(names = {"--krb-password"}, paramLabel = "STRING", description = "Set Kerberos password.", arity = "0..1", interactive = true)
     private String krbPassword;
 
     @Option(names = {"--krb-principal"}, paramLabel = "STRING", description = "Set Kerberos client principal.")
