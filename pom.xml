@@ -62,6 +62,7 @@
     <version.com.fasterxml.jackson.core>2.9.8</version.com.fasterxml.jackson.core>
     <version.com.github.spotbugs>3.1.12</version.com.github.spotbugs>
     <version.com.github.stefanbirkner>1.19.0</version.com.github.stefanbirkner>
+    <version.com.google.guava>27.1-jre</version.com.google.guava>
     <version.com.j2html>1.4.0</version.com.j2html>
     <version.com.mashape.unirest>1.4.9</version.com.mashape.unirest>
     <version.com.mycila>3.0</version.com.mycila>
@@ -74,7 +75,7 @@
     <version.net.sourceforge.pmd>6.13.0</version.net.sourceforge.pmd>
     <version.org.apache.commons.commons-collections4>4.3</version.org.apache.commons.commons-collections4>
     <version.org.apache.commons.commons-compress>1.18</version.org.apache.commons.commons-compress>
-    <version.org.apache.commons.commons-lang3>3.8.1</version.org.apache.commons.commons-lang3>
+    <version.org.apache.commons.commons-lang3>3.9</version.org.apache.commons.commons-lang3>
     <version.org.apache.commons.commons-vfs2>2.3</version.org.apache.commons.commons-vfs2>
     <version.org.apache.httpcomponents.httpasyncclient>4.1.4</version.org.apache.httpcomponents.httpasyncclient>
     <version.org.apache.httpcomponents.httpclient>4.5.8</version.org.apache.httpcomponents.httpclient>
@@ -153,6 +154,12 @@
         <groupId>com.github.stefanbirkner</groupId>
         <artifactId>system-rules</artifactId>
         <version>${version.com.github.stefanbirkner}</version>
+      </dependency>
+      <!-- Required dependency for org.eclipse.packagedrone.utils.rpm -->
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${version.com.google.guava}</version>
       </dependency>
       <dependency>
         <groupId>com.j2html</groupId>
@@ -322,6 +329,12 @@
         <groupId>org.eclipse.packagedrone</groupId>
         <artifactId>org.eclipse.packagedrone.utils.rpm</artifactId>
         <version>${version.org.eclipse.packagedrone}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.fusesource.jansi</groupId>
@@ -413,6 +426,10 @@
       <groupId>com.github.stefanbirkner</groupId>
       <artifactId>system-rules</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
     <dependency>
       <groupId>com.j2html</groupId>
