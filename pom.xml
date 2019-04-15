@@ -181,6 +181,10 @@
             <artifactId>rwx</artifactId>
           </exclusion>
           <exclusion>
+            <groupId>org.commonjava.util</groupId>
+            <artifactId>jhttpc</artifactId>
+          </exclusion>
+          <exclusion>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
           </exclusion>
