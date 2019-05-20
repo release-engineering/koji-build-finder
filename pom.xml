@@ -59,7 +59,7 @@
     <version.ch.qos.logback>1.2.3</version.ch.qos.logback>
     <version.commons-codec>1.12</version.commons-codec>
     <version.commons-io>2.6</version.commons-io>
-    <version.com.fasterxml.jackson.core>2.9.8</version.com.fasterxml.jackson.core>
+    <version.com.fasterxml.jackson.core>2.9.9</version.com.fasterxml.jackson.core>
     <version.com.github.spotbugs>3.1.12</version.com.github.spotbugs>
     <version.com.github.stefanbirkner>1.19.0</version.com.github.stefanbirkner>
     <version.com.google.guava>27.1-jre</version.com.google.guava>
