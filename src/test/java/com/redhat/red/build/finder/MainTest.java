@@ -18,6 +18,7 @@ package com.redhat.red.build.finder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
@@ -140,6 +142,9 @@ public class MainTest {
 
     @Test
     public void verifyConfig() throws IOException {
+        // XXX: Skip on Windows due to org.junit.contrib.java.lang.system.internal.CheckExitCalled: Tried to exit with status 0.
+        assumeFalse(SystemUtils.IS_OS_WINDOWS);
+
         exit.expectSystemExitWithStatus(0);
 
         File outputDirectory = temp.newFolder();
@@ -169,6 +174,9 @@ public class MainTest {
 
     @Test
     public void verifyDebug() throws IOException {
+        // XXX: Skip on Windows due to org.junit.contrib.java.lang.system.internal.CheckExitCalled: Tried to exit with status 0.
+        assumeFalse(SystemUtils.IS_OS_WINDOWS);
+
         exit.expectSystemExitWithStatus(0);
 
         File outputDirectory = temp.newFolder();
@@ -213,6 +221,9 @@ public class MainTest {
 
     @Test
     public void verifyQuiet() throws IOException {
+        // XXX: Skip on Windows due to org.junit.contrib.java.lang.system.internal.CheckExitCalled: Tried to exit with status 0.
+        assumeFalse(SystemUtils.IS_OS_WINDOWS);
+
         exit.expectSystemExitWithStatus(0);
 
         File outputDirectory = temp.newFolder();
