@@ -27,9 +27,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -51,6 +52,7 @@ import org.infinispan.manager.EmbeddedCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.redhat.red.build.finder.pnc.client.PncClient14;
 import com.redhat.red.build.finder.report.BuildStatisticsReport;
 import com.redhat.red.build.finder.report.GAVReport;
 import com.redhat.red.build.finder.report.HTMLReport;
@@ -67,13 +69,13 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Help;
 import picocli.CommandLine.Help.Ansi;
 import picocli.CommandLine.ITypeConverter;
 import picocli.CommandLine.IVersionProvider;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
-import picocli.CommandLine.ParseResult;
 import picocli.CommandLine.Spec;
 
 @Command(abbreviateSynopsis = true, description = "Finds builds in Koji.", mixinStandardHelpOptions = true, name = "koji-build-finder", showDefaultValues = true, sortOptions = true, versionProvider = Main.ManifestVersionProvider.class)
@@ -89,6 +91,9 @@ public final class Main implements Callable<Void> {
 
     @Option(names = {"-a", "--archive-type"}, paramLabel = "STRING", description = "Add a Koji archive type to check.", converter = FilenameConverter.class)
     private List<String> archiveTypes = ConfigDefaults.ARCHIVE_TYPES;
+
+    @Option(names = {"-b", "--build-system"}, paramLabel = "BUILD_SYSTEM", description = "Add a build system (${COMPLETION-CANDIDATES}).")
+    private List<BuildSystem> buildSystems = ConfigDefaults.BUILD_SYSTEMS;
 
     @Option(names = {"--cache-lifespan"}, paramLabel = "LONG", description = "Specify cache lifespan.")
     private Long cacheLifespan = ConfigDefaults.CACHE_LIFESPAN;
@@ -138,6 +143,9 @@ public final class Main implements Callable<Void> {
     @Option(names = {"-o", "--output-directory"}, paramLabel = "FILE", description = "Set output directory.")
     private File outputDirectory = new File(ConfigDefaults.OUTPUT_DIR);
 
+    @Option(names = {"--pnc-url"}, paramLabel = "URL", description = "Set Pnc URL.")
+    private URL pncURL = ConfigDefaults.PNC_URL;
+
     @Option(names = {"-q", "--quiet"}, description = "Disable all logging.")
     private boolean quiet = false;
 
@@ -165,8 +173,9 @@ public final class Main implements Callable<Void> {
 
         try {
             Ansi ansi = System.getProperty("picocli.ansi") == null ? Ansi.ON : (Boolean.getBoolean("picocli.ansi") ? Ansi.ON : Ansi.OFF);
-            CommandLine.call(main, System.out, ansi, args);
-            System.exit(0);
+            CommandLine cmd = new CommandLine(main).setColorScheme(Help.defaultColorScheme(ansi));
+            int exitCode = cmd.execute(args);
+            System.exit(exitCode);
         } catch (picocli.CommandLine.ExecutionException e) {
             LOGGER.error("Error: {}", boldRed(e.getMessage()), e);
             System.exit(1);
@@ -176,7 +185,7 @@ public final class Main implements Callable<Void> {
         }
     }
 
-    public BuildConfig setupBuildConfig(ParseResult parseResult) throws IOException {
+    public BuildConfig setupBuildConfig() throws IOException {
         BuildConfig defaults = BuildConfig.load(Main.class.getClassLoader());
         BuildConfig config;
 
@@ -194,6 +203,11 @@ public final class Main implements Callable<Void> {
                 LOGGER.info("Configuration file {} does not exist. Implicitly creating using defaults from file {} on classpath.", green(configFile), green(ConfigDefaults.CONFIG_FILE));
                 config = defaults;
             }
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("-b")) {
+            config.setBuildSystems(buildSystems);
+            LOGGER.info("Using build systems: {}", green(buildSystems));
         }
 
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("--cache-lifespan")) {
@@ -263,6 +277,10 @@ public final class Main implements Callable<Void> {
             LOGGER.debug("Read Kerberos password");
         }
 
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--pnc-url")) {
+            config.setPncURL(pncURL);
+        }
+
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("--use-builds-file")) {
             config.setUseBuildsFile(useBuildsFile);
         }
@@ -291,10 +309,12 @@ public final class Main implements Callable<Void> {
         config.getChecksumTypes().forEach(checksumType -> {
             cacheManager.defineConfiguration("files-" + checksumType, configuration);
             cacheManager.defineConfiguration("checksums-" + checksumType, configuration);
+            cacheManager.defineConfiguration("checksums-pnc-" + checksumType, configuration);
             cacheManager.defineConfiguration("rpms-" + checksumType, configuration);
         });
 
         cacheManager.defineConfiguration("builds", configuration);
+        cacheManager.defineConfiguration("builds-pnc", configuration);
     }
 
     private void closeCaches() {
@@ -352,7 +372,7 @@ public final class Main implements Callable<Void> {
                 LOGGER.debug("Adding all files in directory: {}", file.getPath());
                 inputs.addAll(FileUtils.listFiles(file, null, true));
             } else {
-                LOGGER.debug("Adding file: {}", file.getPath());
+                LOGGER.info("Adding file: {}", file.getPath());
                 inputs.add(file);
             }
         }
@@ -379,7 +399,11 @@ public final class Main implements Callable<Void> {
         LOGGER.info("{}", green(" |  |   |  |  |  |  |_/ /_/ |   |     \\  |  |   |  / /_/ \\  ___/|  | \\/)"));
         LOGGER.info("{}", green(" |____  |____/|__|____\\____ |   \\___  /  |__|___|  \\____ |\\___  |__|   "));
         LOGGER.info("{}", green("      \\/                   \\/       \\/           \\/     \\/    \\/       "));
-        LOGGER.info("{}{} (SHA: {})", String.format("%" +  Math.max(0, 79 - String.format("%s (SHA: %s)", BuildFinder.getVersion(), BuildFinder.getScmRevision()).length() - 7) + "s", ""), boldYellow(BuildFinder.getVersion()), cyan(BuildFinder.getScmRevision()));
+
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("{}{} (SHA: {})", String.format("%" +  Math.max(0, 79 - String.format("%s (SHA: %s)", BuildFinder.getVersion(), BuildFinder.getScmRevision()).length() - 7) + "s", ""), boldYellow(BuildFinder.getVersion()), cyan(BuildFinder.getScmRevision()));
+        }
+
         LOGGER.info("{}", green(""));
 
         LOGGER.info("Using configuration file: {}", green(configFile));
@@ -387,7 +411,7 @@ public final class Main implements Callable<Void> {
         BuildConfig config = null;
 
         try {
-            config = setupBuildConfig(commandSpec.commandLine().getParseResult());
+            config = setupBuildConfig();
         } catch (IOException e) {
             LOGGER.error("Error reading configuration file: {}", boldRed(e.getMessage()));
             LOGGER.debug("Error", e);
@@ -420,7 +444,7 @@ public final class Main implements Callable<Void> {
 
         LOGGER.info("Checksum type: {}", green(String.join(", ", config.getChecksumTypes().stream().map(String::valueOf).collect(Collectors.toSet()))));
 
-        final Map<KojiChecksumType, MultiValuedMap<String, String>> checksumsFromFile = new HashMap<>(config.getChecksumTypes().size());
+        final Map<KojiChecksumType, MultiValuedMap<String, String>> checksumsFromFile = new EnumMap<>(KojiChecksumType.class);
 
         if (config.getUseChecksumsFile()) {
             config.getChecksumTypes().forEach(checksumType -> {
@@ -482,15 +506,21 @@ public final class Main implements Callable<Void> {
                 LOGGER.info("Total number of checksums: {}", green(numChecksums));
             }
 
-            if (checksums == null || checksums.isEmpty()) {
+            if (checksums.isEmpty()) {
                 LOGGER.warn("The list of checksums is empty");
             }
 
             System.exit(0);
         }
 
+        if (config.getPncURL() != null) {
+            LOGGER.info("Pnc support: {}", green("enabled"));
+        } else {
+            LOGGER.info("Pnc support: {}", green("disabled"));
+        }
+
         BuildFinder finder = null;
-        Map<Integer, KojiBuild> builds = null;
+        Map<BuildSystemInteger, KojiBuild> builds = null;
         File buildsFile = new File(outputDirectory, BuildFinder.getBuildsFilename());
 
         if (config.getUseBuildsFile()) {
@@ -528,7 +558,12 @@ public final class Main implements Callable<Void> {
 
                     analyzer.setChecksums(checksums);
 
-                    finder = new BuildFinder(session, config, analyzer, cacheManager);
+                    if (config.getPncURL() != null) {
+                        PncClient14 pncclient = new PncClient14(config.getPncURL(), -1, -1);
+                        finder = new BuildFinder(session, config, analyzer, cacheManager, pncclient);
+                    } else {
+                        finder = new BuildFinder(session, config, analyzer, cacheManager);
+                    }
 
                     finder.findBuilds(checksums.get(KojiChecksumType.md5).asMap());
 
@@ -553,11 +588,16 @@ public final class Main implements Callable<Void> {
                         LOGGER.info("Using anonymous Koji session");
                     }
 
-                    finder = new BuildFinder(session, config, analyzer, cacheManager);
+                    if (config.getPncURL() != null) {
+                        PncClient14 pncclient = new PncClient14(config.getPncURL());
+                        finder = new BuildFinder(session, config, analyzer, cacheManager, pncclient);
+                    } else {
+                        finder = new BuildFinder(session, config, analyzer, cacheManager);
+                    }
 
                     finder.setOutputDirectory(outputDirectory);
 
-                    Future<Map<Integer, KojiBuild>> futureBuilds = pool.submit(finder);
+                    Future<Map<BuildSystemInteger, KojiBuild>> futureBuilds = pool.submit(finder);
 
                     try {
                         checksums = futureChecksum.get();
@@ -577,7 +617,7 @@ public final class Main implements Callable<Void> {
                         }
                     });
 
-                    if (checksums == null || checksums.isEmpty()) {
+                    if (checksums.isEmpty()) {
                         LOGGER.warn("The list of checksums is empty");
                     }
 
@@ -602,9 +642,11 @@ public final class Main implements Callable<Void> {
             }
         }
 
-        if (builds != null && builds.containsKey(0) && (!builds.get(0).getArchives().isEmpty() || builds.keySet().size() > 1)) {
-            List<KojiBuild> buildList = new ArrayList<>(builds.values());
-            List<Report> reports = new ArrayList<>();
+        BuildSystemInteger zero = new BuildSystemInteger(0, BuildSystem.none);
+
+        if (builds != null && builds.containsKey(zero) && (!builds.get(zero).getArchives().isEmpty() || builds.keySet().size() > 1)) {
+            List<KojiBuild> buildList = builds.entrySet().stream().sorted(Entry.comparingByKey()).map(Entry::getValue).collect(Collectors.toList());
+            List<Report> reports = new ArrayList<>(4);
 
             reports.add(new BuildStatisticsReport(outputDirectory, buildList));
             reports.add(new ProductReport(outputDirectory, buildList));
@@ -622,7 +664,7 @@ public final class Main implements Callable<Void> {
                 }
             });
 
-            Report report = new HTMLReport(outputDirectory, files, buildList, config.getKojiWebURL(), Collections.unmodifiableList(reports));
+            Report report = new HTMLReport(outputDirectory, files, buildList, config.getKojiWebURL(), config.getPncURL(), Collections.unmodifiableList(reports));
 
             try {
                 report.outputHTML();

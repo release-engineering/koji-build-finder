@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +39,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
 public class Checksum {
-    private static int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 1024;
 
     private KojiChecksumType type;
 
@@ -59,8 +59,7 @@ public class Checksum {
     }
 
     public static Set<Checksum> checksum(FileObject fo, Set<KojiChecksumType> checksumTypes, String root) throws IOException {
-        int checksumTypesSize = checksumTypes.size();
-        Map<KojiChecksumType, MessageDigest> mds = new HashMap<>(checksumTypesSize);
+        Map<KojiChecksumType, MessageDigest> mds = new EnumMap<>(KojiChecksumType.class);
 
         for (KojiChecksumType checksumType : checksumTypes) {
             try {
@@ -70,8 +69,9 @@ public class Checksum {
             }
         }
 
+        int checksumTypesSize = checksumTypes.size();
         List<CompletableFuture<Void>> futures = new ArrayList<>(checksumTypesSize);
-        Map<KojiChecksumType, CompletableFuture<Checksum>> futures2 = new HashMap<>(checksumTypesSize);
+        Map<KojiChecksumType, CompletableFuture<Checksum>> futures2 = new EnumMap<>(KojiChecksumType.class);
 
         if (!fo.getName().getExtension().equals("rpm")) {
             int len1;
@@ -121,9 +121,7 @@ public class Checksum {
 
                         final String sigmd5 = Hex.encodeHexString((byte[]) md5);
 
-                        future = CompletableFuture.supplyAsync(() -> {
-                            return new Checksum(checksumType, sigmd5, Utils.normalizePath(fo, root));
-                        });
+                        future = CompletableFuture.supplyAsync(() -> new Checksum(checksumType, sigmd5, Utils.normalizePath(fo, root)));
 
                         futures2.put(checksumType, future);
                         break;
@@ -136,9 +134,7 @@ public class Checksum {
 
                         final String sigsha1 = Hex.encodeHexString((byte[]) sha1);
 
-                        future = CompletableFuture.supplyAsync(() -> {
-                            return new Checksum(checksumType, sigsha1, Utils.normalizePath(fo, root));
-                        });
+                        future = CompletableFuture.supplyAsync(() -> new Checksum(checksumType, sigsha1, Utils.normalizePath(fo, root)));
 
                         futures2.put(checksumType, future);
                         break;
@@ -152,9 +148,7 @@ public class Checksum {
 
                         final String sigsha256 = Hex.encodeHexString((byte[]) sha256);
 
-                        future = CompletableFuture.supplyAsync(() -> {
-                            return new Checksum(checksumType, sigsha256, Utils.normalizePath(fo, root));
-                        });
+                        future = CompletableFuture.supplyAsync(() -> new Checksum(checksumType, sigsha256, Utils.normalizePath(fo, root)));
 
                         futures2.put(checksumType, future);
                         break;

@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -108,9 +108,7 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
         this.config = config;
         this.checksumTypesToCheck = new HashSet<>(config.getChecksumTypes());
 
-        int checksumTypesToCheckSize  = checksumTypesToCheck.size();
-
-        this.map = new HashMap<>(checksumTypesToCheckSize);
+        this.map = new EnumMap<>(KojiChecksumType.class);
 
         checksumTypesToCheck.forEach(checksumType -> this.map.put(checksumType, new HashSetValuedHashMap<>()));
 
@@ -118,7 +116,7 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
 
         this.cacheManager = cacheManager;
 
-        this.fileCaches = new HashMap<>(checksumTypesToCheckSize);
+        this.fileCaches = new EnumMap<>(KojiChecksumType.class);
 
         checksumTypesToCheck.forEach(checksumType -> {
             if (cacheManager != null) {
@@ -151,15 +149,15 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
                             KojiChecksumType checksumType = it.next();
 
                             final String value = Checksum.findByType(fileChecksums, checksumType).getValue();
-                            final MultiValuedMap<String, String> map = fileCaches.get(checksumType).get(value);
+                            final MultiValuedMap<String, String> localMap = fileCaches.get(checksumType).get(value);
 
-                            if (map != null) {
-                                this.map.get(checksumType).putAll(map);
+                            if (localMap != null) {
+                                this.map.get(checksumType).putAll(localMap);
 
-                                map.entries().forEach(entry -> inverseMap.put(entry.getValue(), new Checksum(checksumType, entry.getKey(), entry.getValue())));
+                                localMap.entries().forEach(entry -> inverseMap.put(entry.getValue(), new Checksum(checksumType, entry.getKey(), entry.getValue())));
 
                                 if (queue != null && checksumType.equals(KojiChecksumType.md5)) {
-                                    map.entries().forEach(entry -> {
+                                    localMap.entries().forEach(entry -> {
                                         try {
                                             Checksum checksum = new Checksum(checksumType, entry.getKey(), entry.getValue());
                                             queue.put(checksum);
@@ -171,7 +169,7 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
 
                                 it.remove();
 
-                                LOGGER.info("Loaded {} checksums for file: {} (checksum: {}) from cache", green(map.size()), green(file.getName()), green(value));
+                                LOGGER.info("Loaded {} checksums for file: {} (checksum: {}) from cache", green(localMap.size()), green(file.getName()), green(value));
                             } else {
                                 LOGGER.info("File: {} (checksum: {}) not found in cache", green(file.getName()), green(value));
                             }
@@ -223,9 +221,7 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
 
     private static boolean isJar(FileObject fo) {
         String ext = fo.getName().getExtension();
-        boolean isJar = ext.equals("jar") || ext.equals("war") || ext.equals("rar") || ext.equals("ear") || ext.equals("sar") || ext.equals("kar") || ext.equals("jdocbook") || ext.equals("jdocbook-style") || ext.equals("plugin");
-
-        return isJar;
+        return ext.equals("jar") || ext.equals("war") || ext.equals("rar") || ext.equals("ear") || ext.equals("sar") || ext.equals("kar") || ext.equals("jdocbook") || ext.equals("jdocbook-style") || ext.equals("plugin");
     }
 
     private boolean shouldListArchive(FileObject fo) throws FileSystemException {
@@ -233,15 +229,13 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
             return true;
         }
 
-        if (!isJar(fo) && level.intValue() == 1 || level.intValue() == 2 && fo.getParent().isFolder() && fo.getParent().getName().toString().endsWith("!/") && fo.getParent().getChildren().length == 1) {
-            return true;
-        }
-
-        return false;
+        return !isJar(fo) && level.intValue() == 1 || level.intValue() == 2 && fo.getParent().isFolder() && fo.getParent().getName().toString().endsWith("!/") && fo.getParent().getChildren().length == 1;
     }
 
     private void listArchive(FileObject fo) throws IOException {
-        LOGGER.debug("Creating file system for: {}", Utils.normalizePath(fo, root));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Creating file system for: {}", Utils.normalizePath(fo, root));
+        }
 
         FileObject layered = null;
         FileSystem fs = null;
@@ -265,7 +259,7 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
     }
 
     private boolean includeFile(FileObject fo) {
-        boolean excludeExtension = config.getArchiveExtensions() != null && !config.getArchiveExtensions().isEmpty() && !config.getArchiveExtensions().stream().anyMatch(x -> x.equals(fo.getName().getExtension())) && !fo.getName().getExtension().equals("rpm");
+        boolean excludeExtension = config.getArchiveExtensions() != null && !config.getArchiveExtensions().isEmpty() && config.getArchiveExtensions().stream().noneMatch(x -> x.equals(fo.getName().getExtension())) && !fo.getName().getExtension().equals("rpm");
         boolean excludeFile = false;
 
         if (!excludeExtension) {
@@ -283,8 +277,7 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
     private Callable<Set<Checksum>> checksumTask(FileObject fo) {
         return new Callable<Set<Checksum>>() {
             public Set<Checksum> call() throws IOException {
-                Set<Checksum> checksums = Checksum.checksum(fo, checksumTypesToCheck, root);
-                return checksums;
+                return Checksum.checksum(fo, checksumTypesToCheck, root);
             }
         };
     }
@@ -319,15 +312,15 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
     }
 
     private void listChildren(FileObject fo) throws IOException {
-        List<FileObject> files = new ArrayList<>();
+        List<FileObject> localFiles = new ArrayList<>();
 
         try {
-            fo.findFiles(new AllFileSelector(), true, files);
-            int numChildren = files.size();
+            fo.findFiles(new AllFileSelector(), true, localFiles);
+            int numChildren = localFiles.size();
             Collection<Future<Set<Checksum>>> futures = new ArrayList<>(numChildren);
             List<Callable<Set<Checksum>>> tasks = new ArrayList<>(numChildren);
 
-            for (FileObject file : files) {
+            for (FileObject file : localFiles) {
                 if (file.isFile()) {
                     if (includeFile(file)) {
                         if (!file.getName().getScheme().equals("tar")) {
@@ -366,7 +359,7 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
                 }
             }
         } finally {
-            for (FileObject file : files) {
+            for (FileObject file : localFiles) {
                 file.close();
             }
         }

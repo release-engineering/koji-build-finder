@@ -121,7 +121,7 @@ public class KojiLocalArchive {
         return unmatchedFilenames;
     }
 
-    public void setUnmatchedFilenames(Collection<String> unmatchFilenames) {
+    public void setUnmatchedFilenames(Collection<String> unmatchedFilenames) {
         this.unmatchedFilenames = new TreeSet<>(unmatchedFilenames);
     }
 

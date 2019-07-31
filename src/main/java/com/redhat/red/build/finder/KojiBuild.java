@@ -28,6 +28,7 @@ import org.infinispan.commons.marshall.SerializeWith;
 import org.infinispan.commons.util.Util;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.redhat.red.build.koji.model.json.KojiJsonConstants;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildInfo;
 import com.redhat.red.build.koji.model.xmlrpc.KojiBuildRequest;
@@ -38,11 +39,9 @@ import com.redhat.red.build.koji.model.xmlrpc.KojiTaskRequest;
 
 @SerializeWith(KojiBuild.KojiBuildExternalizer.class)
 public class KojiBuild {
-    private static final String KEY_VERSION = "version";
+    public static final String KEY_VERSION = "version";
 
-    private static final String KEY_MAVEN = "maven";
-
-    private static final String KEY_BUILD_SYSTEM = "build_system";
+    public static final String KEY_MAVEN = "maven";
 
     private KojiBuildInfo buildInfo;
 
@@ -63,6 +62,8 @@ public class KojiBuild {
     private List<KojiRpmInfo> remoteRpms;
 
     private transient List<KojiArchiveInfo> duplicateArchives;
+
+    private transient boolean pnc;
 
     public KojiBuild() {
         this.archives = new ArrayList<>();
@@ -106,10 +107,8 @@ public class KojiBuild {
     }
 
     public KojiTaskRequest getTaskRequest() {
-        if (taskRequest == null) {
-            if (taskInfo != null && taskInfo.getRequest() != null) {
-                taskRequest = new KojiTaskRequest(taskInfo.getRequest());
-            }
+        if (taskRequest == null && taskInfo != null && taskInfo.getRequest() != null) {
+            taskRequest = new KojiTaskRequest(taskInfo.getRequest());
         }
 
         return taskRequest;
@@ -144,10 +143,8 @@ public class KojiBuild {
     }
 
     public List<String> getTypes() {
-        if (types == null) {
-            if (buildInfo != null && buildInfo.getTypeNames() != null) {
-                types = buildInfo.getTypeNames();
-            }
+        if (types == null && buildInfo != null && buildInfo.getTypeNames() != null) {
+            types = buildInfo.getTypeNames();
         }
 
         return types;
@@ -156,8 +153,6 @@ public class KojiBuild {
     public void setTypes(List<String> types) {
         this.types = types;
     }
-
-
 
     public List<KojiRpmInfo> getRpms() {
         return rpms;
@@ -181,6 +176,16 @@ public class KojiBuild {
 
     public void setDuplicateArchives(List<KojiArchiveInfo> duplicateArchives) {
         this.duplicateArchives = duplicateArchives;
+    }
+
+    @JsonIgnore
+    public boolean isPnc() {
+        return pnc;
+    }
+
+    @JsonIgnore
+    public void setPnc(boolean pnc) {
+        this.pnc = pnc;
     }
 
     @JsonIgnore
@@ -230,12 +235,12 @@ public class KojiBuild {
 
     @JsonIgnore
     public boolean isImport() {
-        return !((buildInfo != null && buildInfo.getExtra() != null && buildInfo.getExtra().containsKey(KEY_BUILD_SYSTEM)) || taskInfo != null);
+        return !((buildInfo != null && buildInfo.getExtra() != null && buildInfo.getExtra().containsKey(KojiJsonConstants.BUILD_SYSTEM)) || taskInfo != null);
     }
 
     @JsonIgnore
     public boolean isMaven() {
-        return (buildInfo != null && buildInfo.getExtra() != null && buildInfo.getExtra().containsKey(KEY_MAVEN)) || (taskInfo != null && taskInfo.getMethod() != null && taskInfo.getMethod().equals(KEY_MAVEN));
+        return (buildInfo != null && buildInfo.getExtra() != null && (buildInfo.getExtra().containsKey(KEY_MAVEN) || (buildInfo.getExtra().get(KojiJsonConstants.BUILD_SYSTEM) != null && buildInfo.getExtra().get(KojiJsonConstants.BUILD_SYSTEM).equals("PNC"))) || (taskInfo != null && taskInfo.getMethod() != null && taskInfo.getMethod().equals(KEY_MAVEN)));
     }
 
     @JsonIgnore
@@ -269,29 +274,24 @@ public class KojiBuild {
             return taskInfo.getMethod();
         }
 
-        if (buildInfo != null) {
-            Map<String, Object> extra = buildInfo.getExtra();
-
-            if (extra == null) {
-                return null;
-            }
-
-            if (extra.containsKey(KEY_BUILD_SYSTEM)) {
-                String buildSystem = (String) extra.get(KEY_BUILD_SYSTEM);
-
-                if (extra.containsKey(KEY_VERSION)) {
-                    String version = (String) extra.get(KEY_VERSION);
-
-                    if (version != null) {
-                        buildSystem += " " + version;
-                    }
-                }
-
-                return buildSystem;
-            }
+        if (buildInfo == null) {
+            return null;
         }
 
-        return null;
+        Map<String, Object> extra = buildInfo.getExtra();
+
+        if (extra == null) {
+            return null;
+        }
+
+        String buildSystem = (String) extra.get(KojiJsonConstants.BUILD_SYSTEM);
+        String version = (String) extra.get(KEY_VERSION);
+
+        if (buildSystem != null && version != null) {
+            buildSystem += " " + version;
+        }
+
+        return buildSystem;
     }
 
     @Override

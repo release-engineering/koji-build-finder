@@ -45,12 +45,12 @@ public class DeletedBuildTest {
 
         checksumTable.put("706c11702729457f7228f3f1ab4d3791", Collections.singletonList("wildfly-core-security-7.5.9.Final-redhat-2.jar"));
 
-        Map<Integer, KojiBuild> builds = finder.findBuildsSlow(checksumTable);
+        Map<BuildSystemInteger, KojiBuild> builds = finder.findBuildsSlow(checksumTable);
 
         assertEquals(2, builds.size());
-        assertTrue(builds.containsKey(0));
-        assertTrue(builds.containsKey(505412));
-        assertEquals(KojiBuildState.DELETED, builds.get(505412).getBuildInfo().getBuildState());
+        assertTrue(builds.containsKey(new BuildSystemInteger(0)));
+        assertTrue(builds.containsKey(new BuildSystemInteger(505412, BuildSystem.koji)));
+        assertEquals(KojiBuildState.DELETED, builds.get(new BuildSystemInteger(505412, BuildSystem.koji)).getBuildInfo().getBuildState());
     }
 
     @Test
@@ -60,12 +60,12 @@ public class DeletedBuildTest {
         checksumTable.put("e767ccd9be81091d3b10a54a2a402a95", Collections.singletonList("hibernate-validator-6.0.7.Final-redhat-1.pom"));
         checksumTable.put("b59a0c8832966db746fa3943a901f780", Collections.singletonList("hibernate-validator-cdi-6.0.7.Final-redhat-1.pom"));
 
-        Map<Integer, KojiBuild> builds = finder.findBuildsSlow(checksumTable);
+        Map<BuildSystemInteger, KojiBuild> builds = finder.findBuildsSlow(checksumTable);
 
         assertEquals(2, builds.size());
-        assertTrue(builds.containsKey(0));
-        assertTrue(builds.containsKey(659231));
-        assertEquals(KojiBuildState.COMPLETE, builds.get(659231).getBuildInfo().getBuildState());
+        assertTrue(builds.containsKey(new BuildSystemInteger(0)));
+        assertTrue(builds.containsKey(new BuildSystemInteger(659231, BuildSystem.koji)));
+        assertEquals(KojiBuildState.COMPLETE, builds.get(new BuildSystemInteger(659231, BuildSystem.koji)).getBuildInfo().getBuildState());
     }
 
     @Test
@@ -76,13 +76,13 @@ public class DeletedBuildTest {
         checksumTable.put("59ef4fa1ef35fc0fc074dbfab196c0cd", Collections.singletonList("wildfly-core-security-7.5.9.Final-redhat-2.jar"));
         checksumTable.put("706c11702729457f7228f3f1ab4d3791", Collections.singletonList("wildfly-core-security-7.5.9.Final-redhat-2.jar"));
 
-        Map<Integer, KojiBuild> builds = finder.findBuildsSlow(checksumTable);
+        Map<BuildSystemInteger, KojiBuild> builds = finder.findBuildsSlow(checksumTable);
 
         assertEquals(3, builds.size());
-        assertTrue(builds.containsKey(0));
-        assertTrue(builds.containsKey(500366));
-        assertTrue(builds.containsKey(505412));
-        assertEquals(KojiBuildState.COMPLETE, builds.get(500366).getBuildInfo().getBuildState());
-        assertEquals(KojiBuildState.DELETED, builds.get(505412).getBuildInfo().getBuildState());
+        assertTrue(builds.containsKey(new BuildSystemInteger(0)));
+        assertTrue(builds.containsKey(new BuildSystemInteger(500366, BuildSystem.koji)));
+        assertTrue(builds.containsKey(new BuildSystemInteger(505412, BuildSystem.koji)));
+        assertEquals(KojiBuildState.COMPLETE, builds.get(new BuildSystemInteger(500366, BuildSystem.koji)).getBuildInfo().getBuildState());
+        assertEquals(KojiBuildState.DELETED, builds.get(new BuildSystemInteger(505412, BuildSystem.koji)).getBuildInfo().getBuildState());
     }
 }

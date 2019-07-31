@@ -15,18 +15,21 @@
  */
 package com.redhat.red.build.finder.pnc.client.model;
 
-import java.util.Date;
+import java.io.Serializable;
+import java.time.Instant;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Artifact {
+public class Artifact implements Serializable {
+    private static final long serialVersionUID = 7257116817047942244L;
+
     private Integer id;
 
     private String identifier;
 
-    private String artifactQuality;
+    private Quality artifactQuality;
 
     private String md5;
 
@@ -42,7 +45,7 @@ public class Artifact {
 
     private List<Integer> dependantBuildRecordIds;
 
-    private Date importDate;
+    private Instant importDate;
 
     private String originUrl;
 
@@ -74,11 +77,11 @@ public class Artifact {
         this.identifier = identifier;
     }
 
-    public String getArtifactQuality() {
+    public Quality getArtifactQuality() {
         return artifactQuality;
     }
 
-    public void setArtifactQuality(String artifactQuality) {
+    public void setArtifactQuality(Quality artifactQuality) {
         this.artifactQuality = artifactQuality;
     }
 
@@ -138,11 +141,11 @@ public class Artifact {
         this.dependantBuildRecordIds = dependantBuildRecordIds;
     }
 
-    public Date getImportDate() {
+    public Instant getImportDate() {
         return importDate;
     }
 
-    public void setImportDate(Date importDate) {
+    public void setImportDate(Instant importDate) {
         this.importDate = importDate;
     }
 
@@ -176,5 +179,24 @@ public class Artifact {
 
     public void setPublicUrl(String publicUrl) {
         this.publicUrl = publicUrl;
+    }
+
+    public enum Quality {
+        NEW,
+        VERIFIED,
+        TESTED,
+        DEPRECATED,
+        BLACKLISTED,
+        DELETED,
+        TEMPORARY
+    }
+
+    @Override
+    public String toString() {
+        return "Artifact [id=" + id + ", identifier=" + identifier + ", artifactQuality=" + artifactQuality + ", md5="
+                + md5 + ", sha1=" + sha1 + ", sha256=" + sha256 + ", filename=" + filename + ", deployPath="
+                + deployPath + ", buildRecordIds=" + buildRecordIds + ", dependantBuildRecordIds="
+                + dependantBuildRecordIds + ", importDate=" + importDate + ", originUrl=" + originUrl + ", size=" + size
+                + ", deployUrl=" + deployUrl + ", publicUrl=" + publicUrl + "]";
     }
 }

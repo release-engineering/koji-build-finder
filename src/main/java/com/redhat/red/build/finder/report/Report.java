@@ -17,6 +17,7 @@ package com.redhat.red.build.finder.report;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.FileUtils;
 
@@ -42,7 +43,7 @@ public abstract class Report {
             return;
         }
 
-        FileUtils.writeStringToFile(new File(outputDirectory, baseFilename + ".txt"), text, "UTF-8", false);
+        FileUtils.writeStringToFile(new File(outputDirectory, baseFilename + ".txt"), text, StandardCharsets.UTF_8, false);
     }
 
     public abstract ContainerTag toHTML();
@@ -54,7 +55,7 @@ public abstract class Report {
             return;
         }
 
-        FileUtils.writeStringToFile(new File(outputDirectory, baseFilename + ".html"), html, "UTF-8", false);
+        FileUtils.writeStringToFile(new File(outputDirectory, baseFilename + ".html"), html, StandardCharsets.UTF_8, false);
     }
 
     public String getName() {

@@ -43,7 +43,7 @@ public class GAVReport extends Report {
         setBaseFilename("gav");
         setOutputDirectory(outputDirectory);
 
-        this.gavs = builds.stream().skip(1).filter(b -> b.getTypes() != null && b.getTypes().contains("maven")).flatMap(b -> b.getArchives().stream()).map(a -> a.getArchive().getGroupId() + ":" + a.getArchive().getArtifactId() + ":" + a.getArchive().getVersion()).sorted().distinct().collect(Collectors.toList());
+        this.gavs = builds.stream().filter(b -> b.getBuildInfo().getId() > 0).filter(b -> b.getTypes() != null && b.getTypes().contains("maven")).flatMap(b -> b.getArchives().stream()).map(a -> a.getArchive().getGroupId() + ":" + a.getArchive().getArtifactId() + ":" + a.getArchive().getVersion()).sorted().distinct().collect(Collectors.toList());
     }
 
     @Override

@@ -36,6 +36,9 @@ public class BuildConfig {
     @JsonProperty("archive-types")
     private List<String> archiveTypes;
 
+    @JsonProperty("build-systems")
+    private List<BuildSystem> buildSystems;
+
     @JsonProperty("cache-lifespan")
     private Long cacheLifespan;
 
@@ -65,6 +68,9 @@ public class BuildConfig {
 
     @JsonProperty("output-directory")
     private String outputDirectory;
+
+    @JsonProperty("pnc-url")
+    private URL pncURL;
 
     @JsonProperty("use-builds-file")
     private Boolean useBuildsFile;
@@ -104,23 +110,17 @@ public class BuildConfig {
 
     public static BuildConfig merge(BuildConfig config, File file) throws IOException {
         ObjectReader reader = getMapper().readerForUpdating(config);
-        BuildConfig merged = reader.readValue(file);
-
-        return merged;
+        return reader.readValue(file);
     }
 
     public static BuildConfig merge(BuildConfig config, String json) throws IOException {
         ObjectReader reader = getMapper().readerForUpdating(config);
-        BuildConfig merged = reader.readValue(json);
-
-        return merged;
+        return reader.readValue(json);
     }
 
     public static BuildConfig merge(BuildConfig config, URL url) throws IOException {
         ObjectReader reader = getMapper().readerForUpdating(config);
-        BuildConfig merged = reader.readValue(url);
-
-        return merged;
+        return reader.readValue(url);
     }
 
     private static ObjectMapper getMapper() {
@@ -154,6 +154,18 @@ public class BuildConfig {
 
     public void setArchiveTypes(List<String> archiveTypes) {
         this.archiveTypes = archiveTypes;
+    }
+
+    public List<BuildSystem> getBuildSystems() {
+        if (buildSystems == null) {
+            buildSystems = ConfigDefaults.BUILD_SYSTEMS;
+        }
+
+        return buildSystems;
+    }
+
+    public void setBuildSystems(List<BuildSystem> buildSystems) {
+        this.buildSystems = buildSystems;
     }
 
     public long getCacheLifespan() {
@@ -268,11 +280,24 @@ public class BuildConfig {
         if (outputDirectory == null) {
             outputDirectory = ConfigDefaults.OUTPUT_DIR;
         }
+
         return outputDirectory;
     }
 
     public void setOutputDirectory(String outputDirectory) {
         this.outputDirectory = outputDirectory;
+    }
+
+    public URL getPncURL() {
+        if (pncURL == null) {
+            pncURL = ConfigDefaults.PNC_URL;
+        }
+
+        return pncURL;
+    }
+
+    public void setPncURL(URL pncURL) {
+        this.pncURL = pncURL;
     }
 
     public boolean getUseBuildsFile() {
@@ -305,6 +330,7 @@ public class BuildConfig {
         return "BuildConfig{"
             + "\n\tarchiveExtensions=" + getArchiveExtensions()
             + ", \n\tarchiveTypes=" + getArchiveTypes()
+            + ", \n\tbuildSystems=" + getBuildSystems()
             + ", \n\tcacheLifespan=" + getCacheLifespan()
             + ", \n\tcacheMaxIdle=" + getCacheMaxIdle()
             + ", \n\tchecksumOnly=" + getChecksumOnly()
@@ -314,6 +340,7 @@ public class BuildConfig {
             + ", \n\tkojiHubURL=" + getKojiHubURL()
             + ", \n\tkojiWebURL=" + getKojiWebURL()
             + ", \n\toutputDirectory=" + getOutputDirectory()
+            + ", \n\tpncURL=" + getPncURL()
             + ", \n\tuseBuildsFile=" + getUseBuildsFile()
             + ", \n\tuseChecksumsFile='" + getUseChecksumsFile()
             + "}";

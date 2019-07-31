@@ -28,6 +28,7 @@ import static j2html.TagCreator.tr;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -58,7 +60,7 @@ public class ProductReport extends Report {
         setBaseFilename("products");
         setOutputDirectory(outputDirectory);
 
-        List<String> targets = builds.stream().skip(1).filter(b -> b.getTaskRequest() != null && b.getTaskRequest().asBuildRequest() != null && b.getTaskRequest().asBuildRequest().getTarget() != null).map(b -> b.getTaskRequest().asBuildRequest().getTarget()).collect(Collectors.toList());
+        List<String> targets = builds.stream().filter(b -> b.getBuildInfo() != null && b.getBuildInfo().getId() > 0).filter(b -> b.getTaskRequest() != null && b.getTaskRequest().asBuildRequest() != null && b.getTaskRequest().asBuildRequest().getTarget() != null).map(b -> b.getTaskRequest().asBuildRequest().getTarget()).collect(Collectors.toList());
         Map<String, Long> map = targets.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         List<Map.Entry<String, Long>> countList = map.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
         Collections.reverse(countList);
@@ -80,13 +82,19 @@ public class ProductReport extends Report {
             }
         }
 
-        LOGGER.debug("Product List ({}):", prodMap.asMap().keySet().size());
+        Map<String, Collection<KojiBuild>> pm = prodMap.asMap();
+        Set<String> keySet = pm.keySet();
+        int size = keySet.size();
 
-        this.productMap = new HashMap<>(prodMap.asMap().keySet().size());
+        LOGGER.debug("Product List ({}):", size);
+
+        this.productMap = new HashMap<>(size);
 
         prodMap.asMap().forEach((target, prodBuilds) -> {
            List<String> buildList = prodBuilds.stream().map(b -> b.getBuildInfo().getNvr()).collect(Collectors.toList());
+
            LOGGER.debug("{} ({}): {}", target, targetToProduct(target), buildList);
+
            productMap.put(target, buildList);
         });
     }

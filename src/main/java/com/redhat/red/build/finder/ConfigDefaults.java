@@ -38,13 +38,15 @@ public abstract class ConfigDefaults {
 
     public static final List<String> ARCHIVE_EXTENSIONS = Collections.unmodifiableList(Arrays.asList("dll", "dylib", "ear", "jar", "jdocbook", "jdocbook-style", "kar", "plugin", "pom", "rar", "sar", "so", "war", "xml"));
 
+    public static final List<BuildSystem> BUILD_SYSTEMS = Collections.unmodifiableList(Arrays.asList(BuildSystem.pnc, BuildSystem.koji));
+
     public static final Long CACHE_LIFESPAN = TimeUnit.HOURS.toMillis(1L);
 
     public static final Long CACHE_MAX_IDLE = TimeUnit.HOURS.toMillis(1L);
 
     public static final Boolean CHECKSUM_ONLY = Boolean.FALSE;
 
-    public static final Set<KojiChecksumType> CHECKSUM_TYPES = EnumSet.of(KojiChecksumType.md5);
+    public static final Set<KojiChecksumType> CHECKSUM_TYPES = Collections.unmodifiableSet(EnumSet.of(KojiChecksumType.md5));
 
     public static final String CONFIG_FILE = "config.json";
 
@@ -63,6 +65,8 @@ public abstract class ConfigDefaults {
     public static final URL KOJI_WEB_URL = null;
 
     public static final String OUTPUT_DIR = ".";
+
+    public static final URL PNC_URL = null;
 
     public static final Boolean USE_BUILDS_FILE = Boolean.FALSE;
 

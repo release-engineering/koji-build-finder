@@ -52,7 +52,7 @@ public class ReportTest {
     @Before
     public void setBuilds() throws IOException {
         File buildsFile = TestUtils.loadFile("report-test/builds.json");
-        Map<Integer, KojiBuild> buildMap = JSONUtils.loadBuildsFile(buildsFile);
+        Map<BuildSystemInteger, KojiBuild> buildMap = JSONUtils.loadBuildsFile(buildsFile);
 
         assertEquals(6, buildMap.size());
 
@@ -187,12 +187,12 @@ public class ReportTest {
     public void verifyHTMLReport() throws IOException {
         List<File> files = Collections.unmodifiableList(Collections.emptyList());
 
-        List<Report> reports = new ArrayList<>();
+        List<Report> reports = new ArrayList<>(3);
         reports.add(new BuildStatisticsReport(folder, builds));
         reports.add(new NVRReport(folder, builds));
         reports.add(new GAVReport(folder, builds));
 
-        HTMLReport htmlReport = new HTMLReport(folder, files, builds, ConfigDefaults.KOJI_WEB_URL, Collections.unmodifiableList(reports));
+        HTMLReport htmlReport = new HTMLReport(folder, files, builds, ConfigDefaults.KOJI_WEB_URL, ConfigDefaults.PNC_URL, Collections.unmodifiableList(reports));
         htmlReport.outputHTML();
         assertTrue(FileUtils.readFileToString(new File(htmlReport.getOutputDirectory(), htmlReport.getBaseFilename() + ".html"), "UTF-8").contains("<html>"));
     }

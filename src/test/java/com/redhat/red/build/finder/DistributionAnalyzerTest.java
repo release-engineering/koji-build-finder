@@ -171,7 +171,7 @@ public class DistributionAnalyzerTest {
         config.setArchiveExtensions(Collections.emptyList());
         config.setChecksumTypes(EnumSet.allOf(KojiChecksumType.class));
 
-        assertEquals(config.getChecksumTypes().size(), 3);
+        assertEquals(3, config.getChecksumTypes().size());
 
         DistributionAnalyzer da = new DistributionAnalyzer(target, config);
         Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = da.call();

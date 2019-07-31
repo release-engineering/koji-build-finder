@@ -15,21 +15,25 @@
  */
 package com.redhat.red.build.finder.pnc.client.model;
 
-import java.util.Date;
+import java.io.Serializable;
+import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BuildRecord {
+public class BuildRecord implements Serializable {
+    private static final long serialVersionUID = -1025603827514738142L;
+
     private Integer id;
 
-    private Date submitTime;
+    private Instant submitTime;
 
-    private Date startTime;
+    private Instant startTime;
 
-    private Date endTime;
+    private Instant endTime;
 
     private Integer buildConfigurationId;
 
@@ -70,9 +74,9 @@ public class BuildRecord {
 
     private String executionRootVersion;
 
-    private Integer[] dependentBuildRecordIds;
+    private List<Integer> dependentBuildRecordIds;
 
-    private Integer[] dependencyBuildRecordIds;
+    private List<Integer> dependencyBuildRecordIds;
 
     public Integer getId() {
         return id;
@@ -82,27 +86,27 @@ public class BuildRecord {
         this.id = id;
     }
 
-    public Date getSubmitTime() {
+    public Instant getSubmitTime() {
         return submitTime;
     }
 
-    public void setSubmitTime(Date submitTime) {
+    public void setSubmitTime(Instant submitTime) {
         this.submitTime = submitTime;
     }
 
-    public Date getStartTime() {
+    public Instant getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Date startTime) {
+    public void setStartTime(Instant startTime) {
         this.startTime = startTime;
     }
 
-    public Date getEndTime() {
+    public Instant getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Date endTime) {
+    public void setEndTime(Instant endTime) {
         this.endTime = endTime;
     }
 
@@ -250,19 +254,34 @@ public class BuildRecord {
         this.executionRootVersion = executionRootVersion;
     }
 
-    public Integer[] getDependentBuildRecordIds() {
+    public List<Integer> getDependentBuildRecordIds() {
         return dependentBuildRecordIds;
     }
 
-    public void setDependentBuildRecordIds(Integer[] dependentBuildRecordIds) {
+    public void setDependentBuildRecordIds(List<Integer> dependentBuildRecordIds) {
         this.dependentBuildRecordIds = dependentBuildRecordIds;
     }
 
-    public Integer[] getDependencyBuildRecordIds() {
+    public List<Integer> getDependencyBuildRecordIds() {
         return dependencyBuildRecordIds;
     }
 
-    public void setDependencyBuildRecordIds(Integer[] dependencyBuildRecordIds) {
+    public void setDependencyBuildRecordIds(List<Integer> dependencyBuildRecordIds) {
         this.dependencyBuildRecordIds = dependencyBuildRecordIds;
+    }
+
+    @Override
+    public String toString() {
+        return "BuildRecord [id=" + id + ", submitTime=" + submitTime + ", startTime=" + startTime + ", endTime="
+                + endTime + ", buildConfigurationId=" + buildConfigurationId + ", buildConfigurationName="
+                + buildConfigurationName + ", buildConfigurationRev=" + buildConfigurationRev + ", projectId="
+                + projectId + ", projectName=" + projectName + ", userId=" + userId + ", username=" + username
+                + ", scmRepoURL=" + scmRepoURL + ", scmRevision=" + scmRevision + ", buildEnvironmentId="
+                + buildEnvironmentId + ", attributes=" + attributes + ", liveLogsUri=" + liveLogsUri
+                + ", buildConfigSetRecordId=" + buildConfigSetRecordId + ", buildContentId=" + buildContentId
+                + ", temporaryBuild=" + temporaryBuild + ", productMilestoneId=" + productMilestoneId
+                + ", executionRootName=" + executionRootName + ", executionRootVersion=" + executionRootVersion
+                + ", dependentBuildRecordIds=" + dependentBuildRecordIds
+                + ", dependencyBuildRecordIds=" + dependencyBuildRecordIds + "]";
     }
 }

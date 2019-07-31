@@ -50,9 +50,9 @@ public class EmptyBuildsTest  {
         BuildConfig config = new BuildConfig();
         BuildFinder finder = new BuildFinder(session, config);
         Map<String, Collection<String>> checksumTable = Collections.singletonMap(checksum, filenames);
-        Map<Integer, KojiBuild> builds = finder.findBuildsSlow(checksumTable);
+        Map<BuildSystemInteger, KojiBuild> builds = finder.findBuildsSlow(checksumTable);
 
         assertEquals(1, builds.size());
-        assertTrue(builds.containsKey(0));
+        assertTrue(builds.containsKey(new BuildSystemInteger(0)));
     }
 }

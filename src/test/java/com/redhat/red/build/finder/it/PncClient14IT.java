@@ -5,12 +5,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 
 import com.redhat.red.build.finder.pnc.client.PncClient14;
 import com.redhat.red.build.finder.pnc.client.PncClientException;
 import com.redhat.red.build.finder.pnc.client.model.Artifact;
+import com.redhat.red.build.finder.pnc.client.model.BuildConfiguration;
 import com.redhat.red.build.finder.pnc.client.model.BuildRecord;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,25 +24,30 @@ import org.slf4j.LoggerFactory;
 public class PncClient14IT {
     private static final Logger LOGGER = LoggerFactory.getLogger(PncClient14IT.class);
     private static final String PROPERTY = "com.redhat.red.build.finder.it.pnc.url";
-    private static final String URL = System.getProperty(PROPERTY);
+    private static final String PNC_URL = System.getProperty(PROPERTY);
     private static final int CONNECTION_TIMEOUT = 300000;
     private static final int READ_TIMEOUT = 900000;
 
+    @Before
+    public void verify() {
+        assertNotNull("You must set -Dcom.redhat.red.build.finder.it.pnc.url=<pnc server>", PNC_URL);
+    }
+
     @Test
-    public void testDefaultPncClient14() throws PncClientException {
-        PncClient14 client = new PncClient14(URL);
+    public void testDefaultPncClient14() throws PncClientException, MalformedURLException {
+        PncClient14 client = new PncClient14(new URL(PNC_URL));
         getAnArtifactAndBuildRecord(client);
     }
 
     @Test
-    public void testPncClient14WithTimeouts() throws PncClientException {
-        PncClient14 client = new PncClient14(URL, CONNECTION_TIMEOUT, READ_TIMEOUT);
+    public void testPncClient14WithTimeouts() throws PncClientException, MalformedURLException {
+        PncClient14 client = new PncClient14(new URL(PNC_URL), CONNECTION_TIMEOUT, READ_TIMEOUT);
         getAnArtifactAndBuildRecord(client);
     }
 
     @Test
-    public void testReturnEmptyListIfNoMatchingSha() throws PncClientException {
-        PncClient14 client = new PncClient14(URL);
+    public void testReturnEmptyListIfNoMatchingSha() throws PncClientException, MalformedURLException {
+        PncClient14 client = new PncClient14(new URL(PNC_URL));
         List<Artifact> artifactsMd5 = client.getArtifactsByMd5("do-not-exist");
         assertNotNull(artifactsMd5);
         assertTrue(artifactsMd5.isEmpty());
@@ -51,31 +62,56 @@ public class PncClient14IT {
     }
 
     @Test
-    public void testReturnNullIfNoMatchingBuildRecord() throws PncClientException {
-        PncClient14 client = new PncClient14(URL);
+    public void testReturnNullIfNoMatchingBuildRecord() throws PncClientException, MalformedURLException {
+        PncClient14 client = new PncClient14(new URL(PNC_URL));
         BuildRecord record = client.getBuildRecordById(-1);
         assertNull(record);
     }
 
     private void getAnArtifactAndBuildRecord(PncClient14 client) throws PncClientException {
-        // sha content for classworlds-1.1.jar
-        String md5 = "c20629baa65f1f2948b37aa393b0310b";
-        String sha1 = "60c708f55deeb7c5dfce8a7886ef09cbc1388eca";
-        String sha256 = "4e3e0ad158ec60917e0de544c550f31cd65d5a97c3af1c1968bf427e4a9df2e4";
+        final String md5 = "6a1a161bb7a696df419d149df034d189";
+        final String sha1 = "8a50c8f39257bfe488f578bf52f70e641023b020";
+        final String sha256 = "840b8f9f9a516fcc7e74da710480c6c8f5700ce9bdfa52a5cb752bfe9c54fe92";
+        final Integer id = Integer.valueOf(15821);
 
-        Artifact artifactMd5 = client.getArtifactsByMd5(md5).get(0);
-        Artifact artifactSha1 = client.getArtifactsBySha1(sha1).get(0);
-        Artifact artifactSha256 = client.getArtifactsBySha256(sha256).get(0);
+        List<Artifact> artifactsMd5 = client.getArtifactsByMd5(md5);
+        List<Artifact> artifactsSha1 = client.getArtifactsBySha1(sha1);
+        List<Artifact> artifactsSha256 = client.getArtifactsBySha256(sha256);
 
-        // make sure that all the shas point to the same artifact
+        assertEquals(1, artifactsMd5.size());
+        assertEquals(1, artifactsSha1.size());
+        assertEquals(1, artifactsSha256.size());
+
+        Artifact artifactMd5 = artifactsMd5.get(0);
+        Artifact artifactSha1 = artifactsSha1.get(0);
+        Artifact artifactSha256 = artifactsSha256.get(0);
+
+        assertEquals(md5, artifactMd5.getMd5());
+        assertEquals(sha1, artifactSha1.getSha1());
+        assertEquals(sha256, artifactSha256.getSha256());
+
         assertTrue(artifactMd5.getId().equals(artifactSha1.getId()));
         assertTrue(artifactSha1.getId().equals(artifactSha256.getId()));
 
-        // get the buildrecord and see if we get all the contents
-        List<Integer> buildRecordIds = artifactMd5.getDependantBuildRecordIds();
-        BuildRecord record = client.getBuildRecordById(buildRecordIds.get(0));
-        assertNotNull(record);
-        assertEquals("chads-pfg-demo-project", record.getProjectName());
-        LOGGER.debug("Build Record: {}", record.getProjectName());
+        LOGGER.debug("Artifact name: {}", artifactMd5.getFilename());
+
+        List<Integer> buildRecordIds = artifactMd5.getBuildRecordIds();
+
+        Collections.sort(buildRecordIds);
+
+        assertTrue(buildRecordIds.contains(id));
+
+        BuildRecord record = client.getBuildRecordById(id);
+        BuildConfiguration configuration = client.getBuildConfigurationById(record.getBuildConfigurationId());
+
+        assertEquals("hibernate-hibernate-core", record.getProjectName());
+
+        assertEquals("hibernate-hibernate-core", configuration.getName());
+
+        LOGGER.debug("Build configuration: {}", configuration.toString());
+
+        List<Artifact> artifacts = client.getBuiltArtifactsById(record.getProjectId());
+
+        assertTrue(!artifacts.isEmpty());
     }
 }

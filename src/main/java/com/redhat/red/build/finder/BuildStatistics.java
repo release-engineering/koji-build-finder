@@ -15,47 +15,69 @@
  */
 package com.redhat.red.build.finder;
 
+import static com.redhat.red.build.finder.AnsiUtils.red;
+
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BuildStatistics {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BuildStatistics.class);
+
     private List<KojiBuild> builds;
+
     private long numberOfBuilds;
+
     private long numberOfArchives;
+
     private long numberOfImportedArchives;
+
     private long numberOfImportedBuilds;
 
     public BuildStatistics(List<KojiBuild> builds) {
-        builds.forEach(build -> {
+        this.builds = builds;
+
+        for (KojiBuild build : builds) {
+            boolean isImport = build.isImport();
+            List<KojiLocalArchive> archives = build.getArchives();
+            int archiveCount = archives.size();
+
             if (build.getBuildInfo().getId() > 0) {
                 numberOfBuilds++;
 
-                if (build.isImport()) {
+                if (isImport) {
+                    LOGGER.warn("Imported build: {}", red(build.getBuildInfo().getName()));
+
                     numberOfImportedBuilds++;
                 }
             }
 
-            if (build.getArchives() != null) {
-                long archiveCount = 0;
+            if (archives.isEmpty()) {
+                continue;
+            }
 
-                List<KojiLocalArchive> archives = build.getArchives();
+            for (KojiLocalArchive archive : archives) {
+                if (!isImport && !archive.isBuiltFromSource()) {
+                    int unmatchedFilenamesCount = archive.getUnmatchedFilenames().size();
 
-                for (KojiLocalArchive archive : archives) {
-                    archiveCount++;
+                    numberOfImportedArchives += unmatchedFilenamesCount;
 
-                    if (!build.isImport() && !archive.isBuiltFromSource()) {
-                        numberOfImportedArchives += archive.getUnmatchedFilenames().size();
-                    }
-                }
-
-                numberOfArchives += archiveCount;
-
-                if (build.isImport()) {
-                    numberOfImportedArchives += archiveCount;
+                    LOGGER.warn("Built archive {} with {} unmatched files: {}", red(archive.getArchive().getFilename()), red(unmatchedFilenamesCount), red(archive.getUnmatchedFilenames()));
                 }
             }
-        });
 
-        this.builds = builds;
+            numberOfArchives += archiveCount;
+
+            if (isImport) {
+                numberOfImportedArchives += archiveCount;
+
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Imported build {} with {} archives: {}", red(build.getBuildInfo().getName()), red(archiveCount), red(archives.stream().flatMap(a -> a.getFilenames().stream()).collect(Collectors.toList())));
+                }
+            }
+        }
     }
 
     public long getNumberOfBuilds() {
@@ -76,7 +98,7 @@ public class BuildStatistics {
 
     public double getPercentOfBuildsImported() {
         if (builds.isEmpty()) {
-            return 0;
+            return 0D;
         }
 
         return ((double) numberOfImportedBuilds / (double) numberOfBuilds) * 100.00;
@@ -84,7 +106,7 @@ public class BuildStatistics {
 
     public double getPercentOfArchivesImported() {
         if (builds.isEmpty()) {
-            return 0;
+            return 0D;
         }
 
         return ((double) numberOfImportedArchives / (double) numberOfArchives) * 100.00;

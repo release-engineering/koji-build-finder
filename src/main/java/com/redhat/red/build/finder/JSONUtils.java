@@ -24,12 +24,9 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.redhat.red.build.koji.model.json.util.KojiObjectMapper;
@@ -47,7 +44,7 @@ public final class JSONUtils {
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
     }
 
-    public static void dumpObjectToFile(Object obj, File file) throws JsonGenerationException, JsonMappingException, IOException {
+    public static void dumpObjectToFile(Object obj, File file) throws IOException {
         ObjectMapper mapper = new KojiObjectMapper();
 
         mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
@@ -57,7 +54,7 @@ public final class JSONUtils {
         FileUtils.writeLines(file, Collections.singletonList(null), true);
     }
 
-    public static Map<String, Collection<String>> loadChecksumsFile(File file) throws JsonParseException, JsonMappingException, IOException {
+    public static Map<String, Collection<String>> loadChecksumsFile(File file) throws IOException {
         ObjectMapper mapper = new KojiObjectMapper();
 
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -67,9 +64,9 @@ public final class JSONUtils {
         };
 
         return mapper.readValue(file, typeRef);
-      }
+    }
 
-    public static Map<Integer, KojiBuild> loadBuildsFile(File file) throws JsonParseException, JsonMappingException, IOException {
+    public static Map<BuildSystemInteger, KojiBuild> loadBuildsFile(File file) throws IOException {
         ObjectMapper mapper = new KojiObjectMapper();
 
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

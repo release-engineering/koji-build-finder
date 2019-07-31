@@ -38,39 +38,46 @@ To see the available options, execute the command `java -jar target/koji-build-f
     Usage: koji-build-finder [OPTIONS] FILE...
     Finds builds in Koji.
           FILE...                One or more files.
+      -a, --archive-type=STRING  Add a Koji archive type to check.
+                                   Default: [jar, xml, pom, so, dll, dylib]
+      -b, --build-system=BUILD_SYSTEM
+                                 Add a build system (none, koji, pnc).
+                                   Default: [pnc, koji]
+      -c, --config=FILE          Specify configuration file to use.
+                                   Default: ${user.home}.
+                                   koji-build-finder\config.json
           --cache-lifespan=LONG  Specify cache lifespan.
                                    Default: 3600000
           --cache-max-idle=LONG  Specify cache maximum idle time.
                                    Default: 3600000
+      -d, --debug                Enable debug logging.
           --disable-cache        Disable local cache.
           --disable-recursion    Disable recursion.
+      -e, --archive-extension=STRING
+                                 Add a Koji archive type extension to check.
+                                   Default: [dll, dylib, ear, jar, jdocbook,
+                                   jdocbook-style, kar, plugin, pom, rar, sar, so,
+                                   war, xml]
+      -h, --help                 Show this help message and exit.
+      -k, --checksum-only        Only checksum files and do not find builds.
           --koji-hub-url=URL     Set Koji hub URL.
           --koji-web-url=URL     Set Koji web URL.
           --krb-ccache=FILE      Set location of Kerberos credential cache.
           --krb-keytab=FILE      Set location of Kerberos keytab.
-          --krb-password=STRING  Set Kerberos password.
+          --krb-password[=STRING]
+                                 Set Kerberos password.
           --krb-principal=STRING Set Kerberos client principal.
           --krb-service=STRING   Set Kerberos client service.
-          --use-builds-file      Use builds file.
-          --use-checksums-file   Use checksums file.
-      -a, --archive-type=STRING  Add a Koji archive type to check.
-                                   Default: [jar, xml, pom, so, dll, dylib]
-      -c, --config=FILE          Specify configuration file to use.
-                                   Default: ${user.home}/.koji-build-finder/config.json
-      -d, --debug                Enable debug logging.
-      -e, --archive-extension=STRING
-                                 Add a Koji archive type extension to check.
-                                   Default: [dll, dylib, ear, jar, jdocbook,
-                                   jdocbook-style, kar, plugin, pom, rar, sar, so, war,
-                                   xml]
-      -h, --help                 Show this help message and exit.
-      -k, --checksum-only        Only checksum files and do not find builds.
       -o, --output-directory=FILE
                                  Set output directory.
+                                   Default: .
+          --pnc-url=URL          Set Pnc URL.
       -q, --quiet                Disable all logging.
       -t, --checksum-type=CHECKSUM
-                                 Set checksum type (md5, sha1, sha256).
-                                   Default: md5
+                                 Add a checksum type (md5, sha1, sha256).
+                                   Default: [md5]
+          --use-builds-file      Use builds file.
+          --use-checksums-file   Use checksums file.
       -V, --version              Print version information and exit.
       -x, --exclude=PATTERN      Add a pattern to exclude from build lookup.
                                    Default: [^(?!.*/pom\.xml$).*/.*\.xml$]
@@ -105,13 +112,15 @@ The configuration file is in JSON format. The default configuration file, `confi
     {
       "archive-extensions" : [ "dll", "dylib", "ear", "jar", "jdocbook", "jdocbook-style", "kar", "plugin", "pom", "rar", "sar", "so", "war", "xml" ],
       "archive-types" : [ "jar", "xml", "pom", "so", "dll", "dylib" ],
+      "build-systems" : [ "pnc", "koji" ],
       "cache-lifespan" : 3600000,
       "cache-max-idle" : 3600000,
       "checksum-only" : false,
-      "checksum-type" : "md5",
+      "checksum-type" : [ "md5" ],
       "disable-cache" : false,
       "disable-recursion" : false,
       "excludes" : [ "^(?!.*/pom\\.xml$).*/.*\\.xml$" ],
+      "output-directory" : ".",
       "use-builds-file" : false,
       "use-checksums-file" : false
     }
@@ -119,6 +128,8 @@ The configuration file is in JSON format. The default configuration file, `confi
 The `archive-extensions` option specifies the Koji archive type extensions to include in the archive search. If this option is given, it will override the `archive-types` option and only files matching the extensions will have their checksums taken.
 
 The `archive-types` option specifies the Koji archive types to include in the archive search.
+
+The `build-system` option specifies the build systems to use for search.
 
 The `cache-lifespan` option specifies the cache entry lifespan in milliseconds.
 
@@ -135,6 +146,10 @@ The `disable-recursion` option disables recursion when examining archives.
 The `excludes` option is list of regular expression patterns. Any paths that match any of these patterns will be excluded during the build-lookup stage search.
 
 The `koji-hub-url` and `koji-web-url` configuration options must be set to valid URLs for your particular network.
+
+The `pnc-url` option must be set to a valid URL for your particular network if you want Pnc support.
+
+The `output-directory` option specifies the directory to use for output.
 
 The `use-checksums-file` and `use-builds-file` options specify whether to load any existing `checksums.json` or `builds.json` file, respectively. These files are always written, but not loaded by default.
 

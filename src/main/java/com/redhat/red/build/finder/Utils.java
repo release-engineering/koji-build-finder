@@ -31,9 +31,7 @@ public final class Utils {
 
     public static String normalizePath(FileObject fo, String root) {
         String friendlyURI = fo.getName().getFriendlyURI();
-        String normalizedPath = friendlyURI.substring(friendlyURI.indexOf(root) + root.length());
-
-        return normalizedPath;
+        return friendlyURI.substring(friendlyURI.indexOf(root) + root.length());
     }
 
     public static void shutdownAndAwaitTermination(ExecutorService pool) {

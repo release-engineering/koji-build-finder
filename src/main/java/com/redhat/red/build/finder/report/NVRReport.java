@@ -28,6 +28,7 @@ import static j2html.TagCreator.tr;
 
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.redhat.red.build.finder.KojiBuild;
@@ -44,13 +45,12 @@ public class NVRReport extends Report {
         setBaseFilename("nvr");
         setOutputDirectory(outputDirectory);
 
-        this.nvrs = builds.stream().skip(1).map(KojiBuild::getBuildInfo).map(KojiBuildInfo::getNvr).collect(Collectors.toList());
-        this.nvrs.sort(String::compareToIgnoreCase);
+        this.nvrs = builds.stream().map(KojiBuild::getBuildInfo).filter(info -> info.getId() > 0).map(KojiBuildInfo::getNvr).sorted(String::compareToIgnoreCase).distinct().collect(Collectors.toList());
     }
 
     @Override
     public String renderText() {
-        return this.nvrs.stream().map(Object::toString).collect(Collectors.joining("\n"));
+        return this.nvrs.stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.joining("\n"));
     }
 
     @Override

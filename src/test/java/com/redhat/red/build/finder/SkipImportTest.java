@@ -38,11 +38,11 @@ public class SkipImportTest  {
         BuildConfig config = new BuildConfig();
         BuildFinder finder = new BuildFinder(session, config);
         Map<String, Collection<String>> checksumTable = Collections.singletonMap(checksum, filenames);
-        Map<Integer, KojiBuild> builds = finder.findBuildsSlow(checksumTable);
+        Map<BuildSystemInteger, KojiBuild> builds = finder.findBuildsSlow(checksumTable);
 
         assertEquals(2, builds.size());
-        assertTrue(builds.containsKey(0));
-        assertTrue(builds.containsKey(228994));
-        assertFalse(builds.containsKey(251444));
+        assertTrue(builds.containsKey(new BuildSystemInteger(0)));
+        assertTrue(builds.containsKey(new BuildSystemInteger(228994, BuildSystem.koji)));
+        assertFalse(builds.containsKey(new BuildSystemInteger(251444, BuildSystem.koji)));
     }
 }

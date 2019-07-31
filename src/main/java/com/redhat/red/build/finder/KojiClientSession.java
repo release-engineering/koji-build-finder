@@ -210,11 +210,6 @@ public class KojiClientSession extends KojiClient implements ClientSession {
         return helper.listTagsByIds(buildIds, session);
     }
 
-    @Override
-    public void close() {
-        super.close();
-    }
-
     public KojiSessionInfo getSession() {
         return session;
     }
