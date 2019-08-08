@@ -26,10 +26,7 @@ import org.apache.commons.io.FileUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.redhat.red.build.koji.model.json.util.KojiObjectMapper;
 
 public final class JSONUtils {
     private JSONUtils() {
@@ -37,17 +34,13 @@ public final class JSONUtils {
     }
 
     public static String dumpString(Object obj) throws JsonProcessingException {
-        ObjectMapper mapper = new KojiObjectMapper();
-
-        mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
+        ObjectMapper mapper = new BuildFinderObjectMapper();
 
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
     }
 
     public static void dumpObjectToFile(Object obj, File file) throws IOException {
-        ObjectMapper mapper = new KojiObjectMapper();
-
-        mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
+        ObjectMapper mapper = new BuildFinderObjectMapper();
 
         mapper.writerWithDefaultPrettyPrinter().writeValue(file, obj);
 
@@ -55,25 +48,15 @@ public final class JSONUtils {
     }
 
     public static Map<String, Collection<String>> loadChecksumsFile(File file) throws IOException {
-        ObjectMapper mapper = new KojiObjectMapper();
-
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        TypeReference<Map<String, List<String>>> typeRef = new TypeReference<Map<String, List<String>>>() {
-
-        };
+        ObjectMapper mapper = new BuildFinderObjectMapper();
+        TypeReference<Map<String, List<String>>> typeRef = new TypeReference<Map<String, List<String>>>() { };
 
         return mapper.readValue(file, typeRef);
     }
 
     public static Map<BuildSystemInteger, KojiBuild> loadBuildsFile(File file) throws IOException {
-        ObjectMapper mapper = new KojiObjectMapper();
-
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        TypeReference<Map<Integer, KojiBuild>> ref = new TypeReference<Map<Integer, KojiBuild>>() {
-
-        };
+        ObjectMapper mapper = new BuildFinderObjectMapper();
+        TypeReference<Map<BuildSystemInteger, KojiBuild>> ref = new TypeReference<Map<BuildSystemInteger, KojiBuild>>() { };
 
         return mapper.readValue(file, ref);
     }

@@ -15,10 +15,15 @@
  */
 package com.redhat.red.build.finder;
 
+import java.io.IOException;
 import java.util.Objects;
+
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.KeyDeserializer;
 
 public class BuildSystemInteger implements Comparable<Object> {
     private Integer value;
+
     private BuildSystem buildSystem;
 
     BuildSystemInteger(Integer value) {
@@ -77,5 +82,16 @@ public class BuildSystemInteger implements Comparable<Object> {
         }
 
         return buildSystem.compareTo(other.buildSystem);
+    }
+
+    public static class Deserializer extends KeyDeserializer {
+        @Override
+        public Object deserializeKey(String key, DeserializationContext ctxt) throws IOException {
+            String[] t = key.split(", ");
+            Integer value = Integer.parseInt(t[0]);
+            BuildSystem buildSystem = BuildSystem.valueOf(t[1]);
+
+            return new BuildSystemInteger(value, buildSystem);
+        }
     }
 }
