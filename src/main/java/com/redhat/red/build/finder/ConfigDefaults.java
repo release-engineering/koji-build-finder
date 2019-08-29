@@ -46,7 +46,7 @@ public abstract class ConfigDefaults {
 
     public static final Boolean CHECKSUM_ONLY = Boolean.FALSE;
 
-    public static final Set<KojiChecksumType> CHECKSUM_TYPES = Collections.unmodifiableSet(EnumSet.of(KojiChecksumType.md5));
+    public static final Set<KojiChecksumType> CHECKSUM_TYPES = Collections.unmodifiableSet(EnumSet.allOf(KojiChecksumType.class));
 
     public static final String CONFIG_FILE = "config.json";
 

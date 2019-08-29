@@ -140,16 +140,15 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
             for (File file : files) {
                     fo = sfs.resolveFile(file.getAbsolutePath());
                     root = fo.getName().getFriendlyURI().substring(0, fo.getName().getFriendlyURI().indexOf(fo.getName().getBaseName()));
-                    final Set<Checksum> fileChecksums = cacheManager != null ? Checksum.checksum(fo, checksumTypesToCheck, root) : null;
+                    Set<Checksum> fileChecksums = cacheManager != null ? Checksum.checksum(fo, checksumTypesToCheck, root) : null;
 
                     if (cacheManager != null) {
                         Iterator<KojiChecksumType> it = checksumTypesToCheck.iterator();
 
                         while (it.hasNext()) {
                             KojiChecksumType checksumType = it.next();
-
-                            final String value = Checksum.findByType(fileChecksums, checksumType).getValue();
-                            final MultiValuedMap<String, String> localMap = fileCaches.get(checksumType).get(value);
+                            String value = Checksum.findByType(fileChecksums, checksumType).getValue();
+                            MultiValuedMap<String, String> localMap = fileCaches.get(checksumType).get(value);
 
                             if (localMap != null) {
                                 this.map.get(checksumType).putAll(localMap);
@@ -221,6 +220,7 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
 
     private static boolean isJar(FileObject fo) {
         String ext = fo.getName().getExtension();
+
         return ext.equals("jar") || ext.equals("war") || ext.equals("rar") || ext.equals("ear") || ext.equals("sar") || ext.equals("kar") || ext.equals("jdocbook") || ext.equals("jdocbook-style") || ext.equals("plugin");
     }
 
@@ -243,6 +243,7 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
         try {
             layered = sfs.createFileSystem(fo.getName().getExtension(), fo);
             fs = layered.getFileSystem();
+
             listChildren(layered);
         } catch (IOException e) {
             String filename = Utils.normalizePath(fo, root);

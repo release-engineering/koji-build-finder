@@ -186,13 +186,20 @@ public final class Main implements Callable<Void> {
     }
 
     public BuildConfig setupBuildConfig() throws IOException {
-        BuildConfig defaults = BuildConfig.load(Main.class.getClassLoader());
+        ClassLoader cl = Main.class.getClassLoader();
+        BuildConfig defaults = BuildConfig.load(cl);
         BuildConfig config;
 
         if (configFile.exists()) {
+            LOGGER.info("Using configuration file: {}", green(configFile));
+
             if (defaults == null) {
+                LOGGER.info("No configuration file found on classpath");
                 config = BuildConfig.load(configFile);
             } else {
+                LOGGER.debug("Configuration file found using class loader {}", cl);
+                LOGGER.info("Merging with configuration file found on classpath");
+
                 config = BuildConfig.merge(defaults, configFile);
             }
         } else {
@@ -405,8 +412,6 @@ public final class Main implements Callable<Void> {
         }
 
         LOGGER.info("{}", green(""));
-
-        LOGGER.info("Using configuration file: {}", green(configFile));
 
         BuildConfig config = null;
 
