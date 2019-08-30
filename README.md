@@ -75,7 +75,7 @@ To see the available options, execute the command `java -jar target/koji-build-f
       -q, --quiet                Disable all logging.
       -t, --checksum-type=CHECKSUM
                                  Add a checksum type (md5, sha1, sha256).
-                                   Default: [md5]
+                                   Default: [md5, sha1, sha256]
           --use-builds-file      Use builds file.
           --use-checksums-file   Use checksums file.
       -V, --version              Print version information and exit.
@@ -116,7 +116,7 @@ The configuration file is in JSON format. The default configuration file, `confi
       "cache-lifespan" : 3600000,
       "cache-max-idle" : 3600000,
       "checksum-only" : false,
-      "checksum-type" : [ "md5" ],
+      "checksum-type" : [ "sha256", "sha1", "md5" ],
       "disable-cache" : false,
       "disable-recursion" : false,
       "excludes" : [ "^(?!.*/pom\\.xml$).*/.*\\.xml$" ],
