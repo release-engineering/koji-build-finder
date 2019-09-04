@@ -26,6 +26,7 @@ import com.redhat.red.build.finder.KojiBuild;
 import com.redhat.red.build.finder.PncBuild;
 import com.redhat.red.build.finder.pnc.client.model.Artifact;
 import com.redhat.red.build.finder.pnc.client.model.BuildRecord;
+import com.redhat.red.build.finder.pnc.client.model.BuildRecordPushResult;
 import com.redhat.red.build.finder.pnc.client.model.ProductVersion;
 import com.redhat.red.build.koji.model.json.KojiJsonConstants;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
@@ -86,6 +87,13 @@ public final class PncUtils {
         // XXX: These aren't used by Koji, but we need them to create the hyperlinks for the HTML report
         extra.put("external_project_id", record.getProjectId());
         extra.put("external_build_configuration_id", record.getBuildConfigurationId());
+
+        BuildRecordPushResult result = pncbuild.getBuildRecordPushResult();
+
+        if (result != null) {
+            extra.put("external_brew_build_id", result.getBrewBuildId());
+            extra.put("external_brew_build_url", result.getBrewBuildUrl());
+        }
 
         ProductVersion pv = pncbuild.getProductVersion();
 

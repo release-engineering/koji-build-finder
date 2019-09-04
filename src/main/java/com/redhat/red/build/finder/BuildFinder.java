@@ -67,6 +67,7 @@ import com.redhat.red.build.finder.pnc.client.model.Artifact;
 import com.redhat.red.build.finder.pnc.client.model.Artifact.Quality;
 import com.redhat.red.build.finder.pnc.client.model.BuildConfiguration;
 import com.redhat.red.build.finder.pnc.client.model.BuildRecord;
+import com.redhat.red.build.finder.pnc.client.model.BuildRecordPushResult;
 import com.redhat.red.build.finder.pnc.client.model.ProductVersion;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiArchiveInfo;
@@ -341,15 +342,9 @@ public class BuildFinder implements Callable<Map<BuildSystemInteger, KojiBuild>>
 
             KojiLocalArchive localArchive = new KojiLocalArchive(archive, filenames, analyzer != null ? analyzer.getFiles().get(filenames.iterator().next()) : Collections.emptySet());
 
-            LOGGER.debug("Created id {} filename {}", localArchive.getArchive().getArchiveId(), localArchive.getArchive().getFilename());
-
             build.getArchives().add(localArchive);
 
-            LOGGER.debug("Archives: before {}", build.getArchives());
-
             build.getArchives().sort((KojiLocalArchive a1, KojiLocalArchive a2) -> a1.getArchive().getFilename().compareTo(a2.getArchive().getFilename()));
-
-            LOGGER.debug("Archives after: {}", build.getArchives());
         }
     }
 
@@ -725,21 +720,24 @@ public class BuildFinder implements Callable<Map<BuildSystemInteger, KojiBuild>>
 
         List<Integer> idsList = ids.stream().collect(Collectors.toList());
         List<BuildRecord> records = pncclient.getBuildRecordsById(idsList);
-        List<List<Artifact>> remoteArtifacts = pncclient.getBuiltArtifactsById(idsList);
         List<Integer> buildConfigurationIds = records.stream().map(BuildRecord::getBuildConfigurationId).sorted().distinct().collect(Collectors.toList());
+        List<List<Artifact>> remoteArtifacts = pncclient.getBuiltArtifactsById(idsList);
         List<BuildConfiguration> buildConfigurations = pncclient.getBuildConfigurationsById(buildConfigurationIds);
-        Map<Integer, BuildConfiguration> bcMap = buildConfigurations.stream().collect(Collectors.toMap(BuildConfiguration::getId, Function.identity()));
-        Iterator<List<Artifact>> ita = remoteArtifacts.iterator();
-        List<PncBuild> pncbuilds = records.stream().map(PncBuild::new).collect(Collectors.toList());
-
         List<Integer> productVersionIds = buildConfigurations.stream().map(BuildConfiguration::getProductVersionId).filter(Objects::nonNull).sorted().distinct().collect(Collectors.toList());
         List<ProductVersion> productVersions = pncclient.getProductVersionsById(productVersionIds);
+        List<PncBuild> pncbuilds = records.stream().map(PncBuild::new).collect(Collectors.toList());
+        List<BuildRecordPushResult> results = pncclient.getBuildRecordPushResultsById(idsList);
+        Map<Integer, BuildRecordPushResult> rMap = results.stream().filter(Objects::nonNull).collect(Collectors.toMap(BuildRecordPushResult::getBuildRecordId, Function.identity()));
+        Map<Integer, BuildConfiguration> bcMap = buildConfigurations.stream().collect(Collectors.toMap(BuildConfiguration::getId, Function.identity()));
+        Iterator<List<Artifact>> ita = remoteArtifacts.iterator();
         Map<Integer, ProductVersion> pvMap = productVersions.stream().collect(Collectors.toMap(ProductVersion::getId, Function.identity()));
 
         pncbuilds.stream().forEachOrdered(pncbuild -> {
             BuildRecord record = pncbuild.getBuildRecord();
+            BuildRecordPushResult buildRecordPushResult = rMap.get(record.getId());
             BuildConfiguration buildConfiguration = bcMap.get(record.getBuildConfigurationId());
 
+            pncbuild.setBuildRecordPushResult(buildRecordPushResult);
             pncbuild.setBuildConfiguration(buildConfiguration);
 
             if (buildConfiguration.getProductVersionId() != null) {

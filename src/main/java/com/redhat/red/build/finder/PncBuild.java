@@ -23,12 +23,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.redhat.red.build.finder.pnc.client.model.Artifact;
 import com.redhat.red.build.finder.pnc.client.model.BuildConfiguration;
 import com.redhat.red.build.finder.pnc.client.model.BuildRecord;
+import com.redhat.red.build.finder.pnc.client.model.BuildRecordPushResult;
 import com.redhat.red.build.finder.pnc.client.model.ProductVersion;
 
 public class PncBuild implements Serializable {
     private static final long serialVersionUID = 4500090728323371691L;
 
     private BuildRecord buildRecord;
+
+    private BuildRecordPushResult buildRecordPushResult;
 
     private BuildConfiguration buildConfiguration;
 
@@ -47,8 +50,9 @@ public class PncBuild implements Serializable {
         this.artifacts = new ArrayList<>();
     }
 
-    public PncBuild(BuildRecord buildRecord, BuildConfiguration buildConfiguration, ProductVersion productVersion, List<Artifact> artifacts, List<Artifact> remoteArtifacts) {
+    public PncBuild(BuildRecord buildRecord, BuildRecordPushResult buildRecordPushResult, BuildConfiguration buildConfiguration, ProductVersion productVersion, List<Artifact> artifacts, List<Artifact> remoteArtifacts) {
         this.buildRecord = buildRecord;
+        this.buildRecordPushResult = buildRecordPushResult;
         this.buildConfiguration = buildConfiguration;
         this.productVersion = productVersion;
         this.artifacts = artifacts;
@@ -57,6 +61,14 @@ public class PncBuild implements Serializable {
 
     public BuildRecord getBuildRecord() {
         return buildRecord;
+    }
+
+    public void setBuildRecordPushResult(BuildRecordPushResult buildRecordPushResult) {
+        this.buildRecordPushResult = buildRecordPushResult;
+    }
+
+    public BuildRecordPushResult getBuildRecordPushResult() {
+        return buildRecordPushResult;
     }
 
     public void setBuildRecord(BuildRecord buildRecord) {
@@ -120,6 +132,6 @@ public class PncBuild implements Serializable {
 
     @Override
     public String toString() {
-        return "PncBuild [buildRecord=" + buildRecord + ", artifacts=" + artifacts + ", remoteArtifacts=" + remoteArtifacts + "]";
+        return "PncBuild [buildRecord=" + buildRecord + ", buildRecordPushResult=" + buildRecordPushResult + ", artifacts=" + artifacts + ", remoteArtifacts=" + remoteArtifacts + "]";
     }
 }

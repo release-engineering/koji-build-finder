@@ -36,9 +36,11 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import com.redhat.red.build.finder.pnc.client.model.Artifact;
 import com.redhat.red.build.finder.pnc.client.model.BuildConfiguration;
 import com.redhat.red.build.finder.pnc.client.model.BuildRecord;
+import com.redhat.red.build.finder.pnc.client.model.BuildRecordPushResult;
 import com.redhat.red.build.finder.pnc.client.model.PageParameterArtifact;
 import com.redhat.red.build.finder.pnc.client.model.PageParameterBuildConfiguration;
 import com.redhat.red.build.finder.pnc.client.model.PageParameterBuildRecord;
+import com.redhat.red.build.finder.pnc.client.model.PageParameterBuildRecordPushResult;
 import com.redhat.red.build.finder.pnc.client.model.PageParameterProductVersion;
 import com.redhat.red.build.finder.pnc.client.model.ProductVersion;
 
@@ -302,6 +304,14 @@ public class PncClient14 {
         return urlRequest.toString();
     }
 
+    private String getBuildRecordPushResultByIdUrl(int id) {
+        StringBuilder urlRequest = new StringBuilder();
+
+        urlRequest.append(url).append("/pnc-rest/rest/build-record-push/status/").append(id);
+
+        return urlRequest.toString();
+    }
+
     private String getBuildConfigurationByIdUrl(int id) {
         StringBuilder urlRequest = new StringBuilder();
 
@@ -372,6 +382,62 @@ public class PncClient14 {
         }
 
         return buildRecordList;
+    }
+
+    /**
+     * Get the BuildRecordPushResult object from the buildrecord id. Returns null if no buildrecord push result found
+     *
+     * @param id buildrecord id
+     * @return buildrecord push result DTO
+     *
+     * @throws PncClientException if something goes wrong
+     */
+    public BuildRecordPushResult getBuildRecordPushResultById(int id) throws PncClientException {
+        try {
+            String urlRequest = getBuildRecordPushResultByIdUrl(id);
+            HttpResponse<PageParameterBuildRecordPushResult> buildRecordPushResults = Unirest.get(urlRequest).asObject(PageParameterBuildRecordPushResult.class);
+            PageParameterBuildRecordPushResult buildRecordPushResultData = buildRecordPushResults.getBody();
+
+            if (buildRecordPushResultData == null) {
+                return null;
+            } else {
+                return buildRecordPushResultData.getContent();
+            }
+        } catch (UnirestException e) {
+            throw new PncClientException(e);
+        }
+    }
+
+    public List<BuildRecordPushResult> getBuildRecordPushResultsById(List<Integer> ids) throws PncClientException {
+        List<Future<HttpResponse<PageParameterBuildRecordPushResult>>> futures = new ArrayList<>(ids.size());
+
+        for (Integer id: ids) {
+            String urlRequest = getBuildRecordPushResultByIdUrl(id);
+            Future<HttpResponse<PageParameterBuildRecordPushResult>> buildRecordFuture = Unirest.get(urlRequest).asObjectAsync(PageParameterBuildRecordPushResult.class);
+            futures.add(buildRecordFuture);
+        }
+
+        List<BuildRecordPushResult> buildRecordPushResultList = new ArrayList<>(ids.size());
+
+        for (Future<HttpResponse<PageParameterBuildRecordPushResult>> future : futures) {
+
+            try {
+                HttpResponse<PageParameterBuildRecordPushResult> buildRecordPushResultData = future.get();
+                PageParameterBuildRecordPushResult buildRecordData = buildRecordPushResultData.getBody();
+
+                if (buildRecordData == null) {
+                    buildRecordPushResultList.add(null);
+                } else {
+                    buildRecordPushResultList.add(buildRecordData.getContent());
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (ExecutionException e) {
+                throw new PncClientException(e);
+            }
+        }
+
+        return buildRecordPushResultList;
     }
 
     /**
