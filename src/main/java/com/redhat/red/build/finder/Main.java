@@ -564,7 +564,7 @@ public final class Main implements Callable<Void> {
                     analyzer.setChecksums(checksums);
 
                     if (config.getPncURL() != null) {
-                        PncClient14 pncclient = new PncClient14(config.getPncURL(), -1, -1);
+                        PncClient14 pncclient = new PncClient14(config.getPncURL());
                         finder = new BuildFinder(session, config, analyzer, cacheManager, pncclient);
                     } else {
                         finder = new BuildFinder(session, config, analyzer, cacheManager);

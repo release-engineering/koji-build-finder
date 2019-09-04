@@ -70,8 +70,8 @@
     <version.com.j2html>1.4.0</version.com.j2html>
     <version.com.mashape.unirest>1.4.9</version.com.mashape.unirest>
     <version.com.mycila>3.0</version.com.mycila>
-    <version.com.puppycrawl.tools>8.23</version.com.puppycrawl.tools>
-    <version.com.redhat.red.build.kojiji>2.11</version.com.redhat.red.build.kojiji>
+    <version.com.puppycrawl.tools>8.24</version.com.puppycrawl.tools>
+    <version.com.redhat.red.build.kojiji>2.12</version.com.redhat.red.build.kojiji>
     <version.info.picocli>4.0.3</version.info.picocli>
     <version.io.dropwizard.metrics>4.1.0</version.io.dropwizard.metrics>
     <version.io.reactivex.rxjava2>2.2.12</version.io.reactivex.rxjava2>
@@ -83,7 +83,7 @@
     <version.org.apache.commons.commons-vfs2>2.4.1</version.org.apache.commons.commons-vfs2>
     <version.org.apache.httpcomponents.httpasyncclient>4.1.4</version.org.apache.httpcomponents.httpasyncclient>
     <version.org.apache.httpcomponents.httpclient>4.5.9</version.org.apache.httpcomponents.httpclient>
-    <version.org.apache.httpcomponents.httpcore>4.4.11</version.org.apache.httpcomponents.httpcore>
+    <version.org.apache.httpcomponents.httpcore>4.4.12</version.org.apache.httpcomponents.httpcore>
     <version.org.apache.maven.plugins.maven-antrun-plugin>1.8</version.org.apache.maven.plugins.maven-antrun-plugin>
     <version.org.apache.maven.plugins.maven-assembly-plugin>3.1.1</version.org.apache.maven.plugins.maven-assembly-plugin>
     <version.org.apache.maven.plugins.maven-checkstyle-plugin>3.1.0</version.org.apache.maven.plugins.maven-checkstyle-plugin>

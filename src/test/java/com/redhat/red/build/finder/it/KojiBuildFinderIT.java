@@ -15,29 +15,41 @@
  */
 package com.redhat.red.build.finder.it;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
+import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.redhat.red.build.finder.BuildFinder;
+import com.redhat.red.build.finder.BuildSystemInteger;
 import com.redhat.red.build.finder.ClientSession;
 import com.redhat.red.build.finder.DistributionAnalyzer;
+import com.redhat.red.build.finder.KojiBuild;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
 public class KojiBuildFinderIT extends AbstractKojiIT {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KojiBuildFinderIT.class);
+
     private static final String PROPERTY = "com.redhat.red.build.finder.it.distribution.url";
 
     private static final String URL = System.getProperty(PROPERTY);
@@ -50,7 +62,7 @@ public class KojiBuildFinderIT extends AbstractKojiIT {
     public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
-    public void testChecksumsAndFindBuilds() throws KojiClientException, IOException {
+    public void testChecksumsAndFindBuilds() throws KojiClientException, IOException, ExecutionException {
         assertNotNull("You must set the property " + PROPERTY + " pointing to the URL of the distribution to test with", URL);
 
         final URL url = new URL(URL);
@@ -62,11 +74,17 @@ public class KojiBuildFinderIT extends AbstractKojiIT {
 
         final Timer.Context context = timer.time();
 
-        final Map<String, Collection<String>> map;
+        final Map<KojiChecksumType, MultiValuedMap<String, String>> map;
+
+        final ExecutorService pool = Executors.newFixedThreadPool(1 + getConfig().getChecksumTypes().size());
+
+        final DistributionAnalyzer analyzer;
+
+        final Future<Map<KojiChecksumType, MultiValuedMap<String, String>>> futureChecksum;
 
         try {
-            final DistributionAnalyzer da = new DistributionAnalyzer(Collections.singletonList(file), getConfig());
-            map = da.checksumFiles().get(KojiChecksumType.md5).asMap();
+            analyzer = new DistributionAnalyzer(Collections.singletonList(file), getConfig());
+            futureChecksum = pool.submit(analyzer);
         } finally {
             context.stop();
         }
@@ -77,9 +95,19 @@ public class KojiBuildFinderIT extends AbstractKojiIT {
 
         try {
             final ClientSession session = getKojiClientSession();
-            final BuildFinder finder = new BuildFinder(session, getConfig());
+            final BuildFinder finder = new BuildFinder(session, getConfig(), analyzer, null, getPncClient());
+            finder.setOutputDirectory(folder.newFolder());
+            Future<Map<BuildSystemInteger, KojiBuild>> futureBuilds = pool.submit(finder);
+            Map<BuildSystemInteger, KojiBuild> builds = futureBuilds.get();
+            map = futureChecksum.get();
 
-            finder.findBuilds(map);
+            assertEquals(3, map.size());
+            assertTrue(builds.size() >= 1);
+
+            LOGGER.info("Map size: {}", map.size());
+            LOGGER.info("Builds size: {}", builds.size());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         } finally {
             context2.stop();
         }

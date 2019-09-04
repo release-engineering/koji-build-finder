@@ -32,11 +32,10 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Slf4jReporter;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.red.build.finder.BuildConfig;
 import com.redhat.red.build.finder.ConfigDefaults;
 import com.redhat.red.build.finder.KojiClientSession;
+import com.redhat.red.build.finder.pnc.client.PncClient14;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.config.SimpleKojiConfig;
 import com.redhat.red.build.koji.config.SimpleKojiConfigBuilder;
@@ -52,6 +51,8 @@ public abstract class AbstractKojiIT {
 
     private BuildConfig config;
 
+    private PncClient14 pncclient;
+
     protected static final int MAX_CONNECTIONS = 20;
 
     protected static final MetricRegistry REGISTRY = new MetricRegistry();
@@ -59,30 +60,28 @@ public abstract class AbstractKojiIT {
     @Before
     public void setup() throws IOException, KojiClientException {
         final Path configPath = Paths.get(ConfigDefaults.CONFIG);
-
         final File configFile = configPath.toFile();
 
         if (!configFile.exists()) {
             throw new IOException("File not found: " + configFile.getAbsolutePath());
         }
 
-        final ObjectMapper mapper = new ObjectMapper();
-
-        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        this.config = mapper.readValue(configFile, BuildConfig.class);
-
+        this.config = BuildConfig.load(configFile);
         final URL kojiHubURL = config.getKojiHubURL();
 
         if (kojiHubURL == null) {
             throw new IOException("You must set koji-hub-url in: " + configFile.getAbsolutePath());
         }
 
+        final URL pncURL = config.getPncURL();
+
+        if (pncURL == null) {
+            throw new IOException("You must set pnc-url in: " + configFile.getAbsolutePath());
+        }
+
         final SimpleKojiConfig kojiConfig = new SimpleKojiConfigBuilder().withKojiURL(kojiHubURL.toExternalForm()).withMaxConnections(MAX_CONNECTIONS).build();
-
         this.session = new KojiClientSession(kojiConfig, new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT), REGISTRY);
-
+        this.pncclient = new PncClient14(pncURL);
         this.reporter = Slf4jReporter.forRegistry(REGISTRY).outputTo(LOGGER).convertRatesTo(TimeUnit.SECONDS).convertDurationsTo(TimeUnit.SECONDS).build();
 
         reporter.start(600, TimeUnit.SECONDS);
@@ -94,6 +93,10 @@ public abstract class AbstractKojiIT {
 
     public BuildConfig getConfig() {
         return config;
+    }
+
+    public PncClient14 getPncClient() {
+        return pncclient;
     }
 
     @After

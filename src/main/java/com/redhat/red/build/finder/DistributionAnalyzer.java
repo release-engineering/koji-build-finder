@@ -270,7 +270,9 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
 
         boolean include = (!excludeFile && !excludeExtension);
 
-        LOGGER.debug("Include {}: {}", fo.getName(), include);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Include {}: {}", Utils.normalizePath(fo, root), include);
+        }
 
         return include;
     }
