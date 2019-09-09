@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.vfs2.FileObject;
-import org.eclipse.packagedrone.utils.rpm.RpmSignatureTag;
-import org.eclipse.packagedrone.utils.rpm.parse.RpmInputStream;
+import org.eclipse.packager.rpm.RpmSignatureTag;
+import org.eclipse.packager.rpm.parse.RpmInputStream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
@@ -139,8 +139,7 @@ public class Checksum {
                         futures2.put(checksumType, future);
                         break;
                     case sha256:
-                        // XXX: SHA256HEADER constant is only available in packagedrone 0.15.0 which is not released yet
-                        Object sha256 = in.getSignatureHeader().getTag(273);
+                        Object sha256 = in.getSignatureHeader().getTag(RpmSignatureTag.SHA256HEADER);
 
                         if (!(sha256 instanceof byte[])) {
                             break;
