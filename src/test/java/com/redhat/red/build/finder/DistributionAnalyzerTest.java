@@ -29,6 +29,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.collections4.MultiMapUtils;
@@ -189,10 +190,10 @@ public class DistributionAnalyzerTest {
                 String checksum = entry.getKey();
                 String filename = entry.getValue();
                 Set<Checksum> set = MultiMapUtils.getValuesAsSet(da.getFiles(), filename);
-                Checksum cksum =  Checksum.findByType(set, checksumType);
+                Optional<Checksum> cksum = Checksum.findByType(set, checksumType);
 
-                assertEquals(checksum, cksum.getValue());
-                assertEquals(checksumType, cksum.getType());
+                assertEquals(checksum, cksum.map(Checksum::getValue).orElse(null));
+                assertEquals(checksumType, cksum.map(Checksum::getType).orElse(null));
             }
         });
 

@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -45,7 +44,7 @@ public class EmptyBuildsTest  {
     @Test
     public void verifyEmptyBuilds() throws KojiClientException {
         final String checksum = "abc";
-        final List<String> filenames = Collections.unmodifiableList(Arrays.asList("test.abc"));
+        final List<String> filenames = Collections.unmodifiableList(Collections.singletonList("test.abc"));
         MockKojiClientSession session = new MockKojiClientSession("empty-builds-test");
         BuildConfig config = new BuildConfig();
         BuildFinder finder = new BuildFinder(session, config);

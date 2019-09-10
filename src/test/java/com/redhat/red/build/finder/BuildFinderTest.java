@@ -58,7 +58,7 @@ public class BuildFinderTest {
         File[] file = folder.listFiles();
 
         assertTrue(file != null && file.length == 1);
-        assertTrue(file[0].getCanonicalPath().equals(da.getChecksumFile(checksumType, folder).getCanonicalPath()));
+        assertEquals(file[0].getCanonicalPath(), da.getChecksumFile(checksumType, folder).getCanonicalPath());
     }
 
     @Test

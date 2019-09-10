@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +32,7 @@ public class SkipImportTest  {
     @Test
     public void verifyMultiImportsKeepEarliest() throws KojiClientException {
         final String checksum = "2e7e85f0ee97afde716231a6c792492a";
-        final List<String> filenames = Collections.unmodifiableList(Arrays.asList("commons-lang-2.6-redhat-2.jar"));
+        final List<String> filenames = Collections.unmodifiableList(Collections.singletonList("commons-lang-2.6-redhat-2.jar"));
         ClientSession session = new MockKojiClientSession("skip-import-test");
         BuildConfig config = new BuildConfig();
         BuildFinder finder = new BuildFinder(session, config);

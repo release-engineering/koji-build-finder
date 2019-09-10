@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +71,7 @@ public class ReportTest {
         assertEquals(newBuildsString, buildsString);
 
         List<KojiBuild> buildList = new ArrayList<>(buildMap.values());
-        Collections.sort(buildList, (b1, b2) -> Integer.compare(b1.getBuildInfo().getId(), b2.getBuildInfo().getId()));
+        buildList.sort(Comparator.comparingInt(b -> b.getBuildInfo().getId()));
         this.builds = Collections.unmodifiableList(buildList);
 
         assertEquals(buildMap.size(), buildList.size());
@@ -116,7 +117,7 @@ public class ReportTest {
         assertNull(builds.get(4).getPatchesZip());
         assertNotNull(builds.get(4).getProjectSourcesTgz());
         assertNotNull(builds.get(4).getBuildInfo().getExtra());
-        assertTrue((builds.get(4).getMethod().equals("PNC")));
+        assertEquals("PNC", builds.get(4).getMethod());
         assertTrue(builds.get(4).getDuplicateArchives().isEmpty());
         assertNotNull(builds.get(4).toString());
 

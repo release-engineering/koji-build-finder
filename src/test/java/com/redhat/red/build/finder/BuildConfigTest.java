@@ -80,7 +80,9 @@ public class BuildConfigTest {
     public void verifyIgnoreUnknownProperties() throws IOException {
         String json = "{\"foo\":\"bar\"}";
 
-        BuildConfig.load(json);
+        BuildConfig bc = BuildConfig.load(json);
+
+        assertNotNull(bc);
     }
 
     @Test
@@ -101,6 +103,9 @@ public class BuildConfigTest {
         String json = "{\"archive-types\":[\"jar\"],\"excludes\":\"^(?!.*/pom\\\\.xml$).*/.*\\\\.xml$\",\"checksum-only\":true,\"checksum-type\":\"sha256\",\"koji-hub-url\":\"https://my.url.com/hub\",\"koji-web-url\":\"https://my.url.com/web\"}";
         BuildConfig bc = BuildConfig.load(BuildConfigTest.class.getClassLoader());
         BuildConfig bc2 = BuildConfig.load(json);
+
+        assertNotNull(bc);
+        assertNotNull(bc2);
 
         assertFalse(bc.getChecksumOnly());
         assertTrue(bc2.getChecksumOnly());

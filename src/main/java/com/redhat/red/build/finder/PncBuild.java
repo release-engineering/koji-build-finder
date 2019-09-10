@@ -120,11 +120,7 @@ public class PncBuild implements Serializable {
     @JsonIgnore
     public String getSource() {
         if (buildRecord != null) {
-            String scmURepoRL = buildRecord.getScmRepoURL();
-
-            if (scmURepoRL != null) {
-                return scmURepoRL;
-            }
+            return buildRecord.getScmRepoURL();
         }
 
         return null;

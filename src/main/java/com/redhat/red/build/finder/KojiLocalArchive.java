@@ -103,10 +103,9 @@ public class KojiLocalArchive {
             return archive.getArch() == null;
         case "maven":
             return archive.getGroupId() == null;
-        case "rpm":
-            return false;
         case "win":
             return archive.getPlatforms() == null;
+        case "rpm":
         default:
             return false;
         }

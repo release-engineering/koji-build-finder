@@ -53,10 +53,10 @@
   </scm>
 
   <properties>
-    <koji.hub.url></koji.hub.url>
-    <koji.web.url></koji.web.url>
+    <koji.hub.url/>
+    <koji.web.url/>
     <mavenVersion>3.3.9</mavenVersion>
-    <pnc.url></pnc.url>
+    <pnc.url/>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipITs>true</skipITs>
     <version.ch.qos.logback>1.2.3</version.ch.qos.logback>

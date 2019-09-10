@@ -100,7 +100,7 @@ public class ProductReport extends Report {
     }
 
     private static String targetToProduct(String tagName) {
-        String prodName = tagName.replaceAll("([a-z\\-]+)([0-9\\.?]+)?(.*)", "$1-$2").replaceAll("-+", " ").replaceAll("(jb|jboss)", "JBoss");
+        String prodName = tagName.replaceAll("([a-z\\-]+)([0-9.?]+)?(.*)", "$1-$2").replaceAll("-+", " ").replaceAll("(jb|jboss)", "JBoss");
         Iterator<String> it = Arrays.asList(prodName.split(" ")).iterator();
 
         StringBuilder sb = new StringBuilder();
@@ -111,7 +111,7 @@ public class ProductReport extends Report {
             if (word.length() <= 4) {
                 sb.append(word.toUpperCase(Locale.ENGLISH));
             } else {
-                sb.append(String.valueOf(word.charAt(0)).toUpperCase(Locale.ENGLISH) + word.substring(1, word.length()));
+                sb.append(String.valueOf(word.charAt(0)).toUpperCase(Locale.ENGLISH)).append(word.substring(1));
             }
 
             if (it.hasNext()) {

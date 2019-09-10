@@ -105,6 +105,6 @@ public class BuildRecordPushResult implements Serializable {
         SUCCESS,
         FAILED,
         SYSTEM_ERROR,
-        CANCELED;
+        CANCELED
     }
 }

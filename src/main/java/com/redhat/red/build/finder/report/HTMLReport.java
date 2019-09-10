@@ -83,7 +83,7 @@ public class HTMLReport extends Report {
     private List<Report> reports;
 
     public HTMLReport(File outputDirectory, Collection<File> files, List<KojiBuild> builds, URL kojiwebUrl, URL pncUrl, List<Report> reports) {
-        setName("Build Report for " + String.join(", ", files.stream().map(File::getName).collect(Collectors.toList())));
+        setName("Build Report for " + files.stream().map(File::getName).collect(Collectors.joining(", ")));
         setDescription("List of analyzed artifacts whether or not they were found in a Koji build");
         setBaseFilename("output");
         setOutputDirectory(outputDirectory);
@@ -125,12 +125,12 @@ public class HTMLReport extends Report {
         boolean validId = (id != null && id > 0);
 
         if (!unmatchedFilenames.isEmpty()) {
-            String archives = unmatchedFilenames.stream().collect(Collectors.joining(", "));
+            String archives = String.join(", ", unmatchedFilenames);
 
             name += " (unmatched files: " + archives + ")";
         }
 
-        boolean error = (!unmatchedFilenames.isEmpty() || build.isImport() || id <= 0);
+        boolean error = (!unmatchedFilenames.isEmpty() || build.isImport() || !validId);
 
         if (build.isPnc()) {
             return error ? errorText(name) : a().withHref(pncUrl + "/pnc-web/#/projects/" + build.getBuildInfo().getExtra().get("external_project_id") + "/build-configs/" + build.getBuildInfo().getExtra().get("external_build_configuration_id") + "/build-records/" + build.getBuildInfo().getExtra().get("external_build_id") + "/artifacts").with(text(name));

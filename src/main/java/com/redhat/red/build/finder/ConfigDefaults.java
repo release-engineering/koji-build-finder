@@ -58,7 +58,7 @@ public abstract class ConfigDefaults {
 
     public static final boolean DISABLE_RECURSION = Boolean.FALSE;
 
-    public static final List<Pattern> EXCLUDES = Collections.unmodifiableList(Arrays.asList(Pattern.compile("^(?!.*/pom\\.xml$).*/.*\\.xml$")));
+    public static final List<Pattern> EXCLUDES = Collections.unmodifiableList(Collections.singletonList(Pattern.compile("^(?!.*/pom\\.xml$).*/.*\\.xml$")));
 
     public static final URL KOJI_HUB_URL = null;
 

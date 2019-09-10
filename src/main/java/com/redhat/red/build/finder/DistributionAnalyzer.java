@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -142,35 +143,38 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
                     root = fo.getName().getFriendlyURI().substring(0, fo.getName().getFriendlyURI().indexOf(fo.getName().getBaseName()));
                     Set<Checksum> fileChecksums = cacheManager != null ? Checksum.checksum(fo, checksumTypesToCheck, root) : null;
 
-                    if (cacheManager != null) {
+                    if (fileChecksums != null) {
                         Iterator<KojiChecksumType> it = checksumTypesToCheck.iterator();
 
                         while (it.hasNext()) {
                             KojiChecksumType checksumType = it.next();
-                            String value = Checksum.findByType(fileChecksums, checksumType).getValue();
-                            MultiValuedMap<String, String> localMap = fileCaches.get(checksumType).get(value);
+                            String value = Checksum.findByType(fileChecksums, checksumType).map(Checksum::getValue).orElse(null);
 
-                            if (localMap != null) {
-                                this.map.get(checksumType).putAll(localMap);
+                            if (value != null) {
+                                MultiValuedMap<String, String> localMap = fileCaches.get(checksumType).get(value);
 
-                                localMap.entries().forEach(entry -> inverseMap.put(entry.getValue(), new Checksum(checksumType, entry.getKey(), entry.getValue())));
+                                if (localMap != null) {
+                                    this.map.get(checksumType).putAll(localMap);
 
-                                if (queue != null && checksumType.equals(KojiChecksumType.md5)) {
-                                    localMap.entries().forEach(entry -> {
-                                        try {
-                                            Checksum checksum = new Checksum(checksumType, entry.getKey(), entry.getValue());
-                                            queue.put(checksum);
-                                        } catch (InterruptedException e) {
-                                            Thread.currentThread().interrupt();
-                                        }
-                                    });
+                                    localMap.entries().forEach(entry -> inverseMap.put(entry.getValue(), new Checksum(checksumType, entry.getKey(), entry.getValue())));
+
+                                    if (queue != null && checksumType.equals(KojiChecksumType.md5)) {
+                                        localMap.entries().forEach(entry -> {
+                                            try {
+                                                Checksum checksum = new Checksum(checksumType, entry.getKey(), entry.getValue());
+                                                queue.put(checksum);
+                                            } catch (InterruptedException e) {
+                                                Thread.currentThread().interrupt();
+                                            }
+                                        });
+                                    }
+
+                                    it.remove();
+
+                                    LOGGER.info("Loaded {} checksums for file: {} (checksum: {}) from cache", green(localMap.size()), green(file.getName()), green(value));
+                                } else {
+                                    LOGGER.info("File: {} (checksum: {}) not found in cache", green(file.getName()), green(value));
                                 }
-
-                                it.remove();
-
-                                LOGGER.info("Loaded {} checksums for file: {} (checksum: {}) from cache", green(localMap.size()), green(file.getName()), green(value));
-                            } else {
-                                LOGGER.info("File: {} (checksum: {}) not found in cache", green(file.getName()), green(value));
                             }
                         }
                     }
@@ -180,8 +184,16 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
 
                         listChildren(fo);
 
-                        if (cacheManager != null) {
-                            checksumTypesToCheck.forEach(checksumType -> fileCaches.get(checksumType).put(Checksum.findByType(fileChecksums, checksumType).getValue(), map.get(checksumType)));
+                        if (fileChecksums != null) {
+                            for (KojiChecksumType checksumType : checksumTypesToCheck) {
+                                Optional<Checksum> cksum = Checksum.findByType(fileChecksums, checksumType);
+
+                                if (cksum.isPresent()) {
+                                    fileCaches.get(checksumType).put(cksum.get().getValue(), map.get(checksumType));
+                                } else {
+                                    throw new IOException("Checksum type " + checksumType + " not found");
+                                }
+                            }
                         }
                     }
             }
@@ -237,7 +249,7 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
             LOGGER.debug("Creating file system for: {}", Utils.normalizePath(fo, root));
         }
 
-        FileObject layered = null;
+        FileObject layered;
         FileSystem fs = null;
 
         try {
@@ -278,11 +290,7 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
     }
 
     private Callable<Set<Checksum>> checksumTask(FileObject fo) {
-        return new Callable<Set<Checksum>>() {
-            public Set<Checksum> call() throws IOException {
-                return Checksum.checksum(fo, checksumTypesToCheck, root);
-            }
-        };
+        return () -> Checksum.checksum(fo, checksumTypesToCheck, root);
     }
 
     private void handleFutureChecksum(Future<Set<Checksum>> future) throws IOException {
@@ -290,8 +298,12 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
             Set<Checksum> checksums = future.get();
 
             checksumTypesToCheck.forEach(checksumType ->  {
-                Checksum checksum = Checksum.findByType(checksums, checksumType);
-                map.get(checksumType).put(checksum.getValue(), checksum.getFilename());
+                Optional<Checksum> optionalChecksum = Checksum.findByType(checksums, checksumType);
+
+                if (optionalChecksum.isPresent()) {
+                    Checksum checksum = optionalChecksum.get();
+                    map.get(checksumType).put(checksum.getValue(), checksum.getFilename());
+                }
             });
 
             checksums.forEach(checksum -> inverseMap.put(checksum.getFilename(), checksum));

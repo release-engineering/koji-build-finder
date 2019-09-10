@@ -59,14 +59,14 @@ public class MockKojiClientSession implements ClientSession {
      private String readResource(String resourceFile) throws IOException {
         String resource = FilenameUtils.separatorsToUnix(FilenameUtils.concat(resourcePath, resourceFile));
         File file = TestUtils.loadFile(resource);
-        String fileContents = FileUtils.readFileToString(file, "UTF-8");
-        return fileContents;
+
+        return FileUtils.readFileToString(file, "UTF-8");
     }
 
     private <T> T parseCapturedMessage(Class<T> type, String filename) throws Exception {
         String source = readResource(filename);
-        T parsed = rwxMapper.parse(new ByteArrayInputStream(source.getBytes()), type);
-        return parsed;
+
+        return rwxMapper.parse(new ByteArrayInputStream(source.getBytes()), type);
     }
 
     @Override

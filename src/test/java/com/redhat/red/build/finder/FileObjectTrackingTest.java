@@ -118,9 +118,8 @@ public class FileObjectTrackingTest {
         assertEquals(0, sCount);
 
         Object fCounter = getAbstractFileObjectCounter();
-        int fCount = (Integer) fCounter;
 
-        assertEquals(0, fCount);
+        assertEquals(0, fCounter);
     }
 
     /**

@@ -56,9 +56,7 @@ public class MainTest {
     public static ParseResult parseCommandLine(Object command, String[] args) throws ParameterException {
         CommandLine cmd = new CommandLine(command);
 
-        ParseResult parseResult = cmd.parseArgs(args);
-
-        return parseResult;
+        return cmd.parseArgs(args);
     }
 
     @Test
@@ -105,7 +103,7 @@ public class MainTest {
         String krbPrincipal = "test@TEST.ABC";
         String krbService = "testService";
 
-        String[] args = new String[] {"-o", outputDirectory.toString(), "-c", configFile.toString(), "--disable-cache", "-k", "-t", "sha256", "-x", "", "-a", "jar", "-e", "jar", "--koji-hub-url", hubURL.toString(), "--koji-web-url", webURL.toString(), "--krb-ccache", krbCcache.toString(), "--krb-keytab", krbKeytab.toString(), "--krb-principal", krbPrincipal, "--krb-service", krbService.toString(), "--krb-password", krbPassword.toString(), inputFile.toString()};
+        String[] args = new String[] {"-o", outputDirectory.toString(), "-c", configFile.toString(), "--disable-cache", "-k", "-t", "sha256", "-x", "", "-a", "jar", "-e", "jar", "--koji-hub-url", hubURL.toString(), "--koji-web-url", webURL.toString(), "--krb-ccache", krbCcache.toString(), "--krb-keytab", krbKeytab.toString(), "--krb-principal", krbPrincipal, "--krb-service", krbService, "--krb-password", krbPassword, inputFile.toString()};
 
         ParseResult parseResult = parseCommandLine(new Main(), args);
 

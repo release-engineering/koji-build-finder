@@ -192,7 +192,7 @@ public class KojiBuild {
     public KojiArchiveInfo getProjectSourcesTgz() {
         String mavenArtifactId = buildInfo.getMavenArtifactId();
         String mavenVersion = buildInfo.getMavenVersion();
-        KojiArchiveInfo sourcesZip = null;
+        KojiArchiveInfo sourcesZip;
 
         if (remoteArchives != null && mavenArtifactId != null && mavenVersion != null) {
             String sourcesZipFilename = mavenArtifactId + "-" + mavenVersion + "-project-sources.tar.gz";
@@ -207,7 +207,7 @@ public class KojiBuild {
     public KojiArchiveInfo getScmSourcesZip() {
         String mavenArtifactId = buildInfo.getMavenArtifactId();
         String mavenVersion = buildInfo.getMavenVersion();
-        KojiArchiveInfo sourcesZip = null;
+        KojiArchiveInfo sourcesZip;
 
         if (remoteArchives != null && mavenArtifactId != null && mavenVersion != null) {
             String sourcesZipFilename = mavenArtifactId + "-" + mavenVersion + "-scm-sources.zip";
@@ -222,7 +222,7 @@ public class KojiBuild {
     public KojiArchiveInfo getPatchesZip() {
         String mavenArtifactId = buildInfo.getMavenArtifactId();
         String mavenVersion = buildInfo.getMavenVersion();
-        KojiArchiveInfo patchesZip = null;
+        KojiArchiveInfo patchesZip;
 
         if (remoteArchives != null && mavenArtifactId != null && mavenVersion != null) {
             String patchesZipFilename = mavenArtifactId + "-" + mavenVersion + "-patches.zip";
@@ -257,11 +257,7 @@ public class KojiBuild {
             KojiBuildRequest buildRequest = taskRequest.asBuildRequest();
 
             if (buildRequest != null) {
-                String source = buildRequest.getSource();
-
-                if (source != null) {
-                    return source;
-                }
+                return buildRequest.getSource();
             }
         }
 
@@ -346,7 +342,7 @@ public class KojiBuild {
 
         @Override
         public Set<Class<? extends KojiBuild>> getTypeClasses() {
-            return Util.<Class<? extends KojiBuild>>asSet(KojiBuild.class);
+            return Util.asSet(KojiBuild.class);
         }
 
         @Override

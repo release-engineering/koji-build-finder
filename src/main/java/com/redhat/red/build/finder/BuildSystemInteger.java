@@ -88,7 +88,7 @@ public class BuildSystemInteger implements Comparable<Object> {
         @Override
         public Object deserializeKey(String key, DeserializationContext ctxt) throws IOException {
             String[] t = key.split(", ");
-            Integer value = Integer.parseInt(t[0]);
+            int value = Integer.parseInt(t[0]);
             BuildSystem buildSystem = BuildSystem.valueOf(t[1]);
 
             return new BuildSystemInteger(value, buildSystem);

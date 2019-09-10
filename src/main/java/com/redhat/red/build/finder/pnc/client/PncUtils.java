@@ -46,13 +46,10 @@ public final class PncUtils {
         String executionRootName = record.getExecutionRootName();
         String executionRootVersion = record.getExecutionRootVersion();
         String[] ga = executionRootName.split(":", 2);
-        String mavenGroupId = ga[0];
-        String mavenArtifactId = ga[1];
-        String mavenVersion = executionRootVersion;
 
-        buildInfo.setMavenGroupId(mavenGroupId);
-        buildInfo.setMavenArtifactId(mavenArtifactId);
-        buildInfo.setMavenVersion(mavenVersion);
+        buildInfo.setMavenGroupId(ga[0]);
+        buildInfo.setMavenArtifactId(ga[1]);
+        buildInfo.setMavenVersion(executionRootVersion);
     }
 
     public static String getNVRFromBuildRecord(BuildRecord record) {

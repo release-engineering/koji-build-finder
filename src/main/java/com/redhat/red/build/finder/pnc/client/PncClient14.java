@@ -144,11 +144,7 @@ public class PncClient14 {
     }
 
     private String getArtifactsUrl(String key, String value) {
-        StringBuilder urlRequest = new StringBuilder();
-
-        urlRequest.append(url).append("/pnc-rest/rest/artifacts").append("?").append(key).append("=").append(value);
-
-        return urlRequest.toString();
+        return url + "/pnc-rest/rest/artifacts" + "?" + key + "=" + value;
     }
 
     private List<Artifact> getArtifacts(String key, String value) throws PncClientException {
@@ -234,11 +230,7 @@ public class PncClient14 {
     }
 
     private String getBuiltArtifactsByIdUrl(int id) {
-        StringBuilder urlRequest = new StringBuilder();
-
-        urlRequest.append(url).append("/pnc-rest/rest/build-records/").append(id).append("/built-artifacts");
-
-        return urlRequest.toString();
+        return url + "/pnc-rest/rest/build-records/" + id + "/built-artifacts";
     }
 
     /**
@@ -297,35 +289,19 @@ public class PncClient14 {
     }
 
     private String getBuildRecordByIdUrl(int id) {
-        StringBuilder urlRequest = new StringBuilder();
-
-        urlRequest.append(url).append("/pnc-rest/rest/build-records/").append(id);
-
-        return urlRequest.toString();
+        return url + "/pnc-rest/rest/build-records/" + id;
     }
 
     private String getBuildRecordPushResultByIdUrl(int id) {
-        StringBuilder urlRequest = new StringBuilder();
-
-        urlRequest.append(url).append("/pnc-rest/rest/build-record-push/status/").append(id);
-
-        return urlRequest.toString();
+        return url + "/pnc-rest/rest/build-record-push/status/" + id;
     }
 
     private String getBuildConfigurationByIdUrl(int id) {
-        StringBuilder urlRequest = new StringBuilder();
-
-        urlRequest.append(url).append("/pnc-rest/rest/build-configurations/").append(id);
-
-        return urlRequest.toString();
+        return url + "/pnc-rest/rest/build-configurations/" + id;
     }
 
     private String getProductVersionByIdUrl(int id) {
-        StringBuilder urlRequest = new StringBuilder();
-
-        urlRequest.append(url).append("/pnc-rest/rest/product-versions/").append(id);
-
-        return urlRequest.toString();
+        return url + "/pnc-rest/rest/product-versions/" + id;
     }
 
     /**

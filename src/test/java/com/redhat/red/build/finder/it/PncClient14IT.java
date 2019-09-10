@@ -16,6 +16,7 @@
 package com.redhat.red.build.finder.it;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -87,7 +88,7 @@ public class PncClient14IT {
         final String md5 = "6a1a161bb7a696df419d149df034d189";
         final String sha1 = "8a50c8f39257bfe488f578bf52f70e641023b020";
         final String sha256 = "840b8f9f9a516fcc7e74da710480c6c8f5700ce9bdfa52a5cb752bfe9c54fe92";
-        final Integer id = Integer.valueOf(15821);
+        final int id = 15821;
 
         List<Artifact> artifactsMd5 = client.getArtifactsByMd5(md5);
         List<Artifact> artifactsSha1 = client.getArtifactsBySha1(sha1);
@@ -105,8 +106,8 @@ public class PncClient14IT {
         assertEquals(sha1, artifactSha1.getSha1());
         assertEquals(sha256, artifactSha256.getSha256());
 
-        assertTrue(artifactMd5.getId().equals(artifactSha1.getId()));
-        assertTrue(artifactSha1.getId().equals(artifactSha256.getId()));
+        assertEquals(artifactMd5.getId(), artifactSha1.getId());
+        assertEquals(artifactSha1.getId(), artifactSha256.getId());
 
         LOGGER.debug("Artifact name: {}", artifactMd5.getFilename());
 
@@ -127,6 +128,6 @@ public class PncClient14IT {
 
         List<Artifact> artifacts = client.getBuiltArtifactsById(record.getProjectId());
 
-        assertTrue(!artifacts.isEmpty());
+        assertFalse(artifacts.isEmpty());
     }
 }

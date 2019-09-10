@@ -78,7 +78,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 
-@Command(abbreviateSynopsis = true, description = "Finds builds in Koji.", mixinStandardHelpOptions = true, name = "koji-build-finder", showDefaultValues = true, sortOptions = true, versionProvider = Main.ManifestVersionProvider.class)
+@Command(abbreviateSynopsis = true, description = "Finds builds in Koji.", mixinStandardHelpOptions = true, name = "koji-build-finder", showDefaultValues = true, versionProvider = Main.ManifestVersionProvider.class)
 public final class Main implements Callable<Void> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
@@ -462,7 +462,7 @@ public final class Main implements Callable<Void> {
 
                     try {
                         Map<String, Collection<String>> subChecksums = JSONUtils.loadChecksumsFile(checksumFile);
-                        subChecksums.entrySet().forEach(e -> e.getValue().forEach(v -> checksumsFromFile.get(checksumType).put(e.getKey(), v)));
+                        subChecksums.forEach((key, value) -> value.forEach(v -> checksumsFromFile.get(checksumType).put(key, v)));
                     } catch (IOException e) {
                         LOGGER.error("Error loading checksums file: {}", boldRed(e.getMessage()));
                         LOGGER.debug("Error", e);
@@ -489,7 +489,7 @@ public final class Main implements Callable<Void> {
                 Future<Map<KojiChecksumType, MultiValuedMap<String, String>>> futureChecksum = pool.submit(analyzer);
 
                 try {
-                    checksums  = futureChecksum.get();
+                    checksums = futureChecksum.get();
                 } catch (ExecutionException e) {
                     LOGGER.error("Error getting checksums: {}", boldRed(e.getMessage()), e);
                     LOGGER.debug("Error", e);
@@ -524,7 +524,7 @@ public final class Main implements Callable<Void> {
             LOGGER.info("Pnc support: {}", green("disabled"));
         }
 
-        BuildFinder finder = null;
+        BuildFinder finder;
         Map<BuildSystemInteger, KojiBuild> builds = null;
         File buildsFile = new File(outputDirectory, BuildFinder.getBuildsFilename());
 
@@ -708,7 +708,7 @@ public final class Main implements Callable<Void> {
     static class FilenameConverter implements ITypeConverter<String> {
         @Override
         public String convert(String value) throws Exception {
-            if (value.matches(".*[\\/:\"*?<>|]+.*")) {
+            if (value.matches(".*[/:\"*?<>|]+.*")) {
                 throw new IllegalArgumentException("Invalid name");
             }
 

@@ -25,6 +25,7 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -83,7 +84,7 @@ public class Checksum {
 
                 checksumTypes.forEach(checksumType -> {
                     CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
-                        MessageDigest md =  mds.get(checksumType);
+                        MessageDigest md = mds.get(checksumType);
                         md.update(buffer, 0, len);
                         return null;
                     });
@@ -172,15 +173,17 @@ public class Checksum {
         return results;
     }
 
-    public static Checksum findByType(Set<Checksum> checksums, KojiChecksumType type) {
+    public static Optional<Checksum> findByType(Set<Checksum> checksums, KojiChecksumType type) {
         List<Checksum> list = checksums.stream().filter(checksum -> checksum.getType().equals(type)).collect(Collectors.toList());
         int size = list.size();
 
         if (size == 0) {
-            return null;
+            return Optional.empty();
         }
 
-        return list.get(0);
+        Checksum checksum = list.get(0);
+
+        return Optional.of(checksum);
     }
 
     public KojiChecksumType getType() {
