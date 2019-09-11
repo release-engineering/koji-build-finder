@@ -235,12 +235,12 @@ public class KojiBuild {
 
     @JsonIgnore
     public boolean isImport() {
-        return !((buildInfo != null && buildInfo.getExtra() != null && buildInfo.getExtra().containsKey(KojiJsonConstants.BUILD_SYSTEM)) || taskInfo != null);
+        return !(buildInfo != null && buildInfo.getExtra() != null && buildInfo.getExtra().containsKey(KojiJsonConstants.BUILD_SYSTEM) || taskInfo != null);
     }
 
     @JsonIgnore
     public boolean isMaven() {
-        return (buildInfo != null && buildInfo.getExtra() != null && (buildInfo.getExtra().containsKey(KEY_MAVEN) || (buildInfo.getExtra().get(KojiJsonConstants.BUILD_SYSTEM) != null && buildInfo.getExtra().get(KojiJsonConstants.BUILD_SYSTEM).equals("PNC"))) || (taskInfo != null && taskInfo.getMethod() != null && taskInfo.getMethod().equals(KEY_MAVEN)));
+        return buildInfo != null && buildInfo.getExtra() != null && (buildInfo.getExtra().containsKey(KEY_MAVEN) || buildInfo.getExtra().get(KojiJsonConstants.BUILD_SYSTEM) != null && buildInfo.getExtra().get(KojiJsonConstants.BUILD_SYSTEM).equals("PNC")) || taskInfo != null && taskInfo.getMethod() != null && taskInfo.getMethod().equals(KEY_MAVEN);
     }
 
     @JsonIgnore

@@ -44,7 +44,6 @@ import com.redhat.red.build.finder.BuildSystemInteger;
 import com.redhat.red.build.finder.ClientSession;
 import com.redhat.red.build.finder.DistributionAnalyzer;
 import com.redhat.red.build.finder.KojiBuild;
-import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.model.xmlrpc.KojiChecksumType;
 
 public class KojiBuildFinderIT extends AbstractKojiIT {
@@ -62,7 +61,7 @@ public class KojiBuildFinderIT extends AbstractKojiIT {
     public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
-    public void testChecksumsAndFindBuilds() throws KojiClientException, IOException, ExecutionException {
+    public void testChecksumsAndFindBuilds() throws IOException, ExecutionException {
         assertNotNull("You must set the property " + PROPERTY + " pointing to the URL of the distribution to test with", URL);
 
         final URL url = new URL(URL);

@@ -89,14 +89,19 @@ public class ProductReport extends Report {
         LOGGER.debug("Product List ({}):", size);
 
         this.productMap = new HashMap<>(size);
+        Set<Entry<String, Collection<KojiBuild>>> entrySet = pm.entrySet();
 
-        prodMap.asMap().forEach((target, prodBuilds) -> {
-           List<String> buildList = prodBuilds.stream().map(b -> b.getBuildInfo().getNvr()).collect(Collectors.toList());
+        for (Entry<String, Collection<KojiBuild>> entry : entrySet) {
+            String target = entry.getKey();
+            Collection<KojiBuild> prodBuilds = entry.getValue();
+            List<String> buildList = prodBuilds.stream().map(b -> b.getBuildInfo().getNvr()).collect(Collectors.toList());
 
-           LOGGER.debug("{} ({}): {}", target, targetToProduct(target), buildList);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("{} ({}): {}", target, targetToProduct(target), buildList);
+            }
 
-           productMap.put(target, buildList);
-        });
+            productMap.put(target, buildList);
+        }
     }
 
     private static String targetToProduct(String tagName) {

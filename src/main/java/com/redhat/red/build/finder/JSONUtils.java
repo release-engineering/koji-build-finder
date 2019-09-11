@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -49,7 +48,7 @@ public final class JSONUtils {
 
     public static Map<String, Collection<String>> loadChecksumsFile(File file) throws IOException {
         ObjectMapper mapper = new BuildFinderObjectMapper();
-        TypeReference<Map<String, List<String>>> typeRef = new TypeReference<Map<String, List<String>>>() { };
+        TypeReference<Map<String, Collection<String>>> typeRef = new TypeReference<Map<String, Collection<String>>>() { };
 
         return mapper.readValue(file, typeRef);
     }

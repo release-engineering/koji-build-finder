@@ -122,7 +122,7 @@ public class HTMLReport extends Report {
     private Tag<?> linkArchive(KojiBuild build, KojiArchiveInfo archive, Collection<String> unmatchedFilenames) {
         String name = archive.getFilename();
         Integer id = archive.getArchiveId();
-        boolean validId = (id != null && id > 0);
+        boolean validId = id != null && id > 0;
 
         if (!unmatchedFilenames.isEmpty()) {
             String archives = String.join(", ", unmatchedFilenames);
@@ -130,7 +130,7 @@ public class HTMLReport extends Report {
             name += " (unmatched files: " + archives + ")";
         }
 
-        boolean error = (!unmatchedFilenames.isEmpty() || build.isImport() || !validId);
+        boolean error = !unmatchedFilenames.isEmpty() || build.isImport() || !validId;
 
         if (build.isPnc()) {
             return error ? errorText(name) : a().withHref(pncUrl + "/pnc-web/#/projects/" + build.getBuildInfo().getExtra().get("external_project_id") + "/build-configs/" + build.getBuildInfo().getExtra().get("external_build_configuration_id") + "/build-records/" + build.getBuildInfo().getExtra().get("external_build_id") + "/artifacts").with(text(name));
@@ -157,7 +157,7 @@ public class HTMLReport extends Report {
         String name = rpm.getName() + "-" + rpm.getVersion() + "-" + rpm.getRelease() + "." + rpm.getArch() + ".rpm";
         Integer id = rpm.getId();
         String href = "/rpminfo?rpmID=" + id;
-        boolean error = (build.isImport() || id <= 0);
+        boolean error = build.isImport() || id <= 0;
         return error ? errorText(name) : a().withHref(kojiwebUrl + href).with(text(name));
     }
 
@@ -214,12 +214,12 @@ public class HTMLReport extends Report {
                                       td(build.getBuildInfo().getId() > 0 ? text(build.getBuildInfo().getVersion().replace('_', '-')) : text("")),
                                       td(build.getArchives() != null ? ol(each(build.getArchives(), archive -> li(linkLocalArchive(build, archive), text(": "), text(String.join(", ", archive.getFilenames()))))) : text("")),
                                       td(build.getTags() != null ? ul(each(build.getTags(), tag -> linkTag(build, tag))) : text("")),
-                                      td(build.getMethod() != null ? text(build.getMethod()) : (build.getBuildInfo().getId() > 0 ? errorText("imported build") : text(""))),
+                                      td(build.getMethod() != null ? text(build.getMethod()) : build.getBuildInfo().getId() > 0 ? errorText("imported build") : text("")),
                                       td(build.getScmSourcesZip() != null ? linkArchive(build, build.getScmSourcesZip()) : text("")),
                                       td(build.getPatchesZip() != null ? linkArchive(build, build.getPatchesZip()) : text("")),
-                                      td(build.getSource() != null ? linkSource(build) : (build.getBuildInfo().getId() == 0 ? text("") : errorText("missing URL"))),
-                                      td(build.getTaskInfo() != null && build.getTaskInfo().getMethod() != null && build.getTaskInfo().getMethod().equals("maven") && build.getTaskRequest() != null && build.getTaskRequest().asMavenBuildRequest().getProperties() != null && build.getTaskRequest().asMavenBuildRequest() != null ? each(build.getTaskRequest().asMavenBuildRequest().getProperties().entrySet(), entry -> text(entry.getKey() + (entry.getValue() != null ? ("=" + entry.getValue() + "; ") : "; "))) : text("")),
-                                      td(build.getBuildInfo().getExtra() != null ? each(build.getBuildInfo().getExtra().entrySet(), entry -> text(entry.getKey() + (entry.getValue() != null ? ("=" + entry.getValue() + "; ") : "; "))) : text(""))
+                                      td(build.getSource() != null ? linkSource(build) : build.getBuildInfo().getId() == 0 ? text("") : errorText("missing URL")),
+                                      td(build.getTaskInfo() != null && build.getTaskInfo().getMethod() != null && build.getTaskInfo().getMethod().equals("maven") && build.getTaskRequest() != null && build.getTaskRequest().asMavenBuildRequest().getProperties() != null && build.getTaskRequest().asMavenBuildRequest() != null ? each(build.getTaskRequest().asMavenBuildRequest().getProperties().entrySet(), entry -> text(entry.getKey() + (entry.getValue() != null ? "=" + entry.getValue() + "; " : "; "))) : text("")),
+                                      td(build.getBuildInfo().getExtra() != null ? each(build.getBuildInfo().getExtra().entrySet(), entry -> text(entry.getKey() + (entry.getValue() != null ? "=" + entry.getValue() + "; " : "; "))) : text(""))
                                    ))
                                )
                             )), each(reports, report ->

@@ -44,8 +44,6 @@ public interface ClientSession {
 
     void enrichArchiveTypeInfo(List<KojiArchiveInfo> archiveInfos) throws KojiClientException;
 
-    void close();
-
     List<List<KojiArchiveInfo>> listArchives(List<KojiArchiveQuery> queries) throws KojiClientException;
 
     List<KojiBuildInfo> getBuild(List<KojiIdOrName> idsOrNames) throws KojiClientException;

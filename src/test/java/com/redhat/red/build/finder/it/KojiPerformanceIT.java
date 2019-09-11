@@ -45,7 +45,7 @@ public class KojiPerformanceIT extends AbstractKojiPerformanceIT {
     }
 
     @Test
-    public void testThreads() throws KojiClientException {
+    public void testThreads() {
         final Timer timer = REGISTRY.timer(MetricRegistry.name(KojiPerformanceIT.class, "threads"));
 
         for (int i = 0; i < NUM_LOOPS; i++) {

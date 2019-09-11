@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -120,10 +121,10 @@ public final class Main implements Callable<Void> {
     private boolean checksumOnly = ConfigDefaults.CHECKSUM_ONLY;
 
     @Option(names = {"--koji-hub-url"}, paramLabel = "URL", description = "Set Koji hub URL.")
-    private URL kojiHubURL;
+    private URL kojiHubURL = ConfigDefaults.KOJI_HUB_URL;
 
     @Option(names = {"--koji-web-url"}, paramLabel = "URL", description = "Set Koji web URL.")
-    private URL kojiWebURL;
+    private URL kojiWebURL = ConfigDefaults.KOJI_WEB_URL;
 
     @Option(names = {"--krb-ccache"}, paramLabel = "FILE", description = "Set location of Kerberos credential cache.")
     private File krbCCache;
@@ -172,7 +173,7 @@ public final class Main implements Callable<Void> {
         Main main = new Main();
 
         try {
-            Ansi ansi = System.getProperty("picocli.ansi") == null ? Ansi.ON : (Boolean.getBoolean("picocli.ansi") ? Ansi.ON : Ansi.OFF);
+            Ansi ansi = System.getProperty("picocli.ansi") == null ? Ansi.ON : Boolean.getBoolean("picocli.ansi") ? Ansi.ON : Ansi.OFF;
             CommandLine cmd = new CommandLine(main).setColorScheme(Help.defaultColorScheme(ansi));
             int exitCode = cmd.execute(args);
             System.exit(exitCode);
@@ -185,7 +186,7 @@ public final class Main implements Callable<Void> {
         }
     }
 
-    public BuildConfig setupBuildConfig() throws IOException {
+    private BuildConfig setupBuildConfig() throws IOException {
         ClassLoader cl = Main.class.getClassLoader();
         BuildConfig defaults = BuildConfig.load(cl);
         BuildConfig config;
@@ -313,12 +314,12 @@ public final class Main implements Callable<Void> {
         String location = new File(ConfigDefaults.CONFIG).getParent();
         Configuration configuration = new ConfigurationBuilder().expiration().lifespan(config.getCacheLifespan()).maxIdle(config.getCacheMaxIdle()).wakeUpInterval(-1L).persistence().passivation(false).addSingleFileStore().shared(false).preload(true).fetchPersistentState(true).purgeOnStartup(false).location(location).build();
 
-        config.getChecksumTypes().forEach(checksumType -> {
+        for (KojiChecksumType checksumType : checksumTypes) {
             cacheManager.defineConfiguration("files-" + checksumType, configuration);
             cacheManager.defineConfiguration("checksums-" + checksumType, configuration);
             cacheManager.defineConfiguration("checksums-pnc-" + checksumType, configuration);
             cacheManager.defineConfiguration("rpms-" + checksumType, configuration);
-        });
+        }
 
         cacheManager.defineConfiguration("builds", configuration);
         cacheManager.defineConfiguration("builds-pnc", configuration);
@@ -345,16 +346,14 @@ public final class Main implements Callable<Void> {
         Utils.shutdownAndAwaitTermination(pool);
     }
 
-    public void writeConfiguration(File configFile, BuildConfig config) {
+    private void writeConfiguration(File configFile, BuildConfig config) {
         if (!configFile.exists()) {
             File configDir = configFile.getParentFile();
 
             if (configDir != null) {
-                boolean created = configDir.mkdirs();
+                boolean ret = configDir.mkdirs();
 
-                if (!created) {
-                    LOGGER.debug("mkdirs returned {} for {}", created, configDir);
-                }
+                LOGGER.debug("mkdirs returned {}", ret);
             }
 
             try {
@@ -366,7 +365,7 @@ public final class Main implements Callable<Void> {
         }
     }
 
-    public List<File> createFileList(List<File> files) {
+    private List<File> createFileList(List<File> files) {
         List<File> inputs = new ArrayList<>();
 
         for (File file : files) {
@@ -441,18 +440,16 @@ public final class Main implements Callable<Void> {
 
         List<File> inputs = createFileList(files);
 
-        boolean created = outputDirectory.mkdirs();
+        boolean ret = outputDirectory.mkdirs();
 
-        if (!created) {
-            LOGGER.debug("mkdirs returned {} for {}", created, outputDirectory);
-        }
+        LOGGER.debug("mkdirs returned {}", ret);
 
-        LOGGER.info("Checksum type: {}", green(String.join(", ", config.getChecksumTypes().stream().map(String::valueOf).collect(Collectors.toSet()))));
+        LOGGER.info("Checksum type: {}", green(String.join(", ", checksumTypes.stream().map(String::valueOf).collect(Collectors.toSet()))));
 
         final Map<KojiChecksumType, MultiValuedMap<String, String>> checksumsFromFile = new EnumMap<>(KojiChecksumType.class);
 
         if (config.getUseChecksumsFile()) {
-            config.getChecksumTypes().forEach(checksumType -> {
+            for (KojiChecksumType checksumType : checksumTypes) {
                 File checksumFile = new File(outputDirectory, BuildFinder.getChecksumFilename(checksumType));
 
                 if (checksumFile.exists()) {
@@ -462,7 +459,16 @@ public final class Main implements Callable<Void> {
 
                     try {
                         Map<String, Collection<String>> subChecksums = JSONUtils.loadChecksumsFile(checksumFile);
-                        subChecksums.forEach((key, value) -> value.forEach(v -> checksumsFromFile.get(checksumType).put(key, v)));
+                        Set<Entry<String, Collection<String>>> entrySet = subChecksums.entrySet();
+
+                        for (Entry<String, Collection<String>> entry : entrySet) {
+                            String key = entry.getKey();
+                            Collection<String> values = entry.getValue();
+
+                            for (String value : values) {
+                                checksumsFromFile.get(checksumType).put(key, value);
+                            }
+                        }
                     } catch (IOException e) {
                         LOGGER.error("Error loading checksums file: {}", boldRed(e.getMessage()));
                         LOGGER.debug("Error", e);
@@ -472,7 +478,7 @@ public final class Main implements Callable<Void> {
                     LOGGER.error("File {} does not exist", boldRed(checksumFile));
                     System.exit(1);
                 }
-            });
+            }
         }
 
         Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = checksumsFromFile;
@@ -483,7 +489,7 @@ public final class Main implements Callable<Void> {
                     initCaches(config);
                 }
 
-                pool = Executors.newFixedThreadPool(config.getChecksumTypes().size());
+                pool = Executors.newFixedThreadPool(checksumTypes.size());
 
                 DistributionAnalyzer analyzer = new DistributionAnalyzer(inputs, config, cacheManager);
                 Future<Map<KojiChecksumType, MultiValuedMap<String, String>>> futureChecksum = pool.submit(analyzer);
@@ -496,7 +502,9 @@ public final class Main implements Callable<Void> {
                     System.exit(1);
                 }
 
-                checksums.keySet().forEach(checksumType -> {
+                Set<KojiChecksumType> keySet = checksums.keySet();
+
+                for (KojiChecksumType checksumType : keySet) {
                     try {
                         analyzer.outputToFile(checksumType, outputDirectory);
                     } catch (IOException e) {
@@ -504,7 +512,7 @@ public final class Main implements Callable<Void> {
                         LOGGER.debug("Error", e);
                         System.exit(1);
                     }
-                });
+                }
             } else {
                 int numChecksums = checksums.values().iterator().next().size();
 
@@ -570,7 +578,19 @@ public final class Main implements Callable<Void> {
                         finder = new BuildFinder(session, config, analyzer, cacheManager);
                     }
 
-                    finder.findBuilds(checksums.get(KojiChecksumType.md5).asMap());
+                    Map<Checksum, Collection<String>> newMap = new HashMap<>();
+
+                    for (KojiChecksumType checksumType : checksumTypes) {
+                        Map<String, Collection<String>> map = checksums.get(checksumType).asMap();
+
+                        for (Entry<String, Collection<String>> entry : map.entrySet()) {
+                            for (String filename : entry.getValue()) {
+                                newMap.put(new Checksum(checksumType, entry.getKey(), filename), entry.getValue());
+                            }
+                        }
+                    }
+
+                    finder.findBuilds(newMap);
 
                     finder.setOutputDirectory(outputDirectory);
                 }
@@ -579,7 +599,7 @@ public final class Main implements Callable<Void> {
                     initCaches(config);
                 }
 
-                pool = Executors.newFixedThreadPool(1 + config.getChecksumTypes().size());
+                pool = Executors.newFixedThreadPool(1 + checksumTypes.size());
 
                 DistributionAnalyzer analyzer = new DistributionAnalyzer(inputs, config, cacheManager);
                 Future<Map<KojiChecksumType, MultiValuedMap<String, String>>> futureChecksum = pool.submit(analyzer);
@@ -612,7 +632,9 @@ public final class Main implements Callable<Void> {
                         System.exit(1);
                     }
 
-                    checksums.keySet().forEach(checksumType -> {
+                    Set<KojiChecksumType> keySet = checksums.keySet();
+
+                    for (KojiChecksumType checksumType : keySet) {
                         try {
                             analyzer.outputToFile(checksumType, outputDirectory);
                         } catch (IOException e) {
@@ -620,7 +642,7 @@ public final class Main implements Callable<Void> {
                             LOGGER.debug("Error", e);
                             System.exit(1);
                         }
-                    });
+                    }
 
                     if (checksums.isEmpty()) {
                         LOGGER.warn("The list of checksums is empty");
@@ -660,14 +682,14 @@ public final class Main implements Callable<Void> {
 
             LOGGER.info("Generating {} reports", green(reports.size()));
 
-            reports.forEach(report -> {
+            for (Report report : reports) {
                 try {
                     report.outputText();
                 } catch (IOException e) {
                     LOGGER.error("Error writing {} report", boldRed(report.getName()));
                     LOGGER.debug("Report error", e);
                 }
-            });
+            }
 
             Report report = new HTMLReport(outputDirectory, files, buildList, config.getKojiWebURL(), config.getPncURL(), Collections.unmodifiableList(reports));
 
@@ -700,14 +722,14 @@ public final class Main implements Callable<Void> {
         }
 
         @Override
-        public String[] getVersion() throws Exception {
+        public String[] getVersion() {
             return new String[] {BuildFinder.getVersion() + " (SHA: " + BuildFinder.getScmRevision() + ")"};
         }
     }
 
     static class FilenameConverter implements ITypeConverter<String> {
         @Override
-        public String convert(String value) throws Exception {
+        public String convert(String value) {
             if (value.matches(".*[/:\"*?<>|]+.*")) {
                 throw new IllegalArgumentException("Invalid name");
             }
@@ -727,8 +749,11 @@ public final class Main implements Callable<Void> {
         rootLogger.setLevel(Level.DEBUG);
 
         LoggerContext loggerContext = rootLogger.getLoggerContext();
+        List<ch.qos.logback.classic.Logger> loggerList = loggerContext.getLoggerList();
 
-        loggerContext.getLoggerList().forEach(logger -> logger.setLevel(Level.DEBUG));
+        for (ch.qos.logback.classic.Logger logger : loggerList) {
+            logger.setLevel(Level.DEBUG);
+        }
 
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(loggerContext);

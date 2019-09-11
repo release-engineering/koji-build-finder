@@ -92,7 +92,16 @@ public class MockKojiClientSession implements ClientSession {
         try {
             GetArchiveTypesResponse response = parseCapturedMessage(GetArchiveTypesResponse.class, "getArchiveTypes-all.xml");
             Map<String, KojiArchiveType> types = new HashMap<>();
-            response.getArchiveTypes().forEach(at -> at.getExtensions().forEach(ext -> types.put(ext, at)));
+            List<KojiArchiveType> archiveTypes = response.getArchiveTypes();
+
+            for (KojiArchiveType at : archiveTypes) {
+                List<String> extensions = at.getExtensions();
+
+                for (String ext : extensions) {
+                    types.put(ext, at);
+                }
+            }
+
             return types;
         } catch (Exception e) {
             throw new KojiClientException("getArchiveTypesMap() failed", e);
@@ -140,32 +149,27 @@ public class MockKojiClientSession implements ClientSession {
     }
 
     @Override
-    public void enrichArchiveTypeInfo(List<KojiArchiveInfo> archiveInfos) throws KojiClientException {
+    public void enrichArchiveTypeInfo(List<KojiArchiveInfo> archiveInfos) {
 
     }
 
     @Override
-    public void close() {
-
-    }
-
-    @Override
-    public List<List<KojiArchiveInfo>> listArchives(List<KojiArchiveQuery> queries) throws KojiClientException {
+    public List<List<KojiArchiveInfo>> listArchives(List<KojiArchiveQuery> queries) {
         return null;
     }
 
     @Override
-    public List<KojiBuildInfo> getBuild(List<KojiIdOrName> idsOrNames) throws KojiClientException {
+    public List<KojiBuildInfo> getBuild(List<KojiIdOrName> idsOrNames) {
         return null;
     }
 
     @Override
-    public List<KojiRpmInfo> getRPM(List<KojiIdOrName> idsOrNames) throws KojiClientException {
+    public List<KojiRpmInfo> getRPM(List<KojiIdOrName> idsOrNames) {
         return null;
     }
 
     @Override
-    public List<KojiTaskInfo> getTaskInfo(List<Integer> taskIds, List<Boolean> requests) throws KojiClientException {
+    public List<KojiTaskInfo> getTaskInfo(List<Integer> taskIds, List<Boolean> requests) {
         return null;
     }
 
@@ -175,7 +179,7 @@ public class MockKojiClientSession implements ClientSession {
     }
 
     @Override
-    public List<List<KojiTagInfo>> listTags(List<KojiIdOrName> idsOrNames) throws KojiClientException {
+    public List<List<KojiTagInfo>> listTags(List<KojiIdOrName> idsOrNames) {
         return null;
     }
 }

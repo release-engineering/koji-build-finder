@@ -183,9 +183,11 @@ public class DistributionAnalyzerTest {
         assertTrue(config.getChecksumTypes().contains(KojiChecksumType.sha1));
         assertTrue(config.getChecksumTypes().contains(KojiChecksumType.sha256));
 
-        config.getChecksumTypes().forEach(checksumType -> assertEquals(25, checksums.get(checksumType).size()));
+        Set<KojiChecksumType> checksumTypes = config.getChecksumTypes();
 
-        config.getChecksumTypes().forEach(checksumType -> {
+        for (KojiChecksumType checksumType : checksumTypes) {
+            assertEquals(25, checksums.get(checksumType).size());
+
             for (Entry<String, String> entry : checksums.get(checksumType).entries()) {
                 String checksum = entry.getKey();
                 String filename = entry.getValue();
@@ -195,7 +197,8 @@ public class DistributionAnalyzerTest {
                 assertEquals(checksum, cksum.map(Checksum::getValue).orElse(null));
                 assertEquals(checksumType, cksum.map(Checksum::getType).orElse(null));
             }
-        });
+
+        }
 
         assertEquals(3, checksums.values().size());
         assertEquals(25 * checksums.values().size(), checksums.values().stream().mapToInt(MultiValuedMap::size).sum());

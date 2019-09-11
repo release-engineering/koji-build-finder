@@ -75,7 +75,7 @@ public final class PncUtils {
         buildInfo.setCompletionTime(Date.from(record.getEndTime()));
         buildInfo.setBuildState(KojiBuildState.COMPLETE);
         buildInfo.setOwnerName(record.getUsername());
-        buildInfo.setSource(((record.getScmRepoURL().startsWith("http") ? "git+" : "") + record.getScmRepoURL()) + (record.getScmRevision() != null ? "#" + record.getScmRevision() : ""));
+        buildInfo.setSource((record.getScmRepoURL().startsWith("http") ? "git+" : "") + record.getScmRepoURL() + (record.getScmRevision() != null ? "#" + record.getScmRevision() : ""));
 
         Map<String, Object> extra = new HashMap<>(5);
 

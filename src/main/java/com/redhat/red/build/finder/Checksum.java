@@ -82,7 +82,7 @@ public class Checksum {
             while ((len1 = input.read(buffer)) > 0) {
                 final int len = len1;
 
-                checksumTypes.forEach(checksumType -> {
+                for (KojiChecksumType checksumType : checksumTypes) {
                     CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
                         MessageDigest md = mds.get(checksumType);
                         md.update(buffer, 0, len);
@@ -90,7 +90,7 @@ public class Checksum {
                     });
 
                     futures.add(future);
-                });
+                }
 
                 for (CompletableFuture<Void> future : futures) {
                     future.join();
@@ -99,14 +99,14 @@ public class Checksum {
                 futures.clear();
             }
 
-            checksumTypes.forEach(checksumType -> {
+            for (KojiChecksumType checksumType : checksumTypes) {
                 CompletableFuture<Checksum> future = CompletableFuture.supplyAsync(() -> {
                     MessageDigest md = mds.get(checksumType);
                     return new Checksum(checksumType, Hex.encodeHexString(md.digest()), Utils.normalizePath(fo, root));
                 });
 
                 futures2.put(checksumType, future);
-            });
+            }
         } else {
             try (RpmInputStream in = new RpmInputStream(new BufferedInputStream(fo.getContent().getInputStream()))) {
                 for (KojiChecksumType checksumType : checksumTypes) {
@@ -208,5 +208,10 @@ public class Checksum {
 
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+    @Override
+    public String toString() {
+        return "Checksum [type=" + type + ", value=" + value + ", filename=" + filename + "]";
     }
 }

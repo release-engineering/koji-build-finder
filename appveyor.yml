@@ -13,12 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 version: '{build}'
 init:
 - ps: "Add-Type -AssemblyName System.IO.Compression.FileSystem\nif (!(Test-Path -Path \"C:\\apache-maven\" )) {\n        Write-Host \"Downloading Maven $env:MAVEN_VERSION\"\n        (new-object System.Net.WebClient).DownloadFile(\"https://repo1.maven.org/maven2/org/apache/maven/apache-maven/$env:MAVEN_VERSION/apache-maven-$env:MAVEN_VERSION-bin.zip\", \"C:\\apache-maven-$env:MAVEN_VERSION-bin.zip\") \n        [System.IO.Compression.ZipFile]::ExtractToDirectory(\"C:\\apache-maven-$env:MAVEN_VERSION-bin.zip\", \"C:\\apache-maven\")\n      }"
 environment:
-  MAVEN_VERSION: 3.6.1
+  MAVEN_VERSION: 3.6.2
   matrix:
   - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
 install:

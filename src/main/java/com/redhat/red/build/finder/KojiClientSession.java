@@ -181,7 +181,6 @@ public class KojiClientSession extends KojiClient implements ClientSession {
         return super.multiCall(Constants.GET_RPM, args, KojiRpmInfo.class, session);
     }
 
-
     @Override
     public List<List<KojiRpmInfo>> listBuildRPMs(List<KojiIdOrName> idsOrNames) throws KojiClientException {
         return helper.listBuildRPMs(idsOrNames, session);

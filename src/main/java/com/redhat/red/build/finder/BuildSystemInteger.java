@@ -15,7 +15,6 @@
  */
 package com.redhat.red.build.finder;
 
-import java.io.IOException;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -51,42 +50,50 @@ public class BuildSystemInteger implements Comparable<Object> {
 
     @Override
     public boolean equals(Object obj) {
+        boolean result;
+
         if (this == obj) {
-            return true;
+            result = true;
+        } else if (!(obj instanceof BuildSystemInteger)) {
+            result = false;
+        } else {
+            BuildSystemInteger other = (BuildSystemInteger) obj;
+            result = buildSystem.equals(other.buildSystem) && value.equals(other.value);
         }
 
-        if (!(obj instanceof BuildSystemInteger)) {
-            return false;
-        }
-
-        BuildSystemInteger other = (BuildSystemInteger) obj;
-
-        return buildSystem.equals(other.buildSystem) && value.equals(other.value);
+        return result;
     }
 
     @Override
     public String toString() {
+        String result;
+
         if (buildSystem == null) {
-            return String.valueOf(value);
+            result = String.valueOf(value);
+        } else {
+            result = value + ", " + buildSystem;
         }
 
-        return value + ", " + buildSystem;
+        return result;
     }
 
     @Override
     public int compareTo(Object obj) {
         BuildSystemInteger other = (BuildSystemInteger) obj;
+        int result;
 
         if (buildSystem.equals(other.buildSystem)) {
-            return value.compareTo(other.value);
+            result = value.compareTo(other.value);
+        } else {
+            result = buildSystem.compareTo(other.buildSystem);
         }
 
-        return buildSystem.compareTo(other.buildSystem);
+        return result;
     }
 
     public static class Deserializer extends KeyDeserializer {
         @Override
-        public Object deserializeKey(String key, DeserializationContext ctxt) throws IOException {
+        public Object deserializeKey(String key, DeserializationContext ctxt) {
             String[] t = key.split(", ");
             int value = Integer.parseInt(t[0]);
             BuildSystem buildSystem = BuildSystem.valueOf(t[1]);
