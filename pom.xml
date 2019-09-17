@@ -63,7 +63,7 @@
     <version.commons-codec>1.13</version.commons-codec>
     <version.commons-io>2.6</version.commons-io>
     <version.com.fasterxml.jackson.core>2.9.9</version.com.fasterxml.jackson.core>
-    <version.com.fasterxml.jackson.core.jackson-databind>2.9.9.3</version.com.fasterxml.jackson.core.jackson-databind>
+    <version.com.fasterxml.jackson.core.jackson-databind>2.10.0.pr2</version.com.fasterxml.jackson.core.jackson-databind>
     <version.com.github.spotbugs>3.1.12</version.com.github.spotbugs>
     <version.com.github.stefanbirkner>1.19.0</version.com.github.stefanbirkner>
     <version.com.google.guava>28.1-jre</version.com.google.guava>
