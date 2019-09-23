@@ -63,11 +63,26 @@ public class BuildConfig {
     @JsonProperty("koji-hub-url")
     private URL kojiHubURL;
 
+    @JsonProperty("koji-multicall-size")
+    private Integer kojiMulticallSize;
+
+    @JsonProperty("koji-num-threads")
+    private Integer kojiNumThreads;
+
     @JsonProperty("koji-web-url")
     private URL kojiWebURL;
 
     @JsonProperty("output-directory")
     private String outputDirectory;
+
+    @JsonProperty("pnc-connection-timeout")
+    private Long pncConnectionTimeout;
+
+    @JsonProperty("pnc-partition-size")
+    private Integer pncPartitionSize;
+
+    @JsonProperty("pnc-read-timeout")
+    private Long pncReadTimeout;
 
     @JsonProperty("pnc-url")
     private URL pncURL;
@@ -168,7 +183,7 @@ public class BuildConfig {
         this.buildSystems = buildSystems;
     }
 
-    public long getCacheLifespan() {
+    public Long getCacheLifespan() {
         if (cacheLifespan == null) {
             cacheLifespan = ConfigDefaults.CACHE_LIFESPAN;
         }
@@ -176,11 +191,11 @@ public class BuildConfig {
         return cacheLifespan;
     }
 
-    public void setCacheLifespan(long cacheLifespan) {
+    public void setCacheLifespan(Long cacheLifespan) {
         this.cacheLifespan = cacheLifespan;
     }
 
-    public long getCacheMaxIdle() {
+    public Long getCacheMaxIdle() {
         if (cacheMaxIdle == null) {
             cacheMaxIdle = ConfigDefaults.CACHE_MAX_IDLE;
         }
@@ -188,11 +203,11 @@ public class BuildConfig {
         return cacheMaxIdle;
     }
 
-    public void setCacheMaxIdle(long cacheMaxIdle) {
+    public void setCacheMaxIdle(Long cacheMaxIdle) {
         this.cacheMaxIdle = cacheMaxIdle;
     }
 
-    public boolean getChecksumOnly() {
+    public Boolean getChecksumOnly() {
         if (checksumOnly == null) {
             checksumOnly = ConfigDefaults.CHECKSUM_ONLY;
         }
@@ -200,7 +215,7 @@ public class BuildConfig {
         return checksumOnly;
     }
 
-    public void setChecksumOnly(boolean checksumOnly) {
+    public void setChecksumOnly(Boolean checksumOnly) {
         this.checksumOnly = checksumOnly;
     }
 
@@ -216,7 +231,7 @@ public class BuildConfig {
         this.checksumTypes = checksumTypes;
     }
 
-    public boolean getDisableCache() {
+    public Boolean getDisableCache() {
         if (disableCache == null) {
             disableCache = ConfigDefaults.DISABLE_CACHE;
         }
@@ -224,11 +239,11 @@ public class BuildConfig {
         return disableCache;
     }
 
-    public void setDisableCache(boolean disableCache) {
+    public void setDisableCache(Boolean disableCache) {
         this.disableCache = disableCache;
     }
 
-    public boolean getDisableRecursion() {
+    public Boolean getDisableRecursion() {
         if (disableRecursion == null) {
             disableRecursion = ConfigDefaults.DISABLE_RECURSION;
         }
@@ -236,7 +251,7 @@ public class BuildConfig {
         return disableRecursion;
     }
 
-    public void setDisableRecursion(boolean disableRecursion) {
+    public void setDisableRecursion(Boolean disableRecursion) {
         this.disableRecursion = disableRecursion;
     }
 
@@ -258,6 +273,30 @@ public class BuildConfig {
         }
 
         return kojiHubURL;
+    }
+
+    public int getKojiMulticallSize() {
+        if (kojiMulticallSize == null) {
+            kojiMulticallSize = ConfigDefaults.KOJI_MULTICALL_SIZE;
+        }
+
+        return kojiMulticallSize;
+    }
+
+    public void setKojiMulticallSize(Integer kojiMulticallSize) {
+        this.kojiMulticallSize = kojiMulticallSize;
+    }
+
+    public Integer getKojiNumThreads() {
+        if (kojiNumThreads == null) {
+            kojiNumThreads = ConfigDefaults.KOJI_NUM_THREADS;
+        }
+
+        return kojiNumThreads;
+    }
+
+    public void setKojiNumThreads(Integer kojiNumThreads) {
+        this.kojiNumThreads = kojiNumThreads;
     }
 
     public void setKojiHubURL(URL kojiHubURL) {
@@ -288,6 +327,42 @@ public class BuildConfig {
         this.outputDirectory = outputDirectory;
     }
 
+    public Long getPncConnectionTimeout() {
+        if (pncConnectionTimeout == null) {
+            pncConnectionTimeout = ConfigDefaults.PNC_CONNECTION_TIMEOUT;
+        }
+
+        return pncConnectionTimeout;
+    }
+
+    public void setPncConnectionTimeout(Long pncConnectionTimeout) {
+        this.pncConnectionTimeout = pncConnectionTimeout;
+    }
+
+    public Integer getPncPartitionSize() {
+        if (pncPartitionSize == null) {
+            pncPartitionSize = ConfigDefaults.PNC_PARTITION_SIZE;
+        }
+
+        return pncPartitionSize;
+    }
+
+    public void setPncPartitionSize(Integer pncPartitionSize) {
+        this.pncPartitionSize = pncPartitionSize;
+    }
+
+    public Long getPncReadTimeout() {
+        if (pncReadTimeout == null) {
+            pncReadTimeout = ConfigDefaults.PNC_READ_TIMEOUT;
+        }
+
+        return pncReadTimeout;
+    }
+
+    public void setPncReadTimeout(Long pncReadTimeout) {
+        this.pncReadTimeout = pncReadTimeout;
+    }
+
     public URL getPncURL() {
         if (pncURL == null) {
             pncURL = ConfigDefaults.PNC_URL;
@@ -300,7 +375,7 @@ public class BuildConfig {
         this.pncURL = pncURL;
     }
 
-    public boolean getUseBuildsFile() {
+    public Boolean getUseBuildsFile() {
         if (useBuildsFile == null) {
             useBuildsFile = ConfigDefaults.USE_BUILDS_FILE;
         }
@@ -308,12 +383,12 @@ public class BuildConfig {
         return useBuildsFile;
     }
 
-    public void setUseBuildsFile(boolean useBuildsFile) {
+    public void setUseBuildsFile(Boolean useBuildsFile) {
         this.useBuildsFile = useBuildsFile;
     }
 
 
-    public boolean getUseChecksumsFile() {
+    public Boolean getUseChecksumsFile() {
         if (useChecksumsFile == null) {
             useChecksumsFile = ConfigDefaults.USE_CHECKSUMS_FILE;
         }
@@ -321,7 +396,7 @@ public class BuildConfig {
         return useChecksumsFile;
     }
 
-    public void setUseChecksumsFile(boolean useChecksumsFile) {
+    public void setUseChecksumsFile(Boolean useChecksumsFile) {
         this.useChecksumsFile = useChecksumsFile;
     }
 
@@ -338,8 +413,13 @@ public class BuildConfig {
             + ", \n\tdisableCache=" + getDisableCache()
             + ", \n\texcludes=" + getExcludes()
             + ", \n\tkojiHubURL=" + getKojiHubURL()
+            + ", \n\tkojiMulticallSize=" + getKojiMulticallSize()
+            + ", \n\tkojiNumThreads=" + getKojiNumThreads()
             + ", \n\tkojiWebURL=" + getKojiWebURL()
             + ", \n\toutputDirectory=" + getOutputDirectory()
+            + ", \n\tpncConnectionTimeout=" + getPncConnectionTimeout()
+            + ", \n\tpncPartitionSize=" + getPncPartitionSize()
+            + ", \n\tpncReadTimeout=" + getPncReadTimeout()
             + ", \n\tpncURL=" + getPncURL()
             + ", \n\tuseBuildsFile=" + getUseBuildsFile()
             + ", \n\tuseChecksumsFile='" + getUseChecksumsFile()

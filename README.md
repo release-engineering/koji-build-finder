@@ -61,6 +61,10 @@ To see the available options, execute the command `java -jar target/koji-build-f
       -h, --help                 Show this help message and exit.
       -k, --checksum-only        Only checksum files and do not find builds.
           --koji-hub-url=URL     Set Koji hub URL.
+          --koji-multicall-size=INT
+                                 Set Koji multicall size.
+          --koji-num-threads=INT
+                                 Set Koji num threads.
           --koji-web-url=URL     Set Koji web URL.
           --krb-ccache=FILE      Set location of Kerberos credential cache.
           --krb-keytab=FILE      Set location of Kerberos keytab.
@@ -71,6 +75,12 @@ To see the available options, execute the command `java -jar target/koji-build-f
       -o, --output-directory=FILE
                                  Set output directory.
                                    Default: .
+          --pnc-connection-timeout=LONG
+                                 Set Pnc connection timeout.
+          --pnc-partition-size=INT
+                                 Set Pnc partition size.
+          --pnc-read-timeout=LONG
+                                 Set Pnc read timeout.
           --pnc-url=URL          Set Pnc URL.
       -q, --quiet                Disable all logging.
       -t, --checksum-type=CHECKSUM
@@ -120,7 +130,12 @@ The configuration file is in JSON format. The default configuration file, `confi
       "disable-cache" : false,
       "disable-recursion" : false,
       "excludes" : [ "^(?!.*/pom\\.xml$).*/.*\\.xml$" ],
+      "koji-multicall-size" : 8,
+      "koji-num-threads" : 12,
       "output-directory" : ".",
+      "pnc-connection-timeout" : -1,
+      "pnc-partition-size" : 18,
+      "pnc-read-timeout" : -1,
       "use-builds-file" : false,
       "use-checksums-file" : false
     }
@@ -145,7 +160,17 @@ The `disable-recursion` option disables recursion when examining archives.
 
 The `excludes` option is list of regular expression patterns. Any paths that match any of these patterns will be excluded during the build-lookup stage search.
 
-The `koji-hub-url` and `koji-web-url` configuration options must be set to valid URLs for your particular network.
+The `koji-multicall-size` option sets the Koji multicall size.
+
+The `koji-num-threads` option sets the number of Koji threads.
+
+The `koji-hub-url` and `koji-web-url` options must be set to valid URLs for your particular network.
+
+The `pnc-connection-timeout` option sets the Pnc connection timeout.
+
+The `pnc-partition-size` option sets the Pnc partition size.
+
+The `pnc-read-timeout` option sets the Pnc read timeout.
 
 The `pnc-url` option must be set to a valid URL for your particular network if you want Pnc support.
 

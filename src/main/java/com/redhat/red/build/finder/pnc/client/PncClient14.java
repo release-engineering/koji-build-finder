@@ -16,13 +16,13 @@
 package com.redhat.red.build.finder.pnc.client;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import com.redhat.red.build.finder.BuildConfig;
 import org.apache.commons.collections4.ListUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,35 +51,17 @@ import com.redhat.red.build.finder.pnc.client.model.ProductVersion;
 public class PncClient14 {
     private static final Logger LOGGER = LoggerFactory.getLogger(PncClient14.class);
 
-    private URL url;
+    private BuildConfig config;
 
     /**
      * Create a new PncClient14 object
      *
-     * Default connection timeout is 10000 ms
-     * Default read timeout is 60000 ms
-     *
-     * @param url: Base url of PNC app e.g http://orch.is.here/
+     * @param config the build configuration
      */
-    public PncClient14(URL url) {
+    public PncClient14(BuildConfig config) {
+        this.config = config;
         unirestSetup();
-        this.url = url;
-    }
-
-    /**
-     * Create a new PncClient14 object
-     *
-     * Default connection timeout is 10000 ms
-     * Default read timeout is 60000 ms
-     *
-     * @param url: Base url of PNC app e.g http://orch.is.here/
-     * @param connectionTimeout specify new connection timeout in milliseconds
-     * @param readTimeout specify new socket/read timeout in milliseconds
-     *
-     */
-    public PncClient14(URL url, int connectionTimeout, int readTimeout) {
-        this(url);
-        Unirest.setTimeouts(connectionTimeout, readTimeout);
+        Unirest.setTimeouts(config.getPncConnectionTimeout(), config.getPncReadTimeout());
     }
 
     /**
@@ -144,7 +126,7 @@ public class PncClient14 {
     }
 
     private String getArtifactsUrl(String key, String value) {
-        return url + "/pnc-rest/rest/artifacts" + "?" + key + "=" + value;
+        return config.getPncURL() + "/pnc-rest/rest/artifacts" + "?" + key + "=" + value;
     }
 
     private List<Artifact> getArtifacts(String key, String value) throws PncClientException {
@@ -166,7 +148,7 @@ public class PncClient14 {
 
     private List<List<Artifact>> getArtifactsSplit(List<String> values, String key) throws PncClientException {
         int size = values.size();
-        int partitionSize = 18;
+        int partitionSize = config.getPncPartitionSize();
         List<List<Artifact>> result = new ArrayList<>(size);
         List<List<String>> splitValues = ListUtils.partition(values, partitionSize);
 
@@ -199,8 +181,9 @@ public class PncClient14 {
 
         List<List<Artifact>> artifactsList = new ArrayList<>(values.size());
         List<Future<HttpResponse<PageParameterArtifact>>> futures = new ArrayList<>(values.size());
+        int size = keys.size();
 
-        for (int i = 0; i < keys.size(); i++) {
+        for (int i = 0; i < size; i++) {
             String key = keys.get(i);
             String value = values.get(i);
             String urlRequest = getArtifactsUrl(key, value);
@@ -230,7 +213,7 @@ public class PncClient14 {
     }
 
     private String getBuiltArtifactsByIdUrl(int id) {
-        return url + "/pnc-rest/rest/build-records/" + id + "/built-artifacts";
+        return config.getPncURL() + "/pnc-rest/rest/build-records/" + id + "/built-artifacts";
     }
 
     /**
@@ -289,19 +272,19 @@ public class PncClient14 {
     }
 
     private String getBuildRecordByIdUrl(int id) {
-        return url + "/pnc-rest/rest/build-records/" + id;
+        return config.getPncURL() + "/pnc-rest/rest/build-records/" + id;
     }
 
     private String getBuildRecordPushResultByIdUrl(int id) {
-        return url + "/pnc-rest/rest/build-record-push/status/" + id;
+        return config.getPncURL() + "/pnc-rest/rest/build-record-push/status/" + id;
     }
 
     private String getBuildConfigurationByIdUrl(int id) {
-        return url + "/pnc-rest/rest/build-configurations/" + id;
+        return config.getPncURL() + "/pnc-rest/rest/build-configurations/" + id;
     }
 
     private String getProductVersionByIdUrl(int id) {
-        return url + "/pnc-rest/rest/product-versions/" + id;
+        return config.getPncURL() + "/pnc-rest/rest/product-versions/" + id;
     }
 
     /**
@@ -526,9 +509,5 @@ public class PncClient14 {
         }
 
         return buildConfigurationList;
-    }
-
-    public URL getUrl() {
-        return url;
     }
 }

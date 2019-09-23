@@ -26,6 +26,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 
+import com.redhat.red.build.finder.BuildConfig;
 import com.redhat.red.build.finder.pnc.client.PncClient14;
 import com.redhat.red.build.finder.pnc.client.PncClientException;
 import com.redhat.red.build.finder.pnc.client.model.Artifact;
@@ -41,8 +42,8 @@ public class PncClient14IT {
     private static final Logger LOGGER = LoggerFactory.getLogger(PncClient14IT.class);
     private static final String PROPERTY = "com.redhat.red.build.finder.it.pnc.url";
     private static final String PNC_URL = System.getProperty(PROPERTY);
-    private static final int CONNECTION_TIMEOUT = 300000;
-    private static final int READ_TIMEOUT = 900000;
+    private static final Long CONNECTION_TIMEOUT = 300000L;
+    private static final Long READ_TIMEOUT = 900000L;
 
     @Before
     public void verify() {
@@ -51,19 +52,30 @@ public class PncClient14IT {
 
     @Test
     public void testDefaultPncClient14() throws PncClientException, MalformedURLException {
-        PncClient14 client = new PncClient14(new URL(PNC_URL));
+        BuildConfig config = new BuildConfig();
+        URL pncUrl = new URL(PNC_URL);
+        config.setPncURL(pncUrl);
+        PncClient14 client = new PncClient14(config);
         getAnArtifactAndBuildRecord(client);
     }
 
     @Test
     public void testPncClient14WithTimeouts() throws PncClientException, MalformedURLException {
-        PncClient14 client = new PncClient14(new URL(PNC_URL), CONNECTION_TIMEOUT, READ_TIMEOUT);
+        BuildConfig config = new BuildConfig();
+        URL pncUrl = new URL(PNC_URL);
+        config.setPncURL(pncUrl);
+        config.setPncConnectionTimeout(CONNECTION_TIMEOUT);
+        config.setPncReadTimeout(READ_TIMEOUT);
+        PncClient14 client = new PncClient14(config);
         getAnArtifactAndBuildRecord(client);
     }
 
     @Test
     public void testReturnEmptyListIfNoMatchingSha() throws PncClientException, MalformedURLException {
-        PncClient14 client = new PncClient14(new URL(PNC_URL));
+        BuildConfig config = new BuildConfig();
+        URL pncUrl = new URL(PNC_URL);
+        config.setPncURL(pncUrl);
+        PncClient14 client = new PncClient14(config);
         List<Artifact> artifactsMd5 = client.getArtifactsByMd5("do-not-exist");
         assertNotNull(artifactsMd5);
         assertTrue(artifactsMd5.isEmpty());
@@ -79,7 +91,10 @@ public class PncClient14IT {
 
     @Test
     public void testReturnNullIfNoMatchingBuildRecord() throws PncClientException, MalformedURLException {
-        PncClient14 client = new PncClient14(new URL(PNC_URL));
+        BuildConfig config = new BuildConfig();
+        URL pncUrl = new URL(PNC_URL);
+        config.setPncURL(pncUrl);
+        PncClient14 client = new PncClient14(config);
         BuildRecord record = client.getBuildRecordById(-1);
         assertNull(record);
     }

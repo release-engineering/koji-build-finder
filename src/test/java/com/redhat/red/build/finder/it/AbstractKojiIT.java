@@ -81,7 +81,7 @@ public abstract class AbstractKojiIT {
 
         final SimpleKojiConfig kojiConfig = new SimpleKojiConfigBuilder().withKojiURL(kojiHubURL.toExternalForm()).withMaxConnections(MAX_CONNECTIONS).build();
         this.session = new KojiClientSession(kojiConfig, new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT), REGISTRY);
-        this.pncclient = new PncClient14(pncURL);
+        this.pncclient = new PncClient14(config);
         this.reporter = Slf4jReporter.forRegistry(REGISTRY).outputTo(LOGGER).convertRatesTo(TimeUnit.SECONDS).convertDurationsTo(TimeUnit.SECONDS).build();
 
         reporter.start(600, TimeUnit.SECONDS);

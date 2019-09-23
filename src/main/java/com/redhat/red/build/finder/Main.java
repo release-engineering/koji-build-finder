@@ -106,7 +106,7 @@ public final class Main implements Callable<Void> {
     private File configFile = new File(ConfigDefaults.CONFIG);
 
     @Option(names = {"-d", "--debug"}, description = "Enable debug logging.")
-    private boolean debug = false;
+    private Boolean debug = Boolean.FALSE;
 
     @Option(names = {"--disable-cache"}, description = "Disable local cache.")
     private boolean disableCache = ConfigDefaults.DISABLE_CACHE;
@@ -122,6 +122,12 @@ public final class Main implements Callable<Void> {
 
     @Option(names = {"--koji-hub-url"}, paramLabel = "URL", description = "Set Koji hub URL.")
     private URL kojiHubURL = ConfigDefaults.KOJI_HUB_URL;
+
+    @Option(names = {"--koji-multicall-size"}, paramLabel = "INT", description = "Set Koji multicall size.")
+    private Integer kojiMulticallSize = ConfigDefaults.KOJI_MULTICALL_SIZE;
+
+    @Option(names = {"--koji-num-threads"}, paramLabel = "INT", description = "Set Koji num threads.")
+    private Integer kojiNumThreads = ConfigDefaults.KOJI_NUM_THREADS;
 
     @Option(names = {"--koji-web-url"}, paramLabel = "URL", description = "Set Koji web URL.")
     private URL kojiWebURL = ConfigDefaults.KOJI_WEB_URL;
@@ -144,20 +150,29 @@ public final class Main implements Callable<Void> {
     @Option(names = {"-o", "--output-directory"}, paramLabel = "FILE", description = "Set output directory.")
     private File outputDirectory = new File(ConfigDefaults.OUTPUT_DIR);
 
+    @Option(names = {"--pnc-connection-timeout"}, paramLabel = "LONG", description = "Set Pnc connection timeout.")
+    private Long pncConnectionTimeout = ConfigDefaults.PNC_CONNECTION_TIMEOUT;
+
+    @Option(names = {"--pnc-partition-size"}, paramLabel = "INT", description = "Set Pnc partition size.")
+    private Integer pncPartitionSize = ConfigDefaults.PNC_PARTITION_SIZE;
+
+    @Option(names = {"--pnc-read-timeout"}, paramLabel = "LONG", description = "Set Pnc read timeout.")
+    private Long pncReadTimeout = ConfigDefaults.PNC_READ_TIMEOUT;
+
     @Option(names = {"--pnc-url"}, paramLabel = "URL", description = "Set Pnc URL.")
     private URL pncURL = ConfigDefaults.PNC_URL;
 
     @Option(names = {"-q", "--quiet"}, description = "Disable all logging.")
-    private boolean quiet = false;
+    private Boolean quiet = Boolean.FALSE;
 
     @Option(names = {"-t", "--checksum-type"}, paramLabel = "CHECKSUM", description = "Add a checksum type (${COMPLETION-CANDIDATES}).")
     private Set<KojiChecksumType> checksumTypes = ConfigDefaults.CHECKSUM_TYPES;
 
     @Option(names = {"--use-builds-file"}, description = "Use builds file.")
-    private boolean useBuildsFile = ConfigDefaults.USE_BUILDS_FILE;
+    private Boolean useBuildsFile = ConfigDefaults.USE_BUILDS_FILE;
 
     @Option(names = {"--use-checksums-file"}, description = "Use checksums file.")
-    private boolean useChecksumsFile = ConfigDefaults.USE_CHECKSUMS_FILE;
+    private Boolean useChecksumsFile = ConfigDefaults.USE_CHECKSUMS_FILE;
 
     @Option(names = {"-x", "--exclude"}, paramLabel = "PATTERN", description = "Add a pattern to exclude from build lookup.")
     private List<Pattern> excludes = ConfigDefaults.EXCLUDES;
@@ -261,6 +276,14 @@ public final class Main implements Callable<Void> {
             config.setKojiHubURL(kojiHubURL);
         }
 
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--koji-multicall-size")) {
+            config.setKojiMulticallSize(kojiMulticallSize);
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--koji-num-threads")) {
+            config.setKojiNumThreads(kojiNumThreads);
+        }
+
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("--koji-web-url")) {
             config.setKojiWebURL(kojiWebURL);
         }
@@ -283,6 +306,18 @@ public final class Main implements Callable<Void> {
 
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("--krb-password")) {
             LOGGER.debug("Read Kerberos password");
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--pnc-connection-timeout")) {
+            config.setPncConnectionTimeout(pncConnectionTimeout);
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--pnc-partition-size")) {
+            config.setPncPartitionSize(pncPartitionSize);
+        }
+
+        if (commandSpec.commandLine().getParseResult().hasMatchedOption("--pnc-read-timeout")) {
+            config.setPncReadTimeout(pncReadTimeout);
         }
 
         if (commandSpec.commandLine().getParseResult().hasMatchedOption("--pnc-url")) {
@@ -572,7 +607,7 @@ public final class Main implements Callable<Void> {
                     analyzer.setChecksums(checksums);
 
                     if (config.getPncURL() != null) {
-                        PncClient14 pncclient = new PncClient14(config.getPncURL());
+                        PncClient14 pncclient = new PncClient14(config);
                         finder = new BuildFinder(session, config, analyzer, cacheManager, pncclient);
                     } else {
                         finder = new BuildFinder(session, config, analyzer, cacheManager);
@@ -614,7 +649,7 @@ public final class Main implements Callable<Void> {
                     }
 
                     if (config.getPncURL() != null) {
-                        PncClient14 pncclient = new PncClient14(config.getPncURL());
+                        PncClient14 pncclient = new PncClient14(config);
                         finder = new BuildFinder(session, config, analyzer, cacheManager, pncclient);
                     } else {
                         finder = new BuildFinder(session, config, analyzer, cacheManager);

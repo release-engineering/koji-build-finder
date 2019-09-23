@@ -968,11 +968,11 @@ public class BuildFinder implements Callable<Map<BuildSystemInteger, KojiBuild>>
             }
         }
 
-        final int numThreads = 12;
+        final int numThreads = config.getKojiNumThreads();
         ExecutorService pool = Executors.newFixedThreadPool(numThreads);
         int numChecksums = checksums.size();
         List<List<KojiArchiveInfo>> archives = new ArrayList<>(numChecksums);
-        final int chunkSize = 8;
+        final int chunkSize = config.getKojiMulticallSize();
         List<List<Entry<Checksum, Collection<String>>>> chunks = ListUtils.partition(checksums, chunkSize);
         int numChunks = chunks.size();
         List<KojiArchiveQuery> allQueries = new ArrayList<>(numChecksums);

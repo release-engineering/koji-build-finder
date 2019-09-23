@@ -56,15 +56,25 @@ public abstract class ConfigDefaults {
 
     public static final Boolean DISABLE_CACHE = Boolean.FALSE;
 
-    public static final boolean DISABLE_RECURSION = Boolean.FALSE;
+    public static final Boolean DISABLE_RECURSION = Boolean.FALSE;
 
     public static final List<Pattern> EXCLUDES = Collections.unmodifiableList(Collections.singletonList(Pattern.compile("^(?!.*/pom\\.xml$).*/.*\\.xml$")));
 
     public static final URL KOJI_HUB_URL = null;
 
+    public static final Integer KOJI_MULTICALL_SIZE = 8;
+
+    public static final Integer KOJI_NUM_THREADS = 12;
+
     public static final URL KOJI_WEB_URL = null;
 
     public static final String OUTPUT_DIR = ".";
+
+    public static final Long PNC_CONNECTION_TIMEOUT = -1L;
+
+    public static final Integer PNC_PARTITION_SIZE = 18;
+
+    public static final Long PNC_READ_TIMEOUT = -1L;
 
     public static final URL PNC_URL = null;
 
