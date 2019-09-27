@@ -63,8 +63,9 @@ To see the available options, execute the command `java -jar target/koji-build-f
           --koji-hub-url=URL     Set Koji hub URL.
           --koji-multicall-size=INT
                                  Set Koji multicall size.
-          --koji-num-threads=INT
-                                 Set Koji num threads.
+                                   Default: 8
+          --koji-num-threads=INT Set Koji num threads.
+                                   Default: 12
           --koji-web-url=URL     Set Koji web URL.
           --krb-ccache=FILE      Set location of Kerberos credential cache.
           --krb-keytab=FILE      Set location of Kerberos keytab.
@@ -77,10 +78,13 @@ To see the available options, execute the command `java -jar target/koji-build-f
                                    Default: .
           --pnc-connection-timeout=LONG
                                  Set Pnc connection timeout.
+                                   Default: -1
           --pnc-partition-size=INT
                                  Set Pnc partition size.
+                                   Default: 18
           --pnc-read-timeout=LONG
                                  Set Pnc read timeout.
+                                   Default: -1
           --pnc-url=URL          Set Pnc URL.
       -q, --quiet                Disable all logging.
       -t, --checksum-type=CHECKSUM
@@ -126,7 +130,7 @@ The configuration file is in JSON format. The default configuration file, `confi
       "cache-lifespan" : 3600000,
       "cache-max-idle" : 3600000,
       "checksum-only" : false,
-      "checksum-type" : [ "sha256", "sha1", "md5" ],
+      "checksum-type" : [ "sha1", "sha256", "md5" ],
       "disable-cache" : false,
       "disable-recursion" : false,
       "excludes" : [ "^(?!.*/pom\\.xml$).*/.*\\.xml$" ],
