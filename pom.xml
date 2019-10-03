@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.redhat.rcm</groupId>
     <artifactId>redhat-releng-tools</artifactId>
-    <version>6</version>
+    <version>7</version>
   </parent>
 
   <groupId>com.redhat.red.build</groupId>
@@ -69,7 +69,7 @@
     <version.com.j2html>1.4.0</version.com.j2html>
     <version.com.mashape.unirest>1.4.9</version.com.mashape.unirest>
     <version.com.mycila>3.0</version.com.mycila>
-    <version.com.puppycrawl.tools>8.24</version.com.puppycrawl.tools>
+    <version.com.puppycrawl.tools>8.25</version.com.puppycrawl.tools>
     <version.com.redhat.red.build.kojiji>2.12</version.com.redhat.red.build.kojiji>
     <version.info.picocli>4.0.4</version.info.picocli>
     <version.io.dropwizard.metrics>4.1.0</version.io.dropwizard.metrics>
@@ -116,7 +116,7 @@
     <version.org.jacoco>0.8.4</version.org.jacoco>
     <version.org.jboss.byteman>4.0.7</version.org.jboss.byteman>
     <version.org.json.json>20190722</version.org.json.json>
-    <version.org.ow2.asm>7.1</version.org.ow2.asm>
+    <version.org.ow2.asm>7.2</version.org.ow2.asm>
     <version.org.slf4j>1.7.28</version.org.slf4j>
   </properties>
 
