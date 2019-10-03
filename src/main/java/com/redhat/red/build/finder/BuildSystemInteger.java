@@ -25,12 +25,12 @@ public class BuildSystemInteger implements Comparable<Object> {
 
     private BuildSystem buildSystem;
 
-    BuildSystemInteger(Integer value) {
+    public BuildSystemInteger(int value) {
         this.value = value;
         this.buildSystem = BuildSystem.none;
     }
 
-    BuildSystemInteger(int value, BuildSystem buildSystem) {
+    public BuildSystemInteger(int value, BuildSystem buildSystem) {
         this.value = value;
         this.buildSystem = buildSystem;
     }
