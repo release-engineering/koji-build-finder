@@ -73,7 +73,6 @@
     <version.com.redhat.red.build.kojiji>2.12</version.com.redhat.red.build.kojiji>
     <version.info.picocli>4.0.4</version.info.picocli>
     <version.io.dropwizard.metrics>4.1.0</version.io.dropwizard.metrics>
-    <version.io.reactivex.rxjava2>2.2.12</version.io.reactivex.rxjava2>
     <version.junit>4.12</version.junit>
     <version.net.sourceforge.pmd>6.18.0</version.net.sourceforge.pmd>
     <version.org.apache.commons.commons-collections4>4.4</version.org.apache.commons.commons-collections4>
@@ -215,12 +214,6 @@
         <groupId>io.dropwizard.metrics</groupId>
         <artifactId>metrics-core</artifactId>
         <version>${version.io.dropwizard.metrics}</version>
-      </dependency>
-      <!-- Required dependency for infinispan-core -->
-      <dependency>
-        <groupId>io.reactivex.rxjava2</groupId>
-        <artifactId>rxjava</artifactId>
-        <version>${version.io.reactivex.rxjava2}</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
@@ -376,10 +369,6 @@
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-commons</artifactId>
           </exclusion>
-          <exclusion>
-            <groupId>io.reactivex.rxjava2</groupId>
-            <artifactId>rxjava</artifactId>
-          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -472,11 +461,6 @@
     <dependency>
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.reactivex.rxjava2</groupId>
-      <artifactId>rxjava</artifactId>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
