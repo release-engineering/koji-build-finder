@@ -50,15 +50,16 @@ public class BuildFinderTest {
         BuildConfig config = new BuildConfig();
 
         config.setChecksumTypes(EnumSet.of(checksumType));
+        config.setOutputDirectory(folder.getAbsolutePath());
 
         DistributionAnalyzer da = new DistributionAnalyzer(Collections.singletonList(new File(target.getAbsolutePath())), config);
         da.checksumFiles();
-        da.outputToFile(checksumType, folder);
+        da.outputToFile(checksumType);
 
         File[] file = folder.listFiles();
 
         assertTrue(file != null && file.length == 1);
-        assertEquals(file[0].getCanonicalPath(), da.getChecksumFile(checksumType, folder).getCanonicalPath());
+        assertEquals(file[0].getCanonicalPath(), da.getChecksumFile(checksumType).getCanonicalPath());
     }
 
     @Test
@@ -69,12 +70,13 @@ public class BuildFinderTest {
         BuildConfig config = new BuildConfig();
 
         config.setChecksumTypes(EnumSet.of(checksumType));
+        config.setOutputDirectory(folder.getAbsolutePath());
 
         DistributionAnalyzer da = new DistributionAnalyzer(Collections.singletonList(new File(target.getAbsolutePath())), config);
         da.checksumFiles();
-        da.outputToFile(checksumType, folder);
+        da.outputToFile(checksumType);
 
-        Map<String, Collection<String>> checksums = JSONUtils.loadChecksumsFile(da.getChecksumFile(checksumType, folder));
+        Map<String, Collection<String>> checksums = JSONUtils.loadChecksumsFile(da.getChecksumFile(checksumType));
 
         assertEquals(1, checksums.size());
     }

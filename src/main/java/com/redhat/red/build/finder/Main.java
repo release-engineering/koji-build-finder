@@ -541,7 +541,7 @@ public final class Main implements Callable<Void> {
 
                 for (KojiChecksumType checksumType : keySet) {
                     try {
-                        analyzer.outputToFile(checksumType, outputDirectory);
+                        analyzer.outputToFile(checksumType);
                     } catch (IOException e) {
                         LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
                         LOGGER.debug("Error", e);
@@ -671,7 +671,7 @@ public final class Main implements Callable<Void> {
 
                     for (KojiChecksumType checksumType : keySet) {
                         try {
-                            analyzer.outputToFile(checksumType, outputDirectory);
+                            analyzer.outputToFile(checksumType);
                         } catch (IOException e) {
                             LOGGER.error("Error writing checksums file: {}", boldRed(e.getMessage()));
                             LOGGER.debug("Error", e);

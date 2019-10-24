@@ -388,12 +388,12 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
         }
     }
 
-    public File getChecksumFile(KojiChecksumType checksumType, File outputDirectory) {
-        return new File(outputDirectory, CHECKSUMS_FILENAME_BASENAME + checksumType + ".json");
+    public File getChecksumFile(KojiChecksumType checksumType) {
+        return new File(config.getOutputDirectory(), CHECKSUMS_FILENAME_BASENAME + checksumType + ".json");
     }
 
-    public void outputToFile(KojiChecksumType checksumType, File outputDirectory) throws IOException {
-        JSONUtils.dumpObjectToFile(getChecksums(checksumType), getChecksumFile(checksumType, outputDirectory));
+    public void outputToFile(KojiChecksumType checksumType) throws IOException {
+        JSONUtils.dumpObjectToFile(getChecksums(checksumType), getChecksumFile(checksumType));
     }
 
     public void setFiles(MultiValuedMap<String, Checksum> inverseMap) {

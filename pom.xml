@@ -72,7 +72,7 @@
     <version.com.puppycrawl.tools>8.25</version.com.puppycrawl.tools>
     <version.com.redhat.red.build.kojiji>2.12</version.com.redhat.red.build.kojiji>
     <version.info.picocli>4.0.4</version.info.picocli>
-    <version.io.dropwizard.metrics>4.1.0</version.io.dropwizard.metrics>
+    <version.io.dropwizard.metrics>4.1.1</version.io.dropwizard.metrics>
     <version.junit>4.12</version.junit>
     <version.net.sourceforge.pmd>6.18.0</version.net.sourceforge.pmd>
     <version.org.apache.commons.commons-collections4>4.4</version.org.apache.commons.commons-collections4>
