@@ -106,7 +106,7 @@
     <version.org.bouncycastle>1.64</version.org.bouncycastle>
     <version.org.codehaus.mojo.buildnumber-maven-plugin>1.4</version.org.codehaus.mojo.buildnumber-maven-plugin>
     <version.org.codehaus.mojo.versions-maven-plugin>2.7</version.org.codehaus.mojo.versions-maven-plugin>
-    <version.org.codehaus.plexus.plexus-component-metadata>2.0.0</version.org.codehaus.plexus.plexus-component-metadata>
+    <version.org.codehaus.plexus.plexus-component-metadata>2.1.0</version.org.codehaus.plexus.plexus-component-metadata>
     <version.org.commonjava.rwx>2.3</version.org.commonjava.rwx>
     <version.org.commonjava.util>1.11</version.org.commonjava.util>
     <version.org.eclipse.packager>0.16.0</version.org.eclipse.packager>
