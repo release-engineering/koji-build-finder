@@ -25,18 +25,17 @@ install:
 - cmd: >-
     choco install codecov
 
-    choco upgrade codecov
+    choco upgrade all
 
-    SET M2_HOME=C:\apache-maven\apache-maven-%MAVEN_VERSION%
+    SET MAVEN_HOME=C:\apache-maven\apache-maven-%MAVEN_VERSION%
 
-    SET PATH=%M2_HOME%\bin;%JAVA_HOME%\bin;%PATH%
-
-    mvn --version
+    SET PATH=%MAVEN_HOME%\bin;%JAVA_HOME%\bin;%PATH%
 cache:
 - C:\apache-maven -> appveyor.yml
 - C:\Users\appveyor\.m2 -> pom.xml
 - C:\ProgramData\chocolatey
 build_script:
-- ps: mvn -B clean install
+- ps: iex ((New-Object Net.WebClient).DownloadString('https://gist.githubusercontent.com/IlyaFinkelshteyn/cf03fce8c7c7d343542c4a29b850b046/raw/e415c0f4e23c9650d921eb318987d5ab5c60f3a3/UpdateBuildVersion.ps1'))
+- ps: mvn -V -B clean install
 on_success:
 - ps: codecov -f target/site/jacoco/jacoco.xml

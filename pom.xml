@@ -71,7 +71,7 @@
     <version.com.mycila>3.0</version.com.mycila>
     <version.com.puppycrawl.tools>8.26</version.com.puppycrawl.tools>
     <version.com.redhat.red.build.kojiji>2.12</version.com.redhat.red.build.kojiji>
-    <version.info.picocli>4.0.4</version.info.picocli>
+    <version.info.picocli>4.1.1</version.info.picocli>
     <version.io.dropwizard.metrics>4.1.1</version.io.dropwizard.metrics>
     <version.junit>4.12</version.junit>
     <version.net.sourceforge.pmd>6.19.0</version.net.sourceforge.pmd>
@@ -102,18 +102,18 @@
     <version.org.apache.maven.plugins.maven-shade-plugin>3.2.1</version.org.apache.maven.plugins.maven-shade-plugin>
     <version.org.apache.maven.plugins.maven-site-plugin>3.8.2</version.org.apache.maven.plugins.maven-site-plugin>
     <version.org.apache.maven.plugins.maven-source-plugin>3.2.0</version.org.apache.maven.plugins.maven-source-plugin>
-    <version.org.apache.maven.plugins.maven-surefire-plugin>3.0.0-M3</version.org.apache.maven.plugins.maven-surefire-plugin>
+    <version.org.apache.maven.plugins.maven-surefire-plugin>3.0.0-M4</version.org.apache.maven.plugins.maven-surefire-plugin>
     <version.org.bouncycastle>1.64</version.org.bouncycastle>
     <version.org.codehaus.mojo.buildnumber-maven-plugin>1.4</version.org.codehaus.mojo.buildnumber-maven-plugin>
     <version.org.codehaus.mojo.versions-maven-plugin>2.7</version.org.codehaus.mojo.versions-maven-plugin>
     <version.org.codehaus.plexus.plexus-component-metadata>2.1.0</version.org.codehaus.plexus.plexus-component-metadata>
     <version.org.commonjava.rwx>2.3</version.org.commonjava.rwx>
     <version.org.commonjava.util>1.11</version.org.commonjava.util>
-    <version.org.eclipse.packager>0.16.0</version.org.eclipse.packager>
+    <version.org.eclipse.packager>0.16.1</version.org.eclipse.packager>
     <version.org.fusesource.jansi>1.18</version.org.fusesource.jansi>
     <version.org.infinispan>10.0.1.Final</version.org.infinispan>
     <version.org.jacoco>0.8.5</version.org.jacoco>
-    <version.org.jboss.byteman>4.0.8</version.org.jboss.byteman>
+    <version.org.jboss.byteman>4.0.9</version.org.jboss.byteman>
     <version.org.json.json>20190722</version.org.json.json>
     <version.org.ow2.asm>7.2</version.org.ow2.asm>
     <version.org.slf4j>1.7.29</version.org.slf4j>
