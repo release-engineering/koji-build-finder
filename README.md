@@ -6,6 +6,7 @@
 
 | Name      | Description                | Badge                      |
 | --------- | -------------------------- | -------------------------- |
+| Maven     | Latest Release             | [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.redhat.red.build/koji-build-finder/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.redhat.red.build/koji-build-finder)
 | AppVeyor  | Build Status (Windows)     | [![Build Status (AppVeyor)](https://ci.appveyor.com/api/projects/status/775lq2o1chu7abn5?svg=true)](https://ci.appveyor.com/project/dwalluck/koji-build-finder-6o7ag) |
 | Travis CI | Build Status (Linux/OS X)  | [![Build Status (Travis CI)](https://api.travis-ci.com/release-engineering/koji-build-finder.svg)](https://travis-ci.com/release-engineering/koji-build-finder) |
 | Codecov   | Code Coverage              | [![Code Coverage](https://codecov.io/gh/release-engineering/koji-build-finder/graph/badge.svg)](https://codecov.io/gh/release-engineering/koji-build-finder) |
