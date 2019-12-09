@@ -1092,6 +1092,7 @@
               <excludes>
                 <exclude>module-info.java</exclude>
               </excludes>
+              <showDeprecation>true</showDeprecation>
               <source>1.8</source>
               <target>1.8</target>
             </configuration>
