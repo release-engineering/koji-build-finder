@@ -16,26 +16,16 @@
 
 version: '{build}'
 init:
-- ps: "Add-Type -AssemblyName System.IO.Compression.FileSystem\nif (!(Test-Path -Path \"C:\\apache-maven\" )) {\n        Write-Host \"Downloading Maven $env:MAVEN_VERSION\"\n        (new-object System.Net.WebClient).DownloadFile(\"https://repo1.maven.org/maven2/org/apache/maven/apache-maven/$env:MAVEN_VERSION/apache-maven-$env:MAVEN_VERSION-bin.zip\", \"C:\\apache-maven-$env:MAVEN_VERSION-bin.zip\") \n        [System.IO.Compression.ZipFile]::ExtractToDirectory(\"C:\\apache-maven-$env:MAVEN_VERSION-bin.zip\", \"C:\\apache-maven\")\n      }"
+  - ps: "Add-Type -AssemblyName System.IO.Compression.FileSystem\nif (!(Test-Path -Path \"C:\\apache-maven\" )) {\n        Write-Host \"Downloading Maven $env:MAVEN_VERSION\"\n        (new-object System.Net.WebClient).DownloadFile(\"https://repo1.maven.org/maven2/org/apache/maven/apache-maven/$env:MAVEN_VERSION/apache-maven-$env:MAVEN_VERSION-bin.zip\", \"C:\\apache-maven-$env:MAVEN_VERSION-bin.zip\") \n        [System.IO.Compression.ZipFile]::ExtractToDirectory(\"C:\\apache-maven-$env:MAVEN_VERSION-bin.zip\", \"C:\\apache-maven\")\n      }"
 environment:
   MAVEN_VERSION: 3.6.3
   matrix:
-  - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
+    - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
 install:
-- cmd: >-
-    choco install codecov
-
-    choco upgrade all
-
-    SET MAVEN_HOME=C:\apache-maven\apache-maven-%MAVEN_VERSION%
-
-    SET PATH=%MAVEN_HOME%\bin;%JAVA_HOME%\bin;%PATH%
+  - cmd: SET PATH=C:\apache-maven\apache-maven-%MAVEN_VERSION%\bin;%JAVA_HOME%\bin;%PATH%
 cache:
-- C:\apache-maven -> appveyor.yml
-- C:\Users\appveyor\.m2 -> pom.xml
-- C:\ProgramData\chocolatey
+  - C:\apache-maven -> appveyor.yml
+  - C:\Users\appveyor\.m2 -> pom.xml
 build_script:
-- ps: iex ((New-Object Net.WebClient).DownloadString('https://gist.githubusercontent.com/IlyaFinkelshteyn/cf03fce8c7c7d343542c4a29b850b046/raw/e415c0f4e23c9650d921eb318987d5ab5c60f3a3/UpdateBuildVersion.ps1'))
-- ps: mvn -V -B clean install
-on_success:
-- ps: codecov -f target/site/jacoco/jacoco.xml
+  - ps: iex ((New-Object Net.WebClient).DownloadString('https://gist.githubusercontent.com/IlyaFinkelshteyn/cf03fce8c7c7d343542c4a29b850b046/raw/e415c0f4e23c9650d921eb318987d5ab5c60f3a3/UpdateBuildVersion.ps1'))
+  - ps: mvn -V -B clean install

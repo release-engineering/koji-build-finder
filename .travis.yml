@@ -24,4 +24,4 @@ jobs:
 
 after_success:
   - '[ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_OS_NAME" == "linux" ] && mvn --settings .travis-settings.xml -V -B -DperformRelease -DskipTests deploy'
-  - bash <(curl -s https://codecov.io/bash)
+  - '[ "$TRAVIS_OS_NAME" == "linux" ] && bash <(curl -s https://codecov.io/bash)'
