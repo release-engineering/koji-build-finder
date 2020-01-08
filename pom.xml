@@ -60,25 +60,25 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipITs>true</skipITs>
     <version.ch.qos.logback>1.2.3</version.ch.qos.logback>
-    <version.commons-codec>1.13</version.commons-codec>
+    <version.commons-codec>1.14</version.commons-codec>
     <version.commons-io>2.6</version.commons-io>
-    <version.com.fasterxml.jackson.core>2.10.1</version.com.fasterxml.jackson.core>
+    <version.com.fasterxml.jackson.core>2.10.2</version.com.fasterxml.jackson.core>
     <version.com.github.spotbugs>3.1.12.2</version.com.github.spotbugs>
     <version.com.github.stefanbirkner>1.19.0</version.com.github.stefanbirkner>
-    <version.com.google.guava>28.1-jre</version.com.google.guava>
+    <version.com.google.guava>28.2-jre</version.com.google.guava>
     <version.com.j2html>1.4.0</version.com.j2html>
     <version.com.mashape.unirest>1.4.9</version.com.mashape.unirest>
     <version.com.mycila>3.0</version.com.mycila>
-    <version.com.puppycrawl.tools>8.27</version.com.puppycrawl.tools>
+    <version.com.puppycrawl.tools>8.28</version.com.puppycrawl.tools>
     <version.com.redhat.red.build.kojiji>2.12</version.com.redhat.red.build.kojiji>
-    <version.info.picocli>4.1.2</version.info.picocli>
+    <version.info.picocli>4.1.4</version.info.picocli>
     <version.io.dropwizard.metrics>4.1.2</version.io.dropwizard.metrics>
-    <version.junit>4.12</version.junit>
+    <version.junit>4.13</version.junit>
     <version.net.sourceforge.pmd>6.20.0</version.net.sourceforge.pmd>
     <version.org.apache.commons.commons-collections4>4.4</version.org.apache.commons.commons-collections4>
     <version.org.apache.commons.commons-compress>1.19</version.org.apache.commons.commons-compress>
     <version.org.apache.commons.commons-lang3>3.9</version.org.apache.commons.commons-lang3>
-    <version.org.apache.commons.commons-vfs2>2.4.1</version.org.apache.commons.commons-vfs2>
+    <version.org.apache.commons.commons-vfs2>2.5.0</version.org.apache.commons.commons-vfs2>
     <version.org.apache.httpcomponents.httpasyncclient>4.1.4</version.org.apache.httpcomponents.httpasyncclient>
     <version.org.apache.httpcomponents.httpclient>4.5.10</version.org.apache.httpcomponents.httpclient>
     <version.org.apache.httpcomponents.httpcore>4.4.12</version.org.apache.httpcomponents.httpcore>
@@ -89,7 +89,7 @@
     <version.org.apache.maven.plugins.maven-compiler-plugin>3.8.1</version.org.apache.maven.plugins.maven-compiler-plugin>
     <version.org.apache.maven.plugins.maven-dependency-plugin>3.1.1</version.org.apache.maven.plugins.maven-dependency-plugin>
     <version.org.apache.maven.plugins.maven-deploy-plugin>3.0.0-M1</version.org.apache.maven.plugins.maven-deploy-plugin>
-    <version.org.apache.maven.plugins.maven-enforcer-plugin>3.0.0-M2</version.org.apache.maven.plugins.maven-enforcer-plugin>
+    <version.org.apache.maven.plugins.maven-enforcer-plugin>3.0.0-M3</version.org.apache.maven.plugins.maven-enforcer-plugin>
     <version.org.apache.maven.plugins.maven-gpg-plugin>1.6</version.org.apache.maven.plugins.maven-gpg-plugin>
     <version.org.apache.maven.plugins.maven-install-plugin>3.0.0-M1</version.org.apache.maven.plugins.maven-install-plugin>
     <version.org.apache.maven.plugins.maven-jar-plugin>3.2.0</version.org.apache.maven.plugins.maven-jar-plugin>
@@ -111,12 +111,12 @@
     <version.org.commonjava.util>1.11</version.org.commonjava.util>
     <version.org.eclipse.packager>0.16.1</version.org.eclipse.packager>
     <version.org.fusesource.jansi>1.18</version.org.fusesource.jansi>
-    <version.org.infinispan>10.1.0.CR1</version.org.infinispan>
+    <version.org.infinispan>10.1.0.Final</version.org.infinispan>
     <version.org.jacoco>0.8.5</version.org.jacoco>
     <version.org.jboss.byteman>4.0.9</version.org.jboss.byteman>
     <version.org.json.json>20190722</version.org.json.json>
     <version.org.ow2.asm>7.2</version.org.ow2.asm>
-    <version.org.slf4j>1.7.29</version.org.slf4j>
+    <version.org.slf4j>1.7.30</version.org.slf4j>
   </properties>
 
   <dependencyManagement>
