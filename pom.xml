@@ -78,10 +78,10 @@
     <version.org.apache.commons.commons-collections4>4.4</version.org.apache.commons.commons-collections4>
     <version.org.apache.commons.commons-compress>1.19</version.org.apache.commons.commons-compress>
     <version.org.apache.commons.commons-lang3>3.9</version.org.apache.commons.commons-lang3>
-    <version.org.apache.commons.commons-vfs2>2.5.0</version.org.apache.commons.commons-vfs2>
+    <version.org.apache.commons.commons-vfs2>2.6.0</version.org.apache.commons.commons-vfs2>
     <version.org.apache.httpcomponents.httpasyncclient>4.1.4</version.org.apache.httpcomponents.httpasyncclient>
-    <version.org.apache.httpcomponents.httpclient>4.5.10</version.org.apache.httpcomponents.httpclient>
-    <version.org.apache.httpcomponents.httpcore>4.4.12</version.org.apache.httpcomponents.httpcore>
+    <version.org.apache.httpcomponents.httpclient>4.5.11</version.org.apache.httpcomponents.httpclient>
+    <version.org.apache.httpcomponents.httpcore>4.4.13</version.org.apache.httpcomponents.httpcore>
     <version.org.apache.maven.plugins.maven-antrun-plugin>1.8</version.org.apache.maven.plugins.maven-antrun-plugin>
     <version.org.apache.maven.plugins.maven-assembly-plugin>3.2.0</version.org.apache.maven.plugins.maven-assembly-plugin>
     <version.org.apache.maven.plugins.maven-checkstyle-plugin>3.1.0</version.org.apache.maven.plugins.maven-checkstyle-plugin>
@@ -111,11 +111,11 @@
     <version.org.commonjava.util>1.11</version.org.commonjava.util>
     <version.org.eclipse.packager>0.16.1</version.org.eclipse.packager>
     <version.org.fusesource.jansi>1.18</version.org.fusesource.jansi>
-    <version.org.infinispan>10.1.0.Final</version.org.infinispan>
+    <version.org.infinispan>10.1.1.Final</version.org.infinispan>
     <version.org.jacoco>0.8.5</version.org.jacoco>
-    <version.org.jboss.byteman>4.0.9</version.org.jboss.byteman>
+    <version.org.jboss.byteman>4.0.10</version.org.jboss.byteman>
     <version.org.json.json>20190722</version.org.json.json>
-    <version.org.ow2.asm>7.2</version.org.ow2.asm>
+    <version.org.ow2.asm>7.3.1</version.org.ow2.asm>
     <version.org.slf4j>1.7.30</version.org.slf4j>
   </properties>
 
