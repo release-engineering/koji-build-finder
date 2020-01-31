@@ -69,7 +69,7 @@
     <version.com.j2html>1.4.0</version.com.j2html>
     <version.com.mashape.unirest>1.4.9</version.com.mashape.unirest>
     <version.com.mycila>3.0</version.com.mycila>
-    <version.com.puppycrawl.tools>8.28</version.com.puppycrawl.tools>
+    <version.com.puppycrawl.tools>8.29</version.com.puppycrawl.tools>
     <version.com.redhat.red.build.kojiji>2.12</version.com.redhat.red.build.kojiji>
     <version.info.picocli>4.1.4</version.info.picocli>
     <version.io.dropwizard.metrics>4.1.2</version.io.dropwizard.metrics>
