@@ -112,13 +112,13 @@ public final class Main implements Callable<Void> {
     private boolean disableCache = ConfigDefaults.DISABLE_CACHE;
 
     @Option(names = {"--disable-recursion"}, description = "Disable recursion.")
-    private boolean disableRecursion = ConfigDefaults.DISABLE_RECURSION;
+    private Boolean disableRecursion = ConfigDefaults.DISABLE_RECURSION;
 
     @Option(names = {"-e", "--archive-extension"}, paramLabel = "STRING", description = "Add a Koji archive type extension to check.", converter = FilenameConverter.class)
     private List<String> archiveExtensions = ConfigDefaults.ARCHIVE_EXTENSIONS;
 
     @Option(names = {"-k", "--checksum-only"}, description = "Only checksum files and do not find builds.")
-    private boolean checksumOnly = ConfigDefaults.CHECKSUM_ONLY;
+    private Boolean checksumOnly = ConfigDefaults.CHECKSUM_ONLY;
 
     @Option(names = {"--koji-hub-url"}, paramLabel = "URL", description = "Set Koji hub URL.")
     private URL kojiHubURL = ConfigDefaults.KOJI_HUB_URL;
