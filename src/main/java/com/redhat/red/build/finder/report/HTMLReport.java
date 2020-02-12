@@ -195,39 +195,39 @@ public class HTMLReport extends Report {
     @Override
     public ContainerTag toHTML() {
         return html(
-                head(style().withText(HTML_STYLE)).with(
-                        title().withText(getName())
-                    ),
-                    body().with(
-                        header(
-                            h1(getName())
-                        ),
-                        main(
-                          div(attrs("#div-reports"), table(caption(text("Reports")), thead(tr(th(text("Name")), th(text("Description")))), tbody(tr(td(a().withHref("#div-" + getBaseFilename()).with(text("Builds"))), td(text(getDescription()))), each(reports, report -> tr(td(a().withHref("#div-" + report.getBaseFilename()).with(text(report.getName()))), td(text(report.getDescription()))))))),
-                          div(attrs("#div-" + getBaseFilename()),
-                          table(caption(text("Builds")), thead(tr(th(text("#")), th(text("ID")), th(text("Name")), th(text("Version")), th(text("Artifacts")), th(text("Tags")), th(text("Type")), th(text("Sources")), th(text("Patches")), th(text("SCM URL")), th(text("Options")), th(text("Extra")))),
-                                tbody(each(builds, build ->
-                                      tr(
-                                      td(text(Integer.toString(builds.indexOf(build)))),
-                                      td(build.getBuildInfo().getId() > 0 ? linkBuild(build) : errorText(String.valueOf(build.getBuildInfo().getId()))),
-                                      td(build.getBuildInfo().getId() > 0 ? linkPackage(build) : text("")),
-                                      td(build.getBuildInfo().getId() > 0 ? text(build.getBuildInfo().getVersion().replace('_', '-')) : text("")),
-                                      td(build.getArchives() != null ? ol(each(build.getArchives(), archive -> li(linkLocalArchive(build, archive), text(": "), text(String.join(", ", archive.getFilenames()))))) : text("")),
-                                      td(build.getTags() != null ? ul(each(build.getTags(), tag -> linkTag(build, tag))) : text("")),
-                                      td(build.getMethod() != null ? text(build.getMethod()) : build.getBuildInfo().getId() > 0 ? errorText("imported build") : text("")),
-                                      td(build.getScmSourcesZip() != null ? linkArchive(build, build.getScmSourcesZip()) : text("")),
-                                      td(build.getPatchesZip() != null ? linkArchive(build, build.getPatchesZip()) : text("")),
-                                      td(build.getSource() != null ? linkSource(build) : build.getBuildInfo().getId() == 0 ? text("") : errorText("missing URL")),
-                                      td(build.getTaskInfo() != null && build.getTaskInfo().getMethod() != null && build.getTaskInfo().getMethod().equals("maven") && build.getTaskRequest() != null && build.getTaskRequest().asMavenBuildRequest().getProperties() != null && build.getTaskRequest().asMavenBuildRequest() != null ? each(build.getTaskRequest().asMavenBuildRequest().getProperties().entrySet(), entry -> text(entry.getKey() + (entry.getValue() != null ? "=" + entry.getValue() + "; " : "; "))) : text("")),
-                                      td(build.getBuildInfo().getExtra() != null ? each(build.getBuildInfo().getExtra().entrySet(), entry -> text(entry.getKey() + (entry.getValue() != null ? "=" + entry.getValue() + "; " : "; "))) : text(""))
-                                   ))
-                               )
-                            )), each(reports, report ->
-                                div(attrs("#div-" + report.getBaseFilename()), report.toHTML()))
-                        ),
-                        div(attrs("#div-footer"), footer().attr(Attr.CLASS, "footer").attr(Attr.ID, "footer").with(text("Created: " + new Date() + " by "), a().withHref("https://github.com/release-engineering/koji-build-finder/").with(text(NAME)), text(" " + BuildFinder.getVersion() + " (SHA: "), a().withHref("https://github.com/release-engineering/koji-build-finder/commit/" + BuildFinder.getScmRevision()).with(text(BuildFinder.getScmRevision() + ")"))))
-                    )
-                );
+            head(style().withText(HTML_STYLE)).with(
+                title().withText(getName())
+            ),
+            body().with(
+                header(
+                    h1(getName())
+                ),
+                main(
+                    div(attrs("#div-reports"), table(caption(text("Reports")), thead(tr(th(text("Name")), th(text("Description")))), tbody(tr(td(a().withHref("#div-" + getBaseFilename()).with(text("Builds"))), td(text(getDescription()))), each(reports, report -> tr(td(a().withHref("#div-" + report.getBaseFilename()).with(text(report.getName()))), td(text(report.getDescription()))))))),
+                    div(attrs("#div-" + getBaseFilename()),
+                        table(caption(text("Builds")), thead(tr(th(text("#")), th(text("ID")), th(text("Name")), th(text("Version")), th(text("Artifacts")), th(text("Tags")), th(text("Type")), th(text("Sources")), th(text("Patches")), th(text("SCM URL")), th(text("Options")), th(text("Extra")))),
+                            tbody(each(builds, build ->
+                                tr(
+                                    td(text(Integer.toString(builds.indexOf(build)))),
+                                    td(build.getBuildInfo().getId() > 0 ? linkBuild(build) : errorText(String.valueOf(build.getBuildInfo().getId()))),
+                                    td(build.getBuildInfo().getId() > 0 ? linkPackage(build) : text("")),
+                                    td(build.getBuildInfo().getId() > 0 ? text(build.getBuildInfo().getVersion().replace('_', '-')) : text("")),
+                                    td(build.getArchives() != null ? ol(each(build.getArchives(), archive -> li(linkLocalArchive(build, archive), text(": "), text(String.join(", ", archive.getFilenames()))))) : text("")),
+                                    td(build.getTags() != null ? ul(each(build.getTags(), tag -> linkTag(build, tag))) : text("")),
+                                    td(build.getMethod() != null ? text(build.getMethod()) : build.getBuildInfo().getId() > 0 ? errorText("imported build") : text("")),
+                                    td(build.getScmSourcesZip() != null ? linkArchive(build, build.getScmSourcesZip()) : text("")),
+                                    td(build.getPatchesZip() != null ? linkArchive(build, build.getPatchesZip()) : text("")),
+                                    td(build.getSource() != null ? linkSource(build) : build.getBuildInfo().getId() == 0 ? text("") : errorText("missing URL")),
+                                    td(build.getTaskInfo() != null && build.getTaskInfo().getMethod() != null && build.getTaskInfo().getMethod().equals("maven") && build.getTaskRequest() != null && build.getTaskRequest().asMavenBuildRequest().getProperties() != null && build.getTaskRequest().asMavenBuildRequest() != null ? each(build.getTaskRequest().asMavenBuildRequest().getProperties().entrySet(), entry -> text(entry.getKey() + (entry.getValue() != null ? "=" + entry.getValue() + "; " : "; "))) : text("")),
+                                    td(build.getBuildInfo().getExtra() != null ? each(build.getBuildInfo().getExtra().entrySet(), entry -> text(entry.getKey() + (entry.getValue() != null ? "=" + entry.getValue() + "; " : "; "))) : text(""))
+                                ))
+                            )
+                        )), each(reports, report ->
+                        div(attrs("#div-" + report.getBaseFilename()), report.toHTML()))
+                ),
+                div(attrs("#div-footer"), footer().attr(Attr.CLASS, "footer").attr(Attr.ID, "footer").with(text("Created: " + new Date() + " by "), a().withHref("https://github.com/release-engineering/koji-build-finder/").with(text(NAME)), text(" " + BuildFinder.getVersion() + " (SHA: "), a().withHref("https://github.com/release-engineering/koji-build-finder/commit/" + BuildFinder.getScmRevision()).with(text(BuildFinder.getScmRevision() + ")"))))
+            )
+        );
     }
 
     @Override

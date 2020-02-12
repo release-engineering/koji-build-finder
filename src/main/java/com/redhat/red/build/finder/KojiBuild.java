@@ -293,9 +293,9 @@ public class KojiBuild {
     @Override
     public String toString() {
         return "KojiBuild [buildInfo=" + buildInfo + ", taskInfo=" + taskInfo + ", taskRequest=" + taskRequest
-                + ", archives=" + archives + ", remoteArchives=" + remoteArchives + ", tags=" + tags
-                + ", rpms=" + rpms + ", remoteRpms=" + remoteRpms + ", duplicateArchives=" + duplicateArchives
-                + "]";
+            + ", archives=" + archives + ", remoteArchives=" + remoteArchives + ", tags=" + tags
+            + ", rpms=" + rpms + ", remoteRpms=" + remoteRpms + ", duplicateArchives=" + duplicateArchives
+            + "]";
     }
 
     public static class KojiBuildExternalizer implements AdvancedExternalizer<KojiBuild> {
@@ -314,7 +314,7 @@ public class KojiBuild {
             output.writeObject(build.tags);
             output.writeObject(build.types);
             output.writeObject(build.remoteRpms);
-         }
+        }
 
         @SuppressWarnings("unchecked")
         @Override

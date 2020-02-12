@@ -1290,7 +1290,7 @@ public class BuildFinder implements Callable<Map<BuildSystemInteger, KojiBuild>>
                 notFoundChecksums.put(checksum, filenames);
                 addArchiveWithoutBuild(checksum, filenames);
             } else {
-                   if (size == 1) {
+                if (size == 1) {
                     KojiArchiveInfo archive = localArchiveInfos.get(0);
                     Integer buildId = archive.getBuildId();
 

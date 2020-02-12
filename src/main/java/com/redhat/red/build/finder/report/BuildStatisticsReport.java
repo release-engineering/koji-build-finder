@@ -53,9 +53,9 @@ public class BuildStatisticsReport extends Report {
     @Override
     public ContainerTag toHTML() {
         return table(attrs("#table-" + getBaseFilename()),
-                caption(text(getName())),
-                thead(tr(th(), th(text("Built")), th(text("Imported")), th(text("Total")), th(text("Percent built from source")), th(text("Percent imported")))),
-                tbody(tr(td(strong(text("Builds"))), td(text(String.valueOf(buildStatistics.getNumberOfBuilds() - buildStatistics.getNumberOfImportedBuilds()))), td(text(String.valueOf(buildStatistics.getNumberOfImportedBuilds()))), td(text(String.valueOf(buildStatistics.getNumberOfBuilds()))), td(text((100.00 - buildStatistics.getPercentOfBuildsImported()) + "%")), td(text(buildStatistics.getPercentOfBuildsImported() + "%"))),
-                      tr(td(strong(text("Archives"))), td(text(String.valueOf(buildStatistics.getNumberOfArchives() - buildStatistics.getNumberOfImportedArchives()))), td(text(String.valueOf(buildStatistics.getNumberOfImportedArchives()))), td(text(String.valueOf(buildStatistics.getNumberOfArchives()))), td(text((100.00 - buildStatistics.getPercentOfArchivesImported()) + "%")), td(text(buildStatistics.getPercentOfArchivesImported() + "%")))));
+            caption(text(getName())),
+            thead(tr(th(), th(text("Built")), th(text("Imported")), th(text("Total")), th(text("Percent built from source")), th(text("Percent imported")))),
+            tbody(tr(td(strong(text("Builds"))), td(text(String.valueOf(buildStatistics.getNumberOfBuilds() - buildStatistics.getNumberOfImportedBuilds()))), td(text(String.valueOf(buildStatistics.getNumberOfImportedBuilds()))), td(text(String.valueOf(buildStatistics.getNumberOfBuilds()))), td(text((100.00 - buildStatistics.getPercentOfBuildsImported()) + "%")), td(text(buildStatistics.getPercentOfBuildsImported() + "%"))),
+                tr(td(strong(text("Archives"))), td(text(String.valueOf(buildStatistics.getNumberOfArchives() - buildStatistics.getNumberOfImportedArchives()))), td(text(String.valueOf(buildStatistics.getNumberOfImportedArchives()))), td(text(String.valueOf(buildStatistics.getNumberOfArchives()))), td(text((100.00 - buildStatistics.getPercentOfArchivesImported()) + "%")), td(text(buildStatistics.getPercentOfArchivesImported() + "%")))));
     }
 }

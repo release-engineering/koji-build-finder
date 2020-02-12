@@ -127,6 +127,6 @@ public class KojiLocalArchive {
     @Override
     public String toString() {
         return "KojiLocalArchive [archive=" + archive + ", rpm=" + rpm + ", filenames=" + filenames + ", checksums=" + checksums
-                + ", unmatchedFilenames=" + unmatchedFilenames + "]";
+            + ", unmatchedFilenames=" + unmatchedFilenames + "]";
     }
 }
