@@ -141,67 +141,67 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
             sfs.init();
 
             for (File file : files) {
-                    fo = sfs.resolveFile(file.getAbsolutePath());
-                    root = fo.getName().getFriendlyURI().substring(0, fo.getName().getFriendlyURI().indexOf(fo.getName().getBaseName()));
-                    Set<Checksum> fileChecksums = cacheManager != null ? Checksum.checksum(fo, checksumTypesToCheck, root) : null;
+                fo = sfs.resolveFile(file.getAbsolutePath());
+                root = fo.getName().getFriendlyURI().substring(0, fo.getName().getFriendlyURI().indexOf(fo.getName().getBaseName()));
+                Set<Checksum> fileChecksums = cacheManager != null ? Checksum.checksum(fo, checksumTypesToCheck, root) : null;
 
-                    if (fileChecksums != null) {
-                        Iterator<KojiChecksumType> it = checksumTypesToCheck.iterator();
+                if (fileChecksums != null) {
+                    Iterator<KojiChecksumType> it = checksumTypesToCheck.iterator();
 
-                        while (it.hasNext()) {
-                            KojiChecksumType checksumType = it.next();
-                            String value = Checksum.findByType(fileChecksums, checksumType).map(Checksum::getValue).orElse(null);
+                    while (it.hasNext()) {
+                        KojiChecksumType checksumType = it.next();
+                        String value = Checksum.findByType(fileChecksums, checksumType).map(Checksum::getValue).orElse(null);
 
-                            if (value != null) {
-                                MultiValuedMap<String, String> localMap = fileCaches.get(checksumType).get(value);
+                        if (value != null) {
+                            MultiValuedMap<String, String> localMap = fileCaches.get(checksumType).get(value);
 
-                                if (localMap != null) {
-                                    this.map.get(checksumType).putAll(localMap);
+                            if (localMap != null) {
+                                this.map.get(checksumType).putAll(localMap);
 
-                                    Collection<Map.Entry<String, String>> entries = localMap.entries();
+                                Collection<Map.Entry<String, String>> entries = localMap.entries();
 
+                                for (Map.Entry<String, String> entry : entries) {
+                                    inverseMap.put(entry.getValue(), new Checksum(checksumType, entry.getKey(), entry.getValue()));
+                                }
+
+                                if (queue != null && checksumType.equals(KojiChecksumType.md5)) {
                                     for (Map.Entry<String, String> entry : entries) {
-                                        inverseMap.put(entry.getValue(), new Checksum(checksumType, entry.getKey(), entry.getValue()));
-                                    }
-
-                                    if (queue != null && checksumType.equals(KojiChecksumType.md5)) {
-                                        for (Map.Entry<String, String> entry : entries) {
-                                            try {
-                                                Checksum checksum = new Checksum(checksumType, entry.getKey(), entry.getValue());
-                                                queue.put(checksum);
-                                            } catch (InterruptedException e) {
-                                                Thread.currentThread().interrupt();
-                                            }
+                                        try {
+                                            Checksum checksum = new Checksum(checksumType, entry.getKey(), entry.getValue());
+                                            queue.put(checksum);
+                                        } catch (InterruptedException e) {
+                                            Thread.currentThread().interrupt();
                                         }
                                     }
-
-                                    it.remove();
-
-                                    LOGGER.info("Loaded {} checksums for file: {} (checksum: {}) from cache", green(localMap.size()), green(file.getName()), green(value));
-                                } else {
-                                    LOGGER.info("File: {} (checksum: {}) not found in cache", green(file.getName()), green(value));
                                 }
+
+                                it.remove();
+
+                                LOGGER.info("Loaded {} checksums for file: {} (checksum: {}) from cache", green(localMap.size()), green(file.getName()), green(value));
+                            } else {
+                                LOGGER.info("File: {} (checksum: {}) not found in cache", green(file.getName()), green(value));
                             }
                         }
                     }
+                }
 
-                    if (!checksumTypesToCheck.isEmpty()) {
-                        LOGGER.info("Finding checksums: {} for file: {}", green(String.join(", ", checksumTypesToCheck.stream().map(String::valueOf).collect(Collectors.toSet()))), green(file.getName()));
+                if (!checksumTypesToCheck.isEmpty()) {
+                    LOGGER.info("Finding checksums: {} for file: {}", green(String.join(", ", checksumTypesToCheck.stream().map(String::valueOf).collect(Collectors.toSet()))), green(file.getName()));
 
-                        listChildren(fo);
+                    listChildren(fo);
 
-                        if (fileChecksums != null) {
-                            for (KojiChecksumType checksumType : checksumTypesToCheck) {
-                                Optional<Checksum> cksum = Checksum.findByType(fileChecksums, checksumType);
+                    if (fileChecksums != null) {
+                        for (KojiChecksumType checksumType : checksumTypesToCheck) {
+                            Optional<Checksum> cksum = Checksum.findByType(fileChecksums, checksumType);
 
-                                if (cksum.isPresent()) {
-                                    fileCaches.get(checksumType).put(cksum.get().getValue(), map.get(checksumType));
-                                } else {
-                                    throw new IOException("Checksum type " + checksumType + " not found");
-                                }
+                            if (cksum.isPresent()) {
+                                fileCaches.get(checksumType).put(cksum.get().getValue(), map.get(checksumType));
+                            } else {
+                                throw new IOException("Checksum type " + checksumType + " not found");
                             }
                         }
                     }
+                }
             }
         } finally {
             if (fo != null) {
