@@ -243,7 +243,7 @@ public class DistributionAnalyzer implements Callable<Map<KojiChecksumType, Mult
     }
 
     private boolean shouldListArchive(FileObject fo) throws FileSystemException {
-        if (!config.getDisableRecursion()) {
+        if (!config.getDisableRecursion().booleanValue()) {
             return true;
         }
 

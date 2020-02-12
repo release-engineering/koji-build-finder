@@ -109,7 +109,7 @@ public final class Main implements Callable<Void> {
     private Boolean debug = Boolean.FALSE;
 
     @Option(names = {"--disable-cache"}, description = "Disable local cache.")
-    private boolean disableCache = ConfigDefaults.DISABLE_CACHE;
+    private Boolean disableCache = ConfigDefaults.DISABLE_CACHE;
 
     @Option(names = {"--disable-recursion"}, description = "Disable recursion.")
     private Boolean disableRecursion = ConfigDefaults.DISABLE_RECURSION;
@@ -423,9 +423,9 @@ public final class Main implements Callable<Void> {
 
     @Override
     public Void call() throws Exception {
-        if (quiet) {
+        if (quiet.booleanValue()) {
             disableLogging();
-        } else if (debug) {
+        } else if (debug.booleanValue()) {
             enableDebugLogging();
         }
 
@@ -459,7 +459,7 @@ public final class Main implements Callable<Void> {
 
         LOGGER.debug("{}", config);
 
-        if (!config.getChecksumOnly()) {
+        if (!config.getChecksumOnly().booleanValue()) {
             if (config.getKojiHubURL() == null) {
                 LOGGER.error("Must set koji-hub-url");
                 System.exit(1);
@@ -483,7 +483,7 @@ public final class Main implements Callable<Void> {
 
         final Map<KojiChecksumType, MultiValuedMap<String, String>> checksumsFromFile = new EnumMap<>(KojiChecksumType.class);
 
-        if (config.getUseChecksumsFile()) {
+        if (config.getUseChecksumsFile().booleanValue()) {
             for (KojiChecksumType checksumType : checksumTypes) {
                 File checksumFile = new File(outputDirectory, BuildFinder.getChecksumFilename(checksumType));
 
@@ -518,8 +518,8 @@ public final class Main implements Callable<Void> {
 
         Map<KojiChecksumType, MultiValuedMap<String, String>> checksums = checksumsFromFile;
 
-        if (checksumOnly) {
-            if (!config.getUseChecksumsFile()) {
+        if (checksumOnly.booleanValue()) {
+            if (!config.getUseChecksumsFile().booleanValue()) {
                 if (cacheManager == null && !config.getDisableCache()) {
                     initCaches(config);
                 }
@@ -571,7 +571,7 @@ public final class Main implements Callable<Void> {
         Map<BuildSystemInteger, KojiBuild> builds = null;
         File buildsFile = new File(outputDirectory, BuildFinder.getBuildsFilename());
 
-        if (config.getUseBuildsFile()) {
+        if (config.getUseBuildsFile().booleanValue()) {
             if (buildsFile.exists()) {
                 LOGGER.info("Loading builds from file: {}", green(buildsFile.getPath()));
 
@@ -592,7 +592,7 @@ public final class Main implements Callable<Void> {
                 System.exit(1);
             }
 
-            if (config.getUseChecksumsFile()) {
+            if (config.getUseChecksumsFile().booleanValue()) {
                 boolean isKerberos = krbService != null && krbPrincipal != null && krbPassword != null || krbCCache != null || krbKeytab != null;
 
                 try (KojiClientSession session = isKerberos ? new KojiClientSession(config.getKojiHubURL(), krbService, krbPrincipal, krbPassword, krbCCache, krbKeytab) : new KojiClientSession(config.getKojiHubURL())) {
