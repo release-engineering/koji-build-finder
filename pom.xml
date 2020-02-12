@@ -111,7 +111,7 @@
     <version.org.commonjava.util>1.11</version.org.commonjava.util>
     <version.org.eclipse.packager>0.16.1</version.org.eclipse.packager>
     <version.org.fusesource.jansi>1.18</version.org.fusesource.jansi>
-    <version.org.infinispan>10.0.0.CR1</version.org.infinispan>
+    <version.org.infinispan>11.0.0.Alpha1</version.org.infinispan>
     <version.org.jacoco>0.8.5</version.org.jacoco>
     <version.org.jboss.byteman>4.0.10</version.org.jboss.byteman>
     <version.org.json.json>20190722</version.org.json.json>
