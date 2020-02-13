@@ -66,6 +66,6 @@ public class RepositoryConfiguration implements Serializable {
     @Override
     public String toString() {
         return "RepositoryConfiguration [id=" + id + ", internalUrl=" + internalUrl + ", externalUrl=" + externalUrl
-                + ", preBuildSyncEnabled=" + preBuildSyncEnabled + "]";
+            + ", preBuildSyncEnabled=" + preBuildSyncEnabled + "]";
     }
 }

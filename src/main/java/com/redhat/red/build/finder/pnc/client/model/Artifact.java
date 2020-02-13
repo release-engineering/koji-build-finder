@@ -194,9 +194,9 @@ public class Artifact implements Serializable {
     @Override
     public String toString() {
         return "Artifact [id=" + id + ", identifier=" + identifier + ", artifactQuality=" + artifactQuality + ", md5="
-                + md5 + ", sha1=" + sha1 + ", sha256=" + sha256 + ", filename=" + filename + ", deployPath="
-                + deployPath + ", buildRecordIds=" + buildRecordIds + ", dependantBuildRecordIds="
-                + dependantBuildRecordIds + ", importDate=" + importDate + ", originUrl=" + originUrl + ", size=" + size
-                + ", deployUrl=" + deployUrl + ", publicUrl=" + publicUrl + "]";
+            + md5 + ", sha1=" + sha1 + ", sha256=" + sha256 + ", filename=" + filename + ", deployPath="
+            + deployPath + ", buildRecordIds=" + buildRecordIds + ", dependantBuildRecordIds="
+            + dependantBuildRecordIds + ", importDate=" + importDate + ", originUrl=" + originUrl + ", size=" + size
+            + ", deployUrl=" + deployUrl + ", publicUrl=" + publicUrl + "]";
     }
 }

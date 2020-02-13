@@ -138,9 +138,9 @@ public class ProductMilestone implements Serializable {
     @Override
     public String toString() {
         return "ProductMilestone [id=" + id + ", version=" + version + ", endDate=" + endDate + ", startingDate="
-                + startingDate + ", plannedEndDate=" + plannedEndDate + ", downloadUrl=" + downloadUrl
-                + ", issueTrackerUrl=" + issueTrackerUrl + ", productVersionId=" + productVersionId
-                + ", performedBuilds=" + performedBuilds + ", distributedArtifactIds=" + distributedArtifactIds
-                + ", productReleaseId=" + productReleaseId + "]";
+            + startingDate + ", plannedEndDate=" + plannedEndDate + ", downloadUrl=" + downloadUrl
+            + ", issueTrackerUrl=" + issueTrackerUrl + ", productVersionId=" + productVersionId
+            + ", performedBuilds=" + performedBuilds + ", distributedArtifactIds=" + distributedArtifactIds
+            + ", productReleaseId=" + productReleaseId + "]";
     }
 }

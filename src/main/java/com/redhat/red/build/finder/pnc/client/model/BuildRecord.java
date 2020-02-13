@@ -273,15 +273,15 @@ public class BuildRecord implements Serializable {
     @Override
     public String toString() {
         return "BuildRecord [id=" + id + ", submitTime=" + submitTime + ", startTime=" + startTime + ", endTime="
-                + endTime + ", buildConfigurationId=" + buildConfigurationId + ", buildConfigurationName="
-                + buildConfigurationName + ", buildConfigurationRev=" + buildConfigurationRev + ", projectId="
-                + projectId + ", projectName=" + projectName + ", userId=" + userId + ", username=" + username
-                + ", scmRepoURL=" + scmRepoURL + ", scmRevision=" + scmRevision + ", buildEnvironmentId="
-                + buildEnvironmentId + ", attributes=" + attributes + ", liveLogsUri=" + liveLogsUri
-                + ", buildConfigSetRecordId=" + buildConfigSetRecordId + ", buildContentId=" + buildContentId
-                + ", temporaryBuild=" + temporaryBuild + ", productMilestoneId=" + productMilestoneId
-                + ", executionRootName=" + executionRootName + ", executionRootVersion=" + executionRootVersion
-                + ", dependentBuildRecordIds=" + dependentBuildRecordIds
-                + ", dependencyBuildRecordIds=" + dependencyBuildRecordIds + "]";
+            + endTime + ", buildConfigurationId=" + buildConfigurationId + ", buildConfigurationName="
+            + buildConfigurationName + ", buildConfigurationRev=" + buildConfigurationRev + ", projectId="
+            + projectId + ", projectName=" + projectName + ", userId=" + userId + ", username=" + username
+            + ", scmRepoURL=" + scmRepoURL + ", scmRevision=" + scmRevision + ", buildEnvironmentId="
+            + buildEnvironmentId + ", attributes=" + attributes + ", liveLogsUri=" + liveLogsUri
+            + ", buildConfigSetRecordId=" + buildConfigSetRecordId + ", buildContentId=" + buildContentId
+            + ", temporaryBuild=" + temporaryBuild + ", productMilestoneId=" + productMilestoneId
+            + ", executionRootName=" + executionRootName + ", executionRootVersion=" + executionRootVersion
+            + ", dependentBuildRecordIds=" + dependentBuildRecordIds
+            + ", dependencyBuildRecordIds=" + dependencyBuildRecordIds + "]";
     }
 }

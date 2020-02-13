@@ -111,7 +111,7 @@ public class ProductRelease implements Serializable {
     @Override
     public String toString() {
         return "ProductRelease [id=" + id + ", version=" + version + ", releaseDate=" + releaseDate + ", downloadUrl="
-                + downloadUrl + ", issueTrackerUrl=" + issueTrackerUrl + ", productVersionId=" + productVersionId
-                + ", productMilestoneId=" + productMilestoneId + ", supportLevel=" + supportLevel + "]";
+            + downloadUrl + ", issueTrackerUrl=" + issueTrackerUrl + ", productVersionId=" + productVersionId
+            + ", productMilestoneId=" + productMilestoneId + ", supportLevel=" + supportLevel + "]";
     }
 }

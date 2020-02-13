@@ -68,6 +68,6 @@ public class BuildConfigurationSet implements Serializable {
     @Override
     public String toString() {
         return "BuildConfigurationSet [id=" + id + ", name=" + name + ", productVersionId=" + productVersionId
-                + ", buildConfigurationIds=" + buildConfigurationIds + "]";
+            + ", buildConfigurationIds=" + buildConfigurationIds + "]";
     }
 }

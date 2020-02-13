@@ -130,9 +130,9 @@ public class ProductVersion implements Serializable {
     @Override
     public String toString() {
         return "ProductVersion [id=" + id + ", version=" + version + ", productId=" + productId + ", productName="
-                + productName + ", currentProductMilestoneId=" + currentProductMilestoneId + ", productMilestones="
-                + productMilestones + ", productReleases=" + productReleases + ", buildConfigurationSets="
-                + buildConfigurationSets + ", buildConfigurations=" + buildConfigurations + ", attributes=" + attributes
-                + "]";
+            + productName + ", currentProductMilestoneId=" + currentProductMilestoneId + ", productMilestones="
+            + productMilestones + ", productReleases=" + productReleases + ", buildConfigurationSets="
+            + buildConfigurationSets + ", buildConfigurations=" + buildConfigurations + ", attributes=" + attributes
+            + "]";
     }
 }

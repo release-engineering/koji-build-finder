@@ -107,8 +107,8 @@ public class BuildEnvironment implements Serializable {
     @Override
     public String toString() {
         return "BuildEnvironment [id=" + id + ", name=" + name + ", description=" + description
-                + ", systemImageRepositoryUrl=" + systemImageRepositoryUrl + ", systemImageId=" + systemImageId
-                + ", attributes=" + attributes + ", systemImageType=" + systemImageType + ", deprecated=" + deprecated
-                + "]";
+            + ", systemImageRepositoryUrl=" + systemImageRepositoryUrl + ", systemImageId=" + systemImageId
+            + ", attributes=" + attributes + ", systemImageType=" + systemImageType + ", deprecated=" + deprecated
+            + "]";
     }
 }

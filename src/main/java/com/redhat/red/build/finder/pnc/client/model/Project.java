@@ -97,7 +97,7 @@ public class Project implements Serializable {
     @Override
     public String toString() {
         return "Project [id=" + id + ", name=" + name + ", description=" + description + ", issueTrackerUrl="
-                + issueTrackerUrl + ", projectUrl=" + projectUrl + ", configurationIds=" + configurationIds
-                + ", licenseId=" + licenseId + "]";
+            + issueTrackerUrl + ", projectUrl=" + projectUrl + ", configurationIds=" + configurationIds
+            + ", licenseId=" + licenseId + "]";
     }
 }

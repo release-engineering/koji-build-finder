@@ -189,11 +189,11 @@ public class BuildConfiguration implements Serializable {
     @Override
     public String toString() {
         return "BuildConfiguration [id=" + id + ", name=" + name + ", description=" + description + ", buildScript="
-                + buildScript + ", repositoryConfiguration=" + repositoryConfiguration + ", scmRevision=" + scmRevision
-                + ", creationTime=" + creationTime + ", lastModificationTime=" + lastModificationTime + ", archived="
-                + archived + ", project=" + project + ", buildType=" + buildType + ", environment=" + environment
-                + ", dependencyIds=" + dependencyIds + ", productVersionId=" + productVersionId
-                + ", buildConfigurationSetIds=" + buildConfigurationSetIds + ", genericParameters=" + genericParameters
-                + "]";
+            + buildScript + ", repositoryConfiguration=" + repositoryConfiguration + ", scmRevision=" + scmRevision
+            + ", creationTime=" + creationTime + ", lastModificationTime=" + lastModificationTime + ", archived="
+            + archived + ", project=" + project + ", buildType=" + buildType + ", environment=" + environment
+            + ", dependencyIds=" + dependencyIds + ", productVersionId=" + productVersionId
+            + ", buildConfigurationSetIds=" + buildConfigurationSetIds + ", genericParameters=" + genericParameters
+            + "]";
     }
 }
