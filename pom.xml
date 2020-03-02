@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.redhat.rcm</groupId>
     <artifactId>redhat-releng-tools</artifactId>
-    <version>7</version>
+    <version>8</version>
   </parent>
 
   <groupId>com.redhat.red.build</groupId>
@@ -69,10 +69,10 @@
     <version.com.j2html>1.4.0</version.com.j2html>
     <version.com.mashape.unirest>1.4.9</version.com.mashape.unirest>
     <version.com.mycila>3.0</version.com.mycila>
-    <version.com.puppycrawl.tools>8.29</version.com.puppycrawl.tools>
+    <version.com.puppycrawl.tools>8.30</version.com.puppycrawl.tools>
     <version.com.redhat.red.build.kojiji>2.12</version.com.redhat.red.build.kojiji>
     <version.info.picocli>4.2.0</version.info.picocli>
-    <version.io.dropwizard.metrics>4.1.2</version.io.dropwizard.metrics>
+    <version.io.dropwizard.metrics>4.1.4</version.io.dropwizard.metrics>
     <version.junit>4.13</version.junit>
     <version.net.sourceforge.pmd>6.21.0</version.net.sourceforge.pmd>
     <version.org.apache.commons.commons-collections4>4.4</version.org.apache.commons.commons-collections4>
@@ -573,6 +573,13 @@
               <Makefile>SCRIPT_STYLE</Makefile>
             </mapping>
           </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>com.mycila</groupId>
+              <artifactId>license-maven-plugin-git</artifactId>
+              <version>${version.com.mycila}</version>
+            </dependency>
+          </dependencies>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
