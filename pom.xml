@@ -72,7 +72,7 @@
     <version.com.puppycrawl.tools>8.30</version.com.puppycrawl.tools>
     <version.com.redhat.red.build.kojiji>2.12</version.com.redhat.red.build.kojiji>
     <version.info.picocli>4.2.0</version.info.picocli>
-    <version.io.dropwizard.metrics>4.1.4</version.io.dropwizard.metrics>
+    <version.io.dropwizard.metrics>4.1.5</version.io.dropwizard.metrics>
     <version.junit>4.13</version.junit>
     <version.net.sourceforge.pmd>6.21.0</version.net.sourceforge.pmd>
     <version.org.apache.commons.commons-collections4>4.4</version.org.apache.commons.commons-collections4>
@@ -80,7 +80,7 @@
     <version.org.apache.commons.commons-lang3>3.9</version.org.apache.commons.commons-lang3>
     <version.org.apache.commons.commons-vfs2>2.6.0</version.org.apache.commons.commons-vfs2>
     <version.org.apache.httpcomponents.httpasyncclient>4.1.4</version.org.apache.httpcomponents.httpasyncclient>
-    <version.org.apache.httpcomponents.httpclient>4.5.11</version.org.apache.httpcomponents.httpclient>
+    <version.org.apache.httpcomponents.httpclient>4.5.12</version.org.apache.httpcomponents.httpclient>
     <version.org.apache.httpcomponents.httpcore>4.4.13</version.org.apache.httpcomponents.httpcore>
     <version.org.apache.maven.plugins.maven-antrun-plugin>1.8</version.org.apache.maven.plugins.maven-antrun-plugin>
     <version.org.apache.maven.plugins.maven-assembly-plugin>3.2.0</version.org.apache.maven.plugins.maven-assembly-plugin>
