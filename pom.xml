@@ -74,7 +74,7 @@
     <version.info.picocli>4.2.0</version.info.picocli>
     <version.io.dropwizard.metrics>4.1.5</version.io.dropwizard.metrics>
     <version.junit>4.13</version.junit>
-    <version.net.sourceforge.pmd>6.21.0</version.net.sourceforge.pmd>
+    <version.net.sourceforge.pmd>6.22.0</version.net.sourceforge.pmd>
     <version.org.apache.commons.commons-collections4>4.4</version.org.apache.commons.commons-collections4>
     <version.org.apache.commons.commons-compress>1.20</version.org.apache.commons.commons-compress>
     <version.org.apache.commons.commons-lang3>3.9</version.org.apache.commons.commons-lang3>
@@ -113,7 +113,7 @@
     <version.org.fusesource.jansi>1.18</version.org.fusesource.jansi>
     <version.org.infinispan>10.0.0.CR1</version.org.infinispan>
     <version.org.jacoco>0.8.5</version.org.jacoco>
-    <version.org.jboss.byteman>4.0.10</version.org.jboss.byteman>
+    <version.org.jboss.byteman>4.0.11</version.org.jboss.byteman>
     <version.org.json.json>20190722</version.org.json.json>
     <version.org.ow2.asm>7.3.1</version.org.ow2.asm>
     <version.org.slf4j>1.7.30</version.org.slf4j>
