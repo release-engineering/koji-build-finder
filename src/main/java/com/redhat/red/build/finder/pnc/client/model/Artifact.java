@@ -17,6 +17,7 @@ package com.redhat.red.build.finder.pnc.client.model;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -60,6 +61,8 @@ public class Artifact implements Serializable {
      * Public url to the artifact using public network domain
      */
     private String publicUrl;
+
+    private BuildRecord build;
 
     public Integer getId() {
         return id;
@@ -126,7 +129,9 @@ public class Artifact implements Serializable {
     }
 
     public List<Integer> getBuildRecordIds() {
-        return buildRecordIds;
+        return buildRecordIds == null
+               ? (build == null ? Collections.emptyList() : Collections.singletonList(build.getId())) : //PNC2
+               buildRecordIds;
     }
 
     public void setBuildRecordIds(List<Integer> buildRecordIds) {
@@ -181,6 +186,14 @@ public class Artifact implements Serializable {
         this.publicUrl = publicUrl;
     }
 
+    public BuildRecord getBuild() {
+        return build;
+    }
+
+    public void setBuild(BuildRecord build) {
+        this.build = build;
+    }
+
     public enum Quality {
         NEW,
         VERIFIED,
@@ -197,6 +210,6 @@ public class Artifact implements Serializable {
             + md5 + ", sha1=" + sha1 + ", sha256=" + sha256 + ", filename=" + filename + ", deployPath="
             + deployPath + ", buildRecordIds=" + buildRecordIds + ", dependantBuildRecordIds="
             + dependantBuildRecordIds + ", importDate=" + importDate + ", originUrl=" + originUrl + ", size=" + size
-            + ", deployUrl=" + deployUrl + ", publicUrl=" + publicUrl + "]";
+            + ", deployUrl=" + deployUrl + ", publicUrl=" + publicUrl + ", build=" + build + "]";
     }
 }

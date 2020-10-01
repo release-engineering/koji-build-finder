@@ -53,7 +53,8 @@ import org.infinispan.manager.EmbeddedCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.redhat.red.build.finder.pnc.client.PncClient14;
+import com.redhat.red.build.finder.pnc.client.PncClient;
+import com.redhat.red.build.finder.pnc.client.PncClientFactory;
 import com.redhat.red.build.finder.report.BuildStatisticsReport;
 import com.redhat.red.build.finder.report.GAVReport;
 import com.redhat.red.build.finder.report.HTMLReport;
@@ -607,7 +608,7 @@ public final class Main implements Callable<Void> {
                     analyzer.setChecksums(checksums);
 
                     if (config.getPncURL() != null) {
-                        PncClient14 pncclient = new PncClient14(config);
+                        PncClient pncclient = PncClientFactory.create(config);
                         finder = new BuildFinder(session, config, analyzer, cacheManager, pncclient);
                     } else {
                         finder = new BuildFinder(session, config, analyzer, cacheManager);
@@ -649,7 +650,7 @@ public final class Main implements Callable<Void> {
                     }
 
                     if (config.getPncURL() != null) {
-                        PncClient14 pncclient = new PncClient14(config);
+                        PncClient pncclient = PncClientFactory.create(config);
                         finder = new BuildFinder(session, config, analyzer, cacheManager, pncclient);
                     } else {
                         finder = new BuildFinder(session, config, analyzer, cacheManager);

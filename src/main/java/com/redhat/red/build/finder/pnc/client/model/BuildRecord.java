@@ -78,6 +78,10 @@ public class BuildRecord implements Serializable {
 
     private List<Integer> dependencyBuildRecordIds;
 
+    private BuildConfigurationRevision buildConfigRevision;
+
+    private Project project;
+
     public Integer getId() {
         return id;
     }
@@ -111,7 +115,9 @@ public class BuildRecord implements Serializable {
     }
 
     public Integer getBuildConfigurationId() {
-        return buildConfigurationId;
+        return buildConfigurationId == null
+               ? buildConfigRevision.getId() : //PNC2
+               buildConfigurationId;
     }
 
     public void setBuildConfigurationId(Integer buildConfigurationId) {
@@ -135,7 +141,9 @@ public class BuildRecord implements Serializable {
     }
 
     public Integer getProjectId() {
-        return projectId;
+        return projectId == null
+               ? project.getId() : //PNC2
+               projectId;
     }
 
     public void setProjectId(Integer projectId) {
@@ -143,7 +151,9 @@ public class BuildRecord implements Serializable {
     }
 
     public String getProjectName() {
-        return projectName;
+        return projectName == null
+               ? project.getName() : //PNC2
+               projectName;
     }
 
     public void setProjectName(String projectName) {
@@ -268,6 +278,23 @@ public class BuildRecord implements Serializable {
 
     public void setDependencyBuildRecordIds(List<Integer> dependencyBuildRecordIds) {
         this.dependencyBuildRecordIds = dependencyBuildRecordIds;
+    }
+
+    public BuildConfigurationRevision getBuildConfigRevision() {
+        return buildConfigRevision;
+    }
+
+    public void setBuildConfigRevision(
+        BuildConfigurationRevision buildConfigRevision) {
+        this.buildConfigRevision = buildConfigRevision;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     @Override

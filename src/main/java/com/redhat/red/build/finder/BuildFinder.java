@@ -61,7 +61,7 @@ import org.infinispan.manager.EmbeddedCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.redhat.red.build.finder.pnc.client.PncClient14;
+import com.redhat.red.build.finder.pnc.client.PncClient;
 import com.redhat.red.build.finder.pnc.client.PncClientException;
 import com.redhat.red.build.finder.pnc.client.PncUtils;
 import com.redhat.red.build.finder.pnc.client.model.Artifact;
@@ -127,7 +127,7 @@ public class BuildFinder implements Callable<Map<BuildSystemInteger, KojiBuild>>
 
     private EmbeddedCacheManager cacheManager;
 
-    private PncClient14 pncclient;
+    private PncClient pncclient;
 
     private Map<Checksum, Collection<String>> foundChecksums;
 
@@ -145,7 +145,7 @@ public class BuildFinder implements Callable<Map<BuildSystemInteger, KojiBuild>>
         this(session, config, analyzer, cacheManager, null);
     }
 
-    public BuildFinder(ClientSession session, BuildConfig config, DistributionAnalyzer analyzer, EmbeddedCacheManager cacheManager, PncClient14 pncclient) {
+    public BuildFinder(ClientSession session, BuildConfig config, DistributionAnalyzer analyzer, EmbeddedCacheManager cacheManager, PncClient pncclient) {
         this.session = session;
         this.config = config;
         this.outputDirectory = new File("");

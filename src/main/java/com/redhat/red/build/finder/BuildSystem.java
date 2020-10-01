@@ -18,9 +18,10 @@ package com.redhat.red.build.finder;
 public enum BuildSystem {
     none(0),
     koji(1),
-    pnc(2);
+    pnc(2),
+    pnc2(3);
 
-    private int value;
+    private final int value;
 
     BuildSystem(int value) {
         this.value = value;

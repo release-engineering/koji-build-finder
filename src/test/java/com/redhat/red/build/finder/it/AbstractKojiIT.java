@@ -35,7 +35,8 @@ import com.codahale.metrics.Slf4jReporter;
 import com.redhat.red.build.finder.BuildConfig;
 import com.redhat.red.build.finder.ConfigDefaults;
 import com.redhat.red.build.finder.KojiClientSession;
-import com.redhat.red.build.finder.pnc.client.PncClient14;
+import com.redhat.red.build.finder.pnc.client.PncClient;
+import com.redhat.red.build.finder.pnc.client.PncClientFactory;
 import com.redhat.red.build.koji.KojiClientException;
 import com.redhat.red.build.koji.config.SimpleKojiConfig;
 import com.redhat.red.build.koji.config.SimpleKojiConfigBuilder;
@@ -51,7 +52,7 @@ public abstract class AbstractKojiIT {
 
     private BuildConfig config;
 
-    private PncClient14 pncclient;
+    private PncClient pncclient;
 
     protected static final int MAX_CONNECTIONS = 20;
 
@@ -81,7 +82,7 @@ public abstract class AbstractKojiIT {
 
         final SimpleKojiConfig kojiConfig = new SimpleKojiConfigBuilder().withKojiURL(kojiHubURL.toExternalForm()).withMaxConnections(MAX_CONNECTIONS).build();
         this.session = new KojiClientSession(kojiConfig, new MemoryPasswordManager(), Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT), REGISTRY);
-        this.pncclient = new PncClient14(config);
+        this.pncclient = PncClientFactory.create(config);
         this.reporter = Slf4jReporter.forRegistry(REGISTRY).outputTo(LOGGER).convertRatesTo(TimeUnit.SECONDS).convertDurationsTo(TimeUnit.SECONDS).build();
 
         reporter.start(600, TimeUnit.SECONDS);
@@ -95,7 +96,7 @@ public abstract class AbstractKojiIT {
         return config;
     }
 
-    public PncClient14 getPncClient() {
+    public PncClient getPncClient() {
         return pncclient;
     }
 

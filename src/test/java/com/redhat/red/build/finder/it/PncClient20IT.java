@@ -22,16 +22,16 @@ import java.util.Collections;
 import com.redhat.red.build.finder.BuildConfig;
 import com.redhat.red.build.finder.BuildSystem;
 import com.redhat.red.build.finder.pnc.client.PncClient;
-import com.redhat.red.build.finder.pnc.client.PncClient14;
+import com.redhat.red.build.finder.pnc.client.PncClient20;
 import com.redhat.red.build.finder.pnc.client.PncClientFactory;
 
-public class PncClient14IT extends AbstractPncClientIT {
+public class PncClient20IT extends AbstractPncClientIT {
 
     @Override
     PncClient createPncClient(BuildConfig config) {
-        config.setBuildSystems(Collections.singletonList(BuildSystem.pnc));
+        config.setBuildSystems(Collections.singletonList(BuildSystem.pnc2));
         PncClient client = PncClientFactory.create(config);
-        assertTrue(client instanceof PncClient14);
+        assertTrue(client instanceof PncClient20);
         return client;
     }
 }
