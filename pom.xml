@@ -53,10 +53,10 @@
   </scm>
 
   <properties>
-    <koji.hub.url />
-    <koji.web.url />
+    <koji.hub.url/>
+    <koji.web.url/>
     <mavenVersion>3.3.9</mavenVersion>
-    <pnc.url />
+    <pnc.url/>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipITs>true</skipITs>
     <version.ch.qos.logback>1.2.3</version.ch.qos.logback>
@@ -80,7 +80,7 @@
     <version.org.apache.commons.commons-lang3>3.9</version.org.apache.commons.commons-lang3>
     <version.org.apache.commons.commons-vfs2>2.6.0</version.org.apache.commons.commons-vfs2>
     <version.org.apache.httpcomponents.httpasyncclient>4.1.4</version.org.apache.httpcomponents.httpasyncclient>
-    <version.org.apache.httpcomponents.httpclient>4.5.12</version.org.apache.httpcomponents.httpclient>
+    <version.org.apache.httpcomponents.httpclient>4.5.13</version.org.apache.httpcomponents.httpclient>
     <version.org.apache.httpcomponents.httpcore>4.4.13</version.org.apache.httpcomponents.httpcore>
     <version.org.apache.maven.plugins.maven-antrun-plugin>1.8</version.org.apache.maven.plugins.maven-antrun-plugin>
     <version.org.apache.maven.plugins.maven-assembly-plugin>3.2.0</version.org.apache.maven.plugins.maven-assembly-plugin>
