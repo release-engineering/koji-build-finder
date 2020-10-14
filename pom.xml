@@ -53,10 +53,10 @@
   </scm>
 
   <properties>
-    <koji.hub.url />
-    <koji.web.url />
+    <koji.hub.url/>
+    <koji.web.url/>
     <mavenVersion>3.3.9</mavenVersion>
-    <pnc.url />
+    <pnc.url/>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipITs>true</skipITs>
     <version.ch.qos.logback>1.2.3</version.ch.qos.logback>
@@ -73,7 +73,7 @@
     <version.com.redhat.red.build.kojiji>2.12</version.com.redhat.red.build.kojiji>
     <version.info.picocli>4.2.0</version.info.picocli>
     <version.io.dropwizard.metrics>4.1.5</version.io.dropwizard.metrics>
-    <version.junit>4.13</version.junit>
+    <version.junit>4.13.1</version.junit>
     <version.net.sourceforge.pmd>6.22.0</version.net.sourceforge.pmd>
     <version.org.apache.commons.commons-collections4>4.4</version.org.apache.commons.commons-collections4>
     <version.org.apache.commons.commons-compress>1.20</version.org.apache.commons.commons-compress>
