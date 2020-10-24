@@ -53,10 +53,10 @@
   </scm>
 
   <properties>
-    <koji.hub.url />
-    <koji.web.url />
+    <koji.hub.url/>
+    <koji.web.url/>
     <mavenVersion>3.3.9</mavenVersion>
-    <pnc.url />
+    <pnc.url/>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipITs>true</skipITs>
     <version.ch.qos.logback>1.2.3</version.ch.qos.logback>
@@ -65,7 +65,7 @@
     <version.com.fasterxml.jackson.core>2.10.3</version.com.fasterxml.jackson.core>
     <version.com.github.spotbugs>3.1.12.2</version.com.github.spotbugs>
     <version.com.github.stefanbirkner>1.19.0</version.com.github.stefanbirkner>
-    <version.com.google.guava>28.2-jre</version.com.google.guava>
+    <version.com.google.guava>30.0-android</version.com.google.guava>
     <version.com.j2html>1.4.0</version.com.j2html>
     <version.com.mashape.unirest>1.4.9</version.com.mashape.unirest>
     <version.com.mycila>3.0</version.com.mycila>
